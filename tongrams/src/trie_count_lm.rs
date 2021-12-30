@@ -11,23 +11,25 @@ use crate::loader::{GramsFileLoader, GramsLoader, GramsTextLoader};
 use crate::mappers::SortedArrayMapper;
 use crate::trie_array::TrieArray;
 use crate::trie_count_lm::builder::TrieCountLmBuilder;
-use crate::vocabulary::SimpleVocabulary;
+use crate::vocabulary::Vocabulary;
 use crate::Gram;
 
 #[derive(Default, Debug)]
-pub struct TrieCountLm<T>
+pub struct TrieCountLm<T, V>
 where
     T: TrieArray,
+    V: Vocabulary,
 {
     max_order: usize,
-    vocab: SimpleVocabulary,
+    vocab: V,
     arrays: Vec<T>,
     counts: Vec<Vec<usize>>,
 }
 
-impl<T> TrieCountLm<T>
+impl<T, V> TrieCountLm<T, V>
 where
     T: TrieArray,
+    V: Vocabulary,
 {
     pub fn from_files(filenames: Vec<String>) -> Result<Self> {
         let mut loaders = Vec::with_capacity(filenames.len());
@@ -77,7 +79,7 @@ where
         W: Write,
     {
         bincode::serialize_into(&mut writer, &self.max_order).map_err(handle_bincode_error)?;
-        bincode::serialize_into(&mut writer, &self.vocab).map_err(handle_bincode_error)?;
+        self.vocab.serialize_into(&mut writer)?;
         writer.write_u64::<LittleEndian>(self.arrays.len() as u64)?;
         for array in &self.arrays {
             array.serialize_into(&mut writer)?;
@@ -91,7 +93,7 @@ where
         R: Read,
     {
         let max_order = bincode::deserialize_from(&mut reader).map_err(handle_bincode_error)?;
-        let vocab = bincode::deserialize_from(&mut reader).map_err(handle_bincode_error)?;
+        let vocab = *V::deserialize_from(&mut reader)?;
         let arrays = {
             let len = reader.read_u64::<LittleEndian>()? as usize;
             let mut arrays = Vec::with_capacity(len);
@@ -113,6 +115,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::vocabulary::SimpleVocabulary;
     use crate::SimpleTrieArray;
 
     const GRAMS_1: &'static str = "4
@@ -146,8 +149,10 @@ D D D\t1
 
     #[test]
     fn test_components() {
-        let lm =
-            TrieCountLm::<SimpleTrieArray>::from_texts(vec![GRAMS_1, GRAMS_2, GRAMS_3]).unwrap();
+        let lm = TrieCountLm::<SimpleTrieArray, SimpleVocabulary>::from_texts(vec![
+            GRAMS_1, GRAMS_2, GRAMS_3,
+        ])
+        .unwrap();
 
         #[allow(non_snake_case)]
         let (A, B, C, D) = (0, 1, 2, 3);
@@ -205,8 +210,10 @@ D D D\t1
 
     #[test]
     fn test_lookup() {
-        let lm =
-            TrieCountLm::<SimpleTrieArray>::from_texts(vec![GRAMS_1, GRAMS_2, GRAMS_3]).unwrap();
+        let lm = TrieCountLm::<SimpleTrieArray, SimpleVocabulary>::from_texts(vec![
+            GRAMS_1, GRAMS_2, GRAMS_3,
+        ])
+        .unwrap();
 
         let loader = GramsTextLoader::new(GRAMS_1.as_bytes());
         let gp = loader.parser().unwrap();

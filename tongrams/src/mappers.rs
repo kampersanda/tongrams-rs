@@ -1,4 +1,4 @@
-use crate::vocabulary::SimpleVocabulary;
+use crate::vocabulary::Vocabulary;
 use crate::Gram;
 
 use crate::MAX_ORDER;
@@ -9,7 +9,10 @@ pub struct SortedArrayMapper {
 }
 
 impl SortedArrayMapper {
-    pub fn map_query(&mut self, gram: Gram, vocab: &SimpleVocabulary) -> Option<&[usize]> {
+    pub fn map_query<V>(&mut self, gram: Gram, vocab: &V) -> Option<&[usize]>
+    where
+        V: Vocabulary,
+    {
         let tokens = gram.split_to_tokens();
         for (i, &w) in tokens.iter().enumerate() {
             if let Some(mapped_id) = vocab.get(w) {
@@ -29,6 +32,7 @@ impl SortedArrayMapper {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::vocabulary::SimpleVocabulary;
 
     #[test]
     fn test_basic() {
@@ -37,7 +41,7 @@ mod tests {
             Gram::from_str("D"),
             Gram::from_str("B"),
         ];
-        let vocab = SimpleVocabulary::new(&grams);
+        let vocab = *SimpleVocabulary::new(&grams);
         let mut mapper = SortedArrayMapper::default();
 
         let gram = Gram::from_str("A B D");

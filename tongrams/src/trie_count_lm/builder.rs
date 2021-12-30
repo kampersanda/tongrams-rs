@@ -5,36 +5,38 @@ use anyhow::Result;
 
 use crate::loader::GramsLoader;
 use crate::trie_array::{TrieArray, TrieArrayBuilder};
-use crate::vocabulary::SimpleVocabulary;
+use crate::vocabulary::Vocabulary;
 use crate::Gram;
 use crate::TrieCountLm;
 
-pub struct TrieCountLmBuilder<R, T>
+pub struct TrieCountLmBuilder<R, T, V>
 where
     R: Read,
     T: TrieArray,
+    V: Vocabulary,
 {
     loaders: Vec<Box<dyn GramsLoader<R>>>,
-    vocab: SimpleVocabulary,
+    vocab: V,
     arrays: Vec<T>,
     counts_builder: CountsBuilder,
 }
 
-impl<R, T> TrieCountLmBuilder<R, T>
+impl<R, T, V> TrieCountLmBuilder<R, T, V>
 where
     R: Read,
     T: TrieArray,
+    V: Vocabulary,
 {
     pub fn new(loaders: Vec<Box<dyn GramsLoader<R>>>) -> Self {
         Self {
             loaders,
-            vocab: SimpleVocabulary::default(),
+            vocab: *V::default(),
             arrays: vec![],
             counts_builder: CountsBuilder::default(),
         }
     }
 
-    pub fn build(mut self) -> Result<TrieCountLm<T>> {
+    pub fn build(mut self) -> Result<TrieCountLm<T, V>> {
         self.build_counts()?;
         self.build_vocabulary()?;
 
@@ -75,7 +77,7 @@ where
         };
 
         let grams: Vec<Gram> = records.iter().map(|r| Gram::from_str(&r.gram)).collect();
-        self.vocab = SimpleVocabulary::new(&grams);
+        self.vocab = *V::new(&grams);
 
         let mut array_builder = TrieArrayBuilder::new(records.len(), 0, 0, 0);
         for rec in &records {

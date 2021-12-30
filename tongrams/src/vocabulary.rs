@@ -7,36 +7,55 @@ use serde::{Deserialize, Serialize};
 use crate::handle_bincode_error;
 use crate::Gram;
 
+pub trait Vocabulary {
+    fn default() -> Box<Self>;
+
+    fn new(grams: &[Gram]) -> Box<Self>;
+
+    fn get(&self, gram: Gram) -> Option<usize>;
+
+    fn serialize_into<W: Write>(&self, writer: W) -> Result<()>;
+
+    fn deserialize_from<R: Read>(reader: R) -> Result<Box<Self>>;
+}
+
 #[derive(Default, Debug, Serialize, Deserialize)]
 pub struct SimpleVocabulary {
     map: HashMap<String, usize>,
 }
 
-impl SimpleVocabulary {
-    pub fn new(grams: &[Gram]) -> Self {
+impl Vocabulary for SimpleVocabulary {
+    fn default() -> Box<Self> {
+        Box::new(Self {
+            map: HashMap::new(),
+        })
+    }
+
+    fn new(grams: &[Gram]) -> Box<Self> {
         let mut map = HashMap::new();
         for (id, gram) in grams.iter().enumerate() {
             map.insert(gram.to_string(), id);
         }
-        Self { map }
+        Box::new(Self { map })
     }
 
-    pub fn get(&self, gram: Gram) -> Option<usize> {
+    fn get(&self, gram: Gram) -> Option<usize> {
         self.map.get(&gram.to_string()).map(|x| *x)
     }
 
-    pub fn serialize_into<W>(&self, writer: W) -> Result<()>
+    fn serialize_into<W>(&self, writer: W) -> Result<()>
     where
         W: Write,
     {
         bincode::serialize_into(writer, self).map_err(handle_bincode_error)
     }
 
-    pub fn deserialize_from<R>(reader: R) -> Result<Self>
+    fn deserialize_from<R>(reader: R) -> Result<Box<Self>>
     where
         R: Read,
     {
-        bincode::deserialize_from(reader).map_err(handle_bincode_error)
+        let x: Self = bincode::deserialize_from(reader).map_err(handle_bincode_error)?;
+        Ok(Box::new(x))
     }
 }
 
