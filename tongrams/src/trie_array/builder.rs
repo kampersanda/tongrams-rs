@@ -33,6 +33,6 @@ impl TrieArrayBuilder {
     }
 
     pub fn release_counts_ranks<T: TrieArray>(self) -> T {
-        *T::new(vec![], self.count_ranks, vec![])
+        *T::with_count_ranks(self.count_ranks)
     }
 }

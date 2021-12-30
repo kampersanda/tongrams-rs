@@ -1,4 +1,5 @@
 pub mod builder;
+pub mod ef;
 pub mod simple;
 
 use std::io::{Read, Write};
@@ -6,10 +7,13 @@ use std::io::{Read, Write};
 use anyhow::Result;
 
 pub use crate::trie_array::builder::TrieArrayBuilder;
+pub use crate::trie_array::ef::EliasFanoTrieArray;
 pub use crate::trie_array::simple::SimpleTrieArray;
 
 pub trait TrieArray {
     fn new(token_ids: Vec<usize>, count_ranks: Vec<usize>, pointers: Vec<usize>) -> Box<Self>;
+
+    fn with_count_ranks(count_ranks: Vec<usize>) -> Box<Self>;
 
     fn range(&self, pos: usize) -> (usize, usize);
 

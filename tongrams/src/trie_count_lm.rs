@@ -1,4 +1,5 @@
 pub mod builder;
+pub mod lookuper;
 
 use std::fs::File;
 use std::io::{Read, Write};
@@ -8,11 +9,10 @@ use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
 
 use crate::handle_bincode_error;
 use crate::loader::{GramsFileLoader, GramsLoader, GramsTextLoader};
-use crate::mappers::SortedArrayMapper;
 use crate::trie_array::TrieArray;
 use crate::trie_count_lm::builder::TrieCountLmBuilder;
+use crate::trie_count_lm::lookuper::TrieCountLmLookuper;
 use crate::vocabulary::Vocabulary;
-use crate::Gram;
 
 #[derive(Default, Debug)]
 pub struct TrieCountLm<T, V>
@@ -50,24 +50,8 @@ where
         TrieCountLmBuilder::new(loaders).build()
     }
 
-    pub fn lookup(&self, gram: Gram) -> Option<usize> {
-        let mut mapper = SortedArrayMapper::default();
-        if let Some(token_ids) = mapper.map_query(gram, &self.vocab) {
-            let order = token_ids.len() - 1;
-            let mut pos = token_ids[0];
-            for i in 1..=order {
-                let rng = self.arrays[i].range(pos);
-                if let Some(next_pos) = self.arrays[i].position(rng, token_ids[i]) {
-                    pos = next_pos;
-                } else {
-                    return None;
-                }
-            }
-            let count_rank = self.arrays[order].count_rank(pos);
-            Some(self.counts[order][count_rank])
-        } else {
-            None
-        }
+    pub fn lookuper<'a>(&'a self) -> TrieCountLmLookuper<'a, T, V> {
+        TrieCountLmLookuper::new(self)
     }
 
     pub fn max_order(&self) -> usize {
@@ -115,8 +99,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::vocabulary::SimpleVocabulary;
-    use crate::SimpleTrieArray;
+    use crate::{EliasFanoTrieCountLm, Gram, SimpleTrieCountLm};
 
     const GRAMS_1: &'static str = "4
 A\t10
@@ -147,31 +130,25 @@ D B C\t1
 D D D\t1
 ";
 
-    #[test]
-    fn test_components() {
-        let lm = TrieCountLm::<SimpleTrieArray, SimpleVocabulary>::from_texts(vec![
-            GRAMS_1, GRAMS_2, GRAMS_3,
-        ])
-        .unwrap();
+    const A: usize = 0;
+    const B: usize = 1;
+    const C: usize = 2;
+    const D: usize = 3;
 
-        #[allow(non_snake_case)]
-        let (A, B, C, D) = (0, 1, 2, 3);
-
-        // For vocab
-        let vocab = &lm.vocab;
+    fn test_vocabulary<V: Vocabulary>(vocab: &V) {
         assert_eq!(vocab.get(Gram::from_str("A")), Some(A));
         assert_eq!(vocab.get(Gram::from_str("B")), Some(B));
         assert_eq!(vocab.get(Gram::from_str("C")), Some(C));
         assert_eq!(vocab.get(Gram::from_str("D")), Some(D));
+    }
 
-        // For unigrams
-        let array = &lm.arrays[0];
+    fn test_unigrams<T: TrieArray>(array: &T) {
         for (i, &count_rank) in [2, 1, 0, 0].iter().enumerate() {
             assert_eq!(array.count_rank(i), count_rank);
         }
+    }
 
-        // For bigrams
-        let array = &lm.arrays[1];
+    fn test_bigrams<T: TrieArray>(array: &T) {
         for (i, &token_id) in [A, C, B, C, D, A, D, B, D].iter().enumerate() {
             assert_eq!(array.token_id(i), token_id);
         }
@@ -181,9 +158,9 @@ D D D\t1
         for (i, &range) in [(0, 2), (2, 5), (5, 7), (7, 9)].iter().enumerate() {
             assert_eq!(array.range(i), range);
         }
+    }
 
-        // For trigrams
-        let array = &lm.arrays[2];
+    fn test_trigrams<T: TrieArray>(array: &T) {
         for (i, &token_id) in [C, C, D, D, B, C, D].iter().enumerate() {
             assert_eq!(array.token_id(i), token_id);
         }
@@ -209,35 +186,82 @@ D D D\t1
     }
 
     #[test]
-    fn test_lookup() {
-        let lm = TrieCountLm::<SimpleTrieArray, SimpleVocabulary>::from_texts(vec![
-            GRAMS_1, GRAMS_2, GRAMS_3,
-        ])
-        .unwrap();
+    fn test_simple_components() {
+        let lm = SimpleTrieCountLm::from_texts(vec![GRAMS_1, GRAMS_2, GRAMS_3]).unwrap();
+        test_vocabulary(&lm.vocab);
+        test_unigrams(&lm.arrays[0]);
+        test_bigrams(&lm.arrays[1]);
+        test_trigrams(&lm.arrays[2]);
+    }
+
+    #[test]
+    fn test_ef_components() {
+        let lm = EliasFanoTrieCountLm::from_texts(vec![GRAMS_1, GRAMS_2, GRAMS_3]).unwrap();
+        test_vocabulary(&lm.vocab);
+        test_unigrams(&lm.arrays[0]);
+        test_bigrams(&lm.arrays[1]);
+        test_trigrams(&lm.arrays[2]);
+    }
+
+    #[test]
+    fn test_simple_lookup() {
+        let lm = SimpleTrieCountLm::from_texts(vec![GRAMS_1, GRAMS_2, GRAMS_3]).unwrap();
+        let mut lookuper = lm.lookuper();
 
         let loader = GramsTextLoader::new(GRAMS_1.as_bytes());
         let gp = loader.parser().unwrap();
         for rec in gp {
             let rec = rec.unwrap();
-            assert_eq!(lm.lookup(rec.gram()), Some(rec.count()));
+            assert_eq!(lookuper.run(rec.gram()), Some(rec.count()));
         }
 
         let loader = GramsTextLoader::new(GRAMS_2.as_bytes());
         let gp = loader.parser().unwrap();
         for rec in gp {
             let rec = rec.unwrap();
-            assert_eq!(lm.lookup(rec.gram()), Some(rec.count()));
+            assert_eq!(lookuper.run(rec.gram()), Some(rec.count()));
         }
 
         let loader = GramsTextLoader::new(GRAMS_3.as_bytes());
         let gp = loader.parser().unwrap();
         for rec in gp {
             let rec = rec.unwrap();
-            assert_eq!(lm.lookup(rec.gram()), Some(rec.count()));
+            assert_eq!(lookuper.run(rec.gram()), Some(rec.count()));
         }
 
-        assert_eq!(lm.lookup(Gram::from_str("E")), None);
-        assert_eq!(lm.lookup(Gram::from_str("B A")), None);
-        assert_eq!(lm.lookup(Gram::from_str("B B A")), None);
+        assert_eq!(lookuper.run(Gram::from_str("E")), None);
+        assert_eq!(lookuper.run(Gram::from_str("B A")), None);
+        assert_eq!(lookuper.run(Gram::from_str("B B A")), None);
+    }
+
+    #[test]
+    fn test_ef_lookup() {
+        let lm = EliasFanoTrieCountLm::from_texts(vec![GRAMS_1, GRAMS_2, GRAMS_3]).unwrap();
+        let mut lookuper = lm.lookuper();
+
+        let loader = GramsTextLoader::new(GRAMS_1.as_bytes());
+        let gp = loader.parser().unwrap();
+        for rec in gp {
+            let rec = rec.unwrap();
+            assert_eq!(lookuper.run(rec.gram()), Some(rec.count()));
+        }
+
+        let loader = GramsTextLoader::new(GRAMS_2.as_bytes());
+        let gp = loader.parser().unwrap();
+        for rec in gp {
+            let rec = rec.unwrap();
+            assert_eq!(lookuper.run(rec.gram()), Some(rec.count()));
+        }
+
+        let loader = GramsTextLoader::new(GRAMS_3.as_bytes());
+        let gp = loader.parser().unwrap();
+        for rec in gp {
+            let rec = rec.unwrap();
+            assert_eq!(lookuper.run(rec.gram()), Some(rec.count()));
+        }
+
+        assert_eq!(lookuper.run(Gram::from_str("E")), None);
+        assert_eq!(lookuper.run(Gram::from_str("B A")), None);
+        assert_eq!(lookuper.run(Gram::from_str("B B A")), None);
     }
 }

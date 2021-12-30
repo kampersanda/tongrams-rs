@@ -1,7 +1,5 @@
 use tongrams::loader::{GramsFileLoader, GramsLoader};
-use tongrams::trie_array::SimpleTrieArray;
-use tongrams::vocabulary::SimpleVocabulary;
-use tongrams::TrieCountLm;
+use tongrams::SimpleTrieCountLm;
 
 const TEST_FILENAMES: [&str; 5] = [
     "../test_data/1-grams.sorted",
@@ -25,15 +23,16 @@ fn test_parser() {
 #[test]
 fn test_lookup() {
     let filenames = TEST_FILENAMES.iter().map(|f| f.to_string()).collect();
-    let lm = TrieCountLm::<SimpleTrieArray, SimpleVocabulary>::from_files(filenames).unwrap();
+    let lm = SimpleTrieCountLm::from_files(filenames).unwrap();
     assert_eq!(lm.max_order(), 4);
 
+    let mut lookuper = lm.lookuper();
     for filename in TEST_FILENAMES {
         let loader = GramsFileLoader::new(filename.to_string());
         let parser = loader.parser().unwrap();
         for rec in parser {
             let rec = rec.unwrap();
-            assert_eq!(lm.lookup(rec.gram()), Some(rec.count()));
+            assert_eq!(lookuper.run(rec.gram()), Some(rec.count()));
         }
     }
 
@@ -43,12 +42,11 @@ fn test_lookup() {
 #[test]
 fn test_serialization() {
     let filenames = TEST_FILENAMES.iter().map(|f| f.to_string()).collect();
-    let lm = TrieCountLm::<SimpleTrieArray, SimpleVocabulary>::from_files(filenames).unwrap();
+    let lm = SimpleTrieCountLm::from_files(filenames).unwrap();
 
     let mut data = vec![];
     lm.serialize_into(&mut data).unwrap();
 
-    let other =
-        TrieCountLm::<SimpleTrieArray, SimpleVocabulary>::deserialize_from(&data[..]).unwrap();
+    let other = SimpleTrieCountLm::deserialize_from(&data[..]).unwrap();
     assert_eq!(lm.max_order(), other.max_order());
 }
