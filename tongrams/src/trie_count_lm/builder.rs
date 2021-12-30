@@ -46,7 +46,6 @@ where
         }
 
         Ok(TrieCountLm {
-            max_order,
             vocab: self.vocab,
             arrays: self.arrays,
             counts: self.counts_builder.release(),

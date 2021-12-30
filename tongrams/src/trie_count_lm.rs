@@ -20,7 +20,6 @@ where
     T: TrieArray,
     V: Vocabulary,
 {
-    max_order: usize,
     vocab: V,
     arrays: Vec<T>,
     counts: Vec<Vec<usize>>,
@@ -54,15 +53,14 @@ where
         TrieCountLmLookuper::new(self)
     }
 
-    pub fn max_order(&self) -> usize {
-        self.max_order
+    pub fn num_orders(&self) -> usize {
+        self.arrays.len()
     }
 
     pub fn serialize_into<W>(&self, mut writer: W) -> Result<()>
     where
         W: Write,
     {
-        bincode::serialize_into(&mut writer, &self.max_order).map_err(handle_bincode_error)?;
         self.vocab.serialize_into(&mut writer)?;
         writer.write_u64::<LittleEndian>(self.arrays.len() as u64)?;
         for array in &self.arrays {
@@ -76,7 +74,6 @@ where
     where
         R: Read,
     {
-        let max_order = bincode::deserialize_from(&mut reader).map_err(handle_bincode_error)?;
         let vocab = *V::deserialize_from(&mut reader)?;
         let arrays = {
             let len = reader.read_u64::<LittleEndian>()? as usize;
@@ -88,7 +85,6 @@ where
         };
         let counts = bincode::deserialize_from(&mut reader).map_err(handle_bincode_error)?;
         Ok(Self {
-            max_order,
             vocab,
             arrays,
             counts,

@@ -24,7 +24,7 @@ fn test_parser() {
 fn test_lookup() {
     let filenames = TEST_FILENAMES.iter().map(|f| f.to_string()).collect();
     let lm = SimpleTrieCountLm::from_files(filenames).unwrap();
-    assert_eq!(lm.max_order(), 4);
+    assert_eq!(lm.num_orders(), 5);
 
     let mut lookuper = lm.lookuper();
     for filename in TEST_FILENAMES {
@@ -48,5 +48,5 @@ fn test_serialization() {
     lm.serialize_into(&mut data).unwrap();
 
     let other = SimpleTrieCountLm::deserialize_from(&data[..]).unwrap();
-    assert_eq!(lm.max_order(), other.max_order());
+    assert_eq!(lm.num_orders(), other.num_orders());
 }
