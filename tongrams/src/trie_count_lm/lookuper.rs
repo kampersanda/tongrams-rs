@@ -42,4 +42,8 @@ where
             None
         }
     }
+
+    pub fn with_str(&mut self, gram: &str) -> Option<usize> {
+        self.run(Gram::from_str(gram))
+    }
 }

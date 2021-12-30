@@ -1,5 +1,5 @@
 use tongrams::loader::{GramsFileLoader, GramsLoader};
-use tongrams::SimpleTrieCountLm;
+use tongrams::EliasFanoTrieCountLm;
 
 const TEST_FILENAMES: [&str; 5] = [
     "../test_data/1-grams.sorted",
@@ -23,7 +23,7 @@ fn test_parser() {
 #[test]
 fn test_lookup() {
     let filenames = TEST_FILENAMES.iter().map(|f| f.to_string()).collect();
-    let lm = SimpleTrieCountLm::from_files(filenames).unwrap();
+    let lm = EliasFanoTrieCountLm::from_files(filenames).unwrap();
     assert_eq!(lm.num_orders(), 5);
 
     let mut lookuper = lm.lookuper();
@@ -42,12 +42,12 @@ fn test_lookup() {
 #[test]
 fn test_serialization() {
     let filenames = TEST_FILENAMES.iter().map(|f| f.to_string()).collect();
-    let lm = SimpleTrieCountLm::from_files(filenames).unwrap();
+    let lm = EliasFanoTrieCountLm::from_files(filenames).unwrap();
 
     let mut data = vec![];
     lm.serialize_into(&mut data).unwrap();
 
-    let other = SimpleTrieCountLm::deserialize_from(&data[..]).unwrap();
+    let other = EliasFanoTrieCountLm::deserialize_from(&data[..]).unwrap();
     assert_eq!(lm.num_orders(), other.num_orders());
     assert_eq!(lm.num_nodes(), other.num_nodes());
 }
