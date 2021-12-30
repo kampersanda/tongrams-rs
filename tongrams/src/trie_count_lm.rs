@@ -159,8 +159,6 @@ D D D\t1
     fn test_lookup() {
         let lm = TrieCountLm::from_texts(vec![GRAMS_1, GRAMS_2, GRAMS_3]).unwrap();
 
-        eprintln!("{:?}", &lm);
-
         let loader = GramsTextLoader::new(GRAMS_1.as_bytes());
         let gp = loader.parser().unwrap();
         for rec in gp {

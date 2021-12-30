@@ -50,8 +50,6 @@ where
     }
 
     fn build_counts(&mut self) -> Result<()> {
-        eprintln!("build_counts");
-
         for loader in &self.loaders {
             let gp = loader.parser()?;
             for rec in gp {
@@ -64,8 +62,6 @@ where
     }
 
     fn build_vocabulary(&mut self) -> Result<()> {
-        eprintln!("build_vocabulary");
-
         let records = {
             let gp = self.loaders[0].parser()?;
             let mut records = Vec::new();
@@ -93,8 +89,6 @@ where
 
     /// Builds the sorted array of `order`.
     fn build_sorted_array(&mut self, order: usize) -> Result<()> {
-        eprintln!("build_sorted_array (order={})", order);
-
         let mut prev_gp = self.loaders[order - 1].parser()?;
         let curr_gp = self.loaders[order].parser()?;
 
@@ -217,9 +211,6 @@ mod tests {
             }
             scb.build_sequence();
         }
-
-        eprintln!("v2r_maps = {:?}", scb.v2r_maps);
-        eprintln!("sorted_sequences = {:?}", scb.sorted_sequences);
 
         assert_eq!(scb.rank(0, 1), Some(1));
         assert_eq!(scb.rank(0, 2), Some(0));
