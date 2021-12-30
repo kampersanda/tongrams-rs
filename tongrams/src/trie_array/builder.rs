@@ -1,13 +1,13 @@
 use crate::grams_sequence::SimpleGramsSequence;
-use crate::trie_array::SimpleTrieArray;
+use crate::trie_array::{SimpleTrieArray, TrieArray};
 
 #[derive(Default)]
-pub struct TrieLayerBuilder {
+pub struct TrieArrayBuilder {
     token_ids: Vec<usize>,
     count_ranks: Vec<usize>,
 }
 
-impl TrieLayerBuilder {
+impl TrieArrayBuilder {
     pub fn new(
         num_grams: usize,
         _max_gram_id: usize,
@@ -29,22 +29,11 @@ impl TrieLayerBuilder {
         self.count_ranks.push(rank);
     }
 
-    pub fn release(self, pointers: Vec<usize>) -> SimpleTrieArray {
-        // let token_ids = SimpleGramsSequence::new(&self.token_ids, &pointers);
-        let token_ids = SimpleGramsSequence::new(&self.token_ids);
-        let count_ranks = self.count_ranks;
-        SimpleTrieArray {
-            token_ids,
-            count_ranks,
-            pointers,
-        }
+    pub fn release<T: TrieArray>(self, pointers: Vec<usize>) -> T {
+        *T::new(self.token_ids, self.count_ranks, pointers)
     }
 
-    pub fn release_counts_ranks(self) -> SimpleTrieArray {
-        SimpleTrieArray {
-            token_ids: SimpleGramsSequence::default(),
-            count_ranks: self.count_ranks,
-            pointers: vec![],
-        }
+    pub fn release_counts_ranks<T: TrieArray>(self) -> T {
+        *T::new(vec![], self.count_ranks, vec![])
     }
 }

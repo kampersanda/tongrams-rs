@@ -4,25 +4,31 @@ use std::fs::File;
 use std::io::{Read, Write};
 
 use anyhow::Result;
-use serde::{Deserialize, Serialize};
+use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
 
 use crate::handle_bincode_error;
 use crate::loader::{GramsFileLoader, GramsLoader, GramsTextLoader};
 use crate::mappers::SortedArrayMapper;
-use crate::trie_array::SimpleTrieArray;
+use crate::trie_array::{SimpleTrieArray, TrieArray};
 use crate::trie_count_lm::builder::TrieCountLmBuilder;
 use crate::vocabulary::SimpleVocabulary;
 use crate::Gram;
 
-#[derive(Default, Debug, Deserialize, Serialize)]
-pub struct TrieCountLm {
+#[derive(Default, Debug)]
+pub struct TrieCountLm<TA>
+where
+    TA: TrieArray,
+{
     max_order: usize,
     vocab: SimpleVocabulary,
-    arrays: Vec<SimpleTrieArray>,
+    arrays: Vec<TA>,
     counts: Vec<Vec<usize>>,
 }
 
-impl TrieCountLm {
+impl<TA> TrieCountLm<TA>
+where
+    TA: TrieArray,
+{
     pub fn from_files(filenames: Vec<String>) -> Result<Self> {
         let mut loaders = Vec::with_capacity(filenames.len());
         for filename in filenames {
@@ -66,18 +72,41 @@ impl TrieCountLm {
         self.max_order
     }
 
-    pub fn serialize_into<W>(&self, writer: W) -> Result<()>
+    pub fn serialize_into<W>(&self, mut writer: W) -> Result<()>
     where
         W: Write,
     {
-        bincode::serialize_into(writer, self).map_err(handle_bincode_error)
+        bincode::serialize_into(&mut writer, &self.max_order).map_err(handle_bincode_error)?;
+        bincode::serialize_into(&mut writer, &self.vocab).map_err(handle_bincode_error)?;
+        writer.write_u64::<LittleEndian>(self.arrays.len() as u64)?;
+        for array in &self.arrays {
+            array.serialize_into(&mut writer)?;
+        }
+        bincode::serialize_into(&mut writer, &self.counts).map_err(handle_bincode_error)?;
+        Ok(())
     }
 
-    pub fn deserialize_from<R>(reader: R) -> Result<Self>
+    pub fn deserialize_from<R>(mut reader: R) -> Result<Self>
     where
         R: Read,
     {
-        bincode::deserialize_from(reader).map_err(handle_bincode_error)
+        let max_order = bincode::deserialize_from(&mut reader).map_err(handle_bincode_error)?;
+        let vocab = bincode::deserialize_from(&mut reader).map_err(handle_bincode_error)?;
+        let arrays = {
+            let len = reader.read_u64::<LittleEndian>()? as usize;
+            let mut arrays = Vec::with_capacity(len);
+            for _ in 0..len {
+                arrays.push(*TA::deserialize_from(&mut reader)?);
+            }
+            arrays
+        };
+        let counts = bincode::deserialize_from(&mut reader).map_err(handle_bincode_error)?;
+        Ok(Self {
+            max_order,
+            vocab,
+            arrays,
+            counts,
+        })
     }
 }
 
@@ -116,7 +145,8 @@ D D D\t1
 
     #[test]
     fn test_components() {
-        let lm = TrieCountLm::from_texts(vec![GRAMS_1, GRAMS_2, GRAMS_3]).unwrap();
+        let lm =
+            TrieCountLm::<SimpleTrieArray>::from_texts(vec![GRAMS_1, GRAMS_2, GRAMS_3]).unwrap();
 
         #[allow(non_snake_case)]
         let (A, B, C, D) = (0, 1, 2, 3);
@@ -174,7 +204,8 @@ D D D\t1
 
     #[test]
     fn test_lookup() {
-        let lm = TrieCountLm::from_texts(vec![GRAMS_1, GRAMS_2, GRAMS_3]).unwrap();
+        let lm =
+            TrieCountLm::<SimpleTrieArray>::from_texts(vec![GRAMS_1, GRAMS_2, GRAMS_3]).unwrap();
 
         let loader = GramsTextLoader::new(GRAMS_1.as_bytes());
         let gp = loader.parser().unwrap();

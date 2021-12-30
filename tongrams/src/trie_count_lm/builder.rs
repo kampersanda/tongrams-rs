@@ -4,24 +4,26 @@ use std::io::Read;
 use anyhow::Result;
 
 use crate::loader::GramsLoader;
-use crate::trie_array::{SimpleTrieArray, TrieLayerBuilder};
+use crate::trie_array::{TrieArray, TrieArrayBuilder};
 use crate::vocabulary::SimpleVocabulary;
 use crate::Gram;
 use crate::TrieCountLm;
 
-pub struct TrieCountLmBuilder<R>
+pub struct TrieCountLmBuilder<R, T>
 where
     R: Read,
+    T: TrieArray,
 {
     loaders: Vec<Box<dyn GramsLoader<R>>>,
     vocab: SimpleVocabulary,
-    arrays: Vec<SimpleTrieArray>,
+    arrays: Vec<T>,
     counts_builder: CountsBuilder,
 }
 
-impl<R> TrieCountLmBuilder<R>
+impl<R, T> TrieCountLmBuilder<R, T>
 where
     R: Read,
+    T: TrieArray,
 {
     pub fn new(loaders: Vec<Box<dyn GramsLoader<R>>>) -> Self {
         Self {
@@ -32,7 +34,7 @@ where
         }
     }
 
-    pub fn build(mut self) -> Result<TrieCountLm> {
+    pub fn build(mut self) -> Result<TrieCountLm<T>> {
         self.build_counts()?;
         self.build_vocabulary()?;
 
@@ -75,7 +77,7 @@ where
         let grams: Vec<Gram> = records.iter().map(|r| Gram::from_str(&r.gram)).collect();
         self.vocab = SimpleVocabulary::new(&grams);
 
-        let mut array_builder = TrieLayerBuilder::new(records.len(), 0, 0, 0);
+        let mut array_builder = TrieArrayBuilder::new(records.len(), 0, 0, 0);
         for rec in &records {
             let count_rank = self.counts_builder.rank(0, rec.count).unwrap();
             array_builder.add_count_rank(count_rank);
@@ -92,7 +94,7 @@ where
         let mut prev_gp = self.loaders[order - 1].parser()?;
         let curr_gp = self.loaders[order].parser()?;
 
-        let mut array_builder = TrieLayerBuilder::new(curr_gp.num_grams(), 0, 0, 0);
+        let mut array_builder = TrieArrayBuilder::new(curr_gp.num_grams(), 0, 0, 0);
         let num_pointers = prev_gp.num_grams() + 1;
 
         let mut pointers = Vec::with_capacity(num_pointers);
