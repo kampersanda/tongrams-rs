@@ -30,25 +30,25 @@ impl TrieArray for SimpleTrieArray {
         })
     }
 
+    /// Gets the token id with a given index.
+    fn token_id(&self, i: usize) -> usize {
+        self.token_ids[i]
+    }
+
+    fn count_rank(&self, i: usize) -> usize {
+        self.count_ranks[i]
+    }
+
     fn range(&self, pos: usize) -> (usize, usize) {
         (self.pointers[pos], self.pointers[pos + 1])
     }
 
-    /// Gets the token id with a given index.
-    fn token_id(&self, pos: usize) -> usize {
-        self.token_ids[pos]
-    }
-
-    fn count_rank(&self, pos: usize) -> usize {
-        self.count_ranks[pos]
-    }
-
-    /// Searches for an element within a given range, returning its index.
-    fn position(&self, rng: (usize, usize), id: usize) -> Option<usize> {
-        self.token_ids[rng.0..rng.1]
+    fn find_token(&self, pos: usize, id: usize) -> Option<usize> {
+        let (b, e) = self.range(pos);
+        self.token_ids[b..e]
             .iter()
             .position(|&x| x == id)
-            .map(|i| i + rng.0)
+            .map(|i| i + b)
     }
 
     fn serialize_into<W>(&self, writer: W) -> Result<()>
