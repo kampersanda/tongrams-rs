@@ -1,8 +1,13 @@
 use std::collections::HashMap;
+use std::io::{Read, Write};
 
+use anyhow::Result;
+use serde::{Deserialize, Serialize};
+
+use crate::handle_bincode_error;
 use crate::Gram;
 
-#[derive(Default, Debug)]
+#[derive(Default, Debug, Serialize, Deserialize)]
 pub struct SimpleVocabulary {
     map: HashMap<String, usize>,
 }
@@ -18,6 +23,20 @@ impl SimpleVocabulary {
 
     pub fn get(&self, gram: Gram) -> Option<usize> {
         self.map.get(&gram.to_string()).map(|x| *x)
+    }
+
+    pub fn serialize_into<W>(&self, writer: W) -> Result<()>
+    where
+        W: Write,
+    {
+        bincode::serialize_into(writer, self).map_err(handle_bincode_error)
+    }
+
+    pub fn deserialize_from<R>(reader: R) -> Result<Self>
+    where
+        R: Read,
+    {
+        bincode::deserialize_from(reader).map_err(handle_bincode_error)
     }
 }
 

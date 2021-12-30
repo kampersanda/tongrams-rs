@@ -1,8 +1,12 @@
 pub mod builder;
 
 use std::fs::File;
+use std::io::{Read, Write};
 
 use anyhow::Result;
+use serde::{Deserialize, Serialize};
+
+use crate::handle_bincode_error;
 
 use crate::loader::{GramsFileLoader, GramsLoader, GramsTextLoader};
 use crate::mappers::SortedArrayMapper;
@@ -11,7 +15,7 @@ use crate::trie_count_lm::builder::TrieCountLmBuilder;
 use crate::vocabulary::SimpleVocabulary;
 use crate::Gram;
 
-#[derive(Default, Debug)]
+#[derive(Default, Debug, Deserialize, Serialize)]
 pub struct TrieCountLm {
     max_order: usize,
     vocab: SimpleVocabulary,
@@ -61,6 +65,20 @@ impl TrieCountLm {
 
     pub fn max_order(&self) -> usize {
         self.max_order
+    }
+
+    pub fn serialize_into<W>(&self, writer: W) -> Result<()>
+    where
+        W: Write,
+    {
+        bincode::serialize_into(writer, self).map_err(handle_bincode_error)
+    }
+
+    pub fn deserialize_from<R>(reader: R) -> Result<Self>
+    where
+        R: Read,
+    {
+        bincode::deserialize_from(reader).map_err(handle_bincode_error)
     }
 }
 

@@ -1,6 +1,12 @@
-use crate::grams_sequence::SimpleGramsSequence;
+use std::io::{Read, Write};
 
-#[derive(Default, Debug)]
+use anyhow::Result;
+use serde::{Deserialize, Serialize};
+
+use crate::grams_sequence::SimpleGramsSequence;
+use crate::handle_bincode_error;
+
+#[derive(Default, Debug, Serialize, Deserialize)]
 pub struct SimpleSortedArray {
     token_ids: SimpleGramsSequence,
     count_ranks: Vec<usize>,
@@ -22,6 +28,20 @@ impl SimpleSortedArray {
 
     pub fn position(&self, rng: (usize, usize), id: usize) -> Option<usize> {
         self.token_ids.position(rng, id)
+    }
+
+    pub fn serialize_into<W>(&self, writer: W) -> Result<()>
+    where
+        W: Write,
+    {
+        bincode::serialize_into(writer, self).map_err(handle_bincode_error)
+    }
+
+    pub fn deserialize_from<R>(reader: R) -> Result<Self>
+    where
+        R: Read,
+    {
+        bincode::deserialize_from(reader).map_err(handle_bincode_error)
     }
 }
 

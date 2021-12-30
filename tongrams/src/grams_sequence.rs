@@ -1,4 +1,11 @@
-#[derive(Default, Debug)]
+use std::io::{Read, Write};
+
+use anyhow::Result;
+use serde::{Deserialize, Serialize};
+
+use crate::handle_bincode_error;
+
+#[derive(Default, Debug, Serialize, Deserialize)]
 pub struct SimpleGramsSequence {
     token_ids: Vec<usize>,
 }
@@ -39,5 +46,19 @@ impl SimpleGramsSequence {
             .iter()
             .position(|&x| x == id)
             .map(|i| i + rng.0)
+    }
+
+    pub fn serialize_into<W>(&self, writer: W) -> Result<()>
+    where
+        W: Write,
+    {
+        bincode::serialize_into(writer, self).map_err(handle_bincode_error)
+    }
+
+    pub fn deserialize_from<R>(reader: R) -> Result<Self>
+    where
+        R: Read,
+    {
+        bincode::deserialize_from(reader).map_err(handle_bincode_error)
     }
 }

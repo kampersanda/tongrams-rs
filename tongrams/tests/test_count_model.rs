@@ -21,7 +21,7 @@ fn test_parser() {
 }
 
 #[test]
-fn test_trie_count_lm() {
+fn test_lookup() {
     let filenames = TEST_FILENAMES.iter().map(|f| f.to_string()).collect();
     let lm = TrieCountLm::from_files(filenames).unwrap();
     assert_eq!(lm.max_order(), 4);
@@ -36,4 +36,16 @@ fn test_trie_count_lm() {
     }
 
     // TODO: Add not-found test
+}
+
+#[test]
+fn test_serialization() {
+    let filenames = TEST_FILENAMES.iter().map(|f| f.to_string()).collect();
+    let lm = TrieCountLm::from_files(filenames).unwrap();
+
+    let mut data = vec![];
+    lm.serialize_into(&mut data).unwrap();
+
+    let other = TrieCountLm::deserialize_from(&data[..]).unwrap();
+    assert_eq!(lm.max_order(), other.max_order());
 }

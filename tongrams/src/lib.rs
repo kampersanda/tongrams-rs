@@ -34,3 +34,7 @@ impl Record {
         self.count
     }
 }
+
+pub fn handle_bincode_error(e: std::boxed::Box<bincode::ErrorKind>) -> anyhow::Error {
+    anyhow::anyhow!("{:?}", e)
+}
