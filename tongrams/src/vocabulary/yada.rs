@@ -26,11 +26,8 @@ impl Vocabulary for DoubleArrayVocabulary {
         keyset.sort_by(|(g1, _), (g2, _)| g1.cmp(g2));
         for i in 1..keyset.len() {
             if keyset[i - 1].0 == keyset[i].0 {
-                return Err(anyhow!(
-                    "Depulicated key: {:?} => {}",
-                    keyset[i - 1].0,
-                    keyset[i - 1].1
-                ));
+                let (k, v) = keyset[i - 1];
+                return Err(anyhow!("Depulicated key: {:?} => {}", k, v));
             }
         }
         Ok(Box::new(Self {
