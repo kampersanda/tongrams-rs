@@ -58,6 +58,10 @@ where
         self.arrays.len()
     }
 
+    pub fn num_nodes(&self) -> usize {
+        self.arrays.iter().fold(0, |acc, x| acc + x.num_tokens())
+    }
+
     pub fn serialize_into<W>(&self, mut writer: W) -> Result<()>
     where
         W: Write,

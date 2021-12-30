@@ -23,6 +23,10 @@ pub trait TrieArray {
 
     fn find_token(&self, pos: usize, id: usize) -> Option<usize>;
 
+    fn num_tokens(&self) -> usize;
+
+    fn num_pointers(&self) -> usize;
+
     fn serialize_into<W: Write>(&self, writer: W) -> Result<()>;
 
     fn deserialize_from<R: Read>(reader: R) -> Result<Box<Self>>;
@@ -51,6 +55,9 @@ mod tests {
         assert_eq!(ta.find_token(1, 3), Some(4));
         assert_eq!(ta.find_token(1, 1), Some(2));
         assert_eq!(ta.find_token(1, 4), None);
+
+        assert_eq!(ta.num_tokens(), 9);
+        assert_eq!(ta.num_pointers(), 5);
     }
 
     fn test_basic_2<T: TrieArray>() {
@@ -72,6 +79,9 @@ mod tests {
         assert_eq!(ta.find_token(2, 2), Some(1));
         assert_eq!(ta.find_token(2, 3), Some(2));
         assert_eq!(ta.find_token(2, 4), None);
+
+        assert_eq!(ta.num_tokens(), 7);
+        assert_eq!(ta.num_pointers(), 10);
     }
 
     #[test]

@@ -69,6 +69,14 @@ impl TrieArray for EliasFanoTrieArray {
         None
     }
 
+    fn num_tokens(&self) -> usize {
+        self.token_ids.len()
+    }
+
+    fn num_pointers(&self) -> usize {
+        self.pointers.len()
+    }
+
     fn serialize_into<W>(&self, writer: W) -> Result<()>
     where
         W: Write,
@@ -99,8 +107,8 @@ impl EliasFanoTrieArray {
             sampled_ids[i] = sampled_id;
             let (b, e) = (pointers[i], pointers[i + 1]);
             debug_assert!(b <= e);
-            for j in b..e {
-                token_ids[j] = token_ids[j] + sampled_id;
+            for token_id in token_ids.iter_mut().take(e).skip(b) {
+                *token_id += sampled_id;
             }
             if e != 0 {
                 sampled_id = token_ids[e - 1];

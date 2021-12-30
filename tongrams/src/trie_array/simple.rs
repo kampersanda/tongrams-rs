@@ -51,6 +51,14 @@ impl TrieArray for SimpleTrieArray {
             .map(|i| i + b)
     }
 
+    fn num_tokens(&self) -> usize {
+        self.token_ids.len()
+    }
+
+    fn num_pointers(&self) -> usize {
+        self.pointers.len()
+    }
+
     fn serialize_into<W>(&self, writer: W) -> Result<()>
     where
         W: Write,
