@@ -4,7 +4,7 @@ use std::io::Read;
 use anyhow::Result;
 
 use crate::loader::GramsLoader;
-use crate::trie_layer::{SimpleTrieLayer, TrieLayerBuilder};
+use crate::trie_array::{SimpleTrieArray, TrieLayerBuilder};
 use crate::vocabulary::SimpleVocabulary;
 use crate::Gram;
 use crate::TrieCountLm;
@@ -15,7 +15,7 @@ where
 {
     loaders: Vec<Box<dyn GramsLoader<R>>>,
     vocab: SimpleVocabulary,
-    layers: Vec<SimpleTrieLayer>,
+    arrays: Vec<SimpleTrieArray>,
     counts_builder: CountsBuilder,
 }
 
@@ -27,7 +27,7 @@ where
         Self {
             loaders,
             vocab: SimpleVocabulary::default(),
-            layers: vec![],
+            arrays: vec![],
             counts_builder: CountsBuilder::default(),
         }
     }
@@ -44,7 +44,7 @@ where
         Ok(TrieCountLm {
             max_order,
             vocab: self.vocab,
-            layers: self.layers,
+            arrays: self.arrays,
             counts: self.counts_builder.release(),
         })
     }
@@ -75,14 +75,14 @@ where
         let grams: Vec<Gram> = records.iter().map(|r| Gram::from_str(&r.gram)).collect();
         self.vocab = SimpleVocabulary::new(&grams);
 
-        let mut layer_builder = TrieLayerBuilder::new(records.len(), 0, 0, 0);
+        let mut array_builder = TrieLayerBuilder::new(records.len(), 0, 0, 0);
         for rec in &records {
             let count_rank = self.counts_builder.rank(0, rec.count).unwrap();
-            layer_builder.add_count_rank(count_rank);
+            array_builder.add_count_rank(count_rank);
         }
 
-        let layer = layer_builder.release_counts_ranks();
-        self.layers.push(layer);
+        let array = array_builder.release_counts_ranks();
+        self.arrays.push(array);
 
         Ok(())
     }
@@ -92,7 +92,7 @@ where
         let mut prev_gp = self.loaders[order - 1].parser()?;
         let curr_gp = self.loaders[order].parser()?;
 
-        let mut layer_builder = TrieLayerBuilder::new(curr_gp.num_grams(), 0, 0, 0);
+        let mut array_builder = TrieLayerBuilder::new(curr_gp.num_grams(), 0, 0, 0);
         let num_pointers = prev_gp.num_grams() + 1;
 
         let mut pointers = Vec::with_capacity(num_pointers);
@@ -118,7 +118,7 @@ where
 
             let token_id = self.vocab.get(token).unwrap();
             let count_rank = self.counts_builder.rank(order, curr_rec.count()).unwrap();
-            layer_builder.add(token_id, count_rank);
+            array_builder.add(token_id, count_rank);
         }
 
         for _ in prev_gp {
@@ -126,8 +126,8 @@ where
         }
         pointers.push(pointer);
 
-        let layer = layer_builder.release(pointers);
-        self.layers.push(layer);
+        let array = array_builder.release(pointers);
+        self.arrays.push(array);
 
         Ok(())
     }

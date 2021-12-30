@@ -9,8 +9,8 @@ use serde::{Deserialize, Serialize};
 use crate::handle_bincode_error;
 use crate::loader::{GramsFileLoader, GramsLoader, GramsTextLoader};
 use crate::mappers::SortedArrayMapper;
+use crate::trie_array::SimpleTrieArray;
 use crate::trie_count_lm::builder::TrieCountLmBuilder;
-use crate::trie_layer::SimpleTrieLayer;
 use crate::vocabulary::SimpleVocabulary;
 use crate::Gram;
 
@@ -18,7 +18,7 @@ use crate::Gram;
 pub struct TrieCountLm {
     max_order: usize,
     vocab: SimpleVocabulary,
-    layers: Vec<SimpleTrieLayer>,
+    arrays: Vec<SimpleTrieArray>,
     counts: Vec<Vec<usize>>,
 }
 
@@ -48,14 +48,14 @@ impl TrieCountLm {
             let order = token_ids.len() - 1;
             let mut pos = token_ids[0];
             for i in 1..=order {
-                let rng = self.layers[i].range(pos);
-                if let Some(next_pos) = self.layers[i].position(rng, token_ids[i]) {
+                let rng = self.arrays[i].range(pos);
+                if let Some(next_pos) = self.arrays[i].position(rng, token_ids[i]) {
                     pos = next_pos;
                 } else {
                     return None;
                 }
             }
-            let count_rank = self.layers[order].count_rank(pos);
+            let count_rank = self.arrays[order].count_rank(pos);
             Some(self.counts[order][count_rank])
         } else {
             None
@@ -129,30 +129,30 @@ D D D\t1
         assert_eq!(vocab.get(Gram::from_str("D")), Some(D));
 
         // For unigrams
-        let sa = &lm.layers[0];
+        let array = &lm.arrays[0];
         for (i, &count_rank) in [2, 1, 0, 0].iter().enumerate() {
-            assert_eq!(sa.count_rank(i), count_rank);
+            assert_eq!(array.count_rank(i), count_rank);
         }
 
         // For bigrams
-        let sa = &lm.layers[1];
+        let array = &lm.arrays[1];
         for (i, &token_id) in [A, C, B, C, D, A, D, B, D].iter().enumerate() {
-            assert_eq!(sa.token_id(i), token_id);
+            assert_eq!(array.token_id(i), token_id);
         }
         for (i, &count_rank) in [3, 0, 0, 0, 1, 2, 0, 1, 1].iter().enumerate() {
-            assert_eq!(sa.count_rank(i), count_rank);
+            assert_eq!(array.count_rank(i), count_rank);
         }
         for (i, &range) in [(0, 2), (2, 5), (5, 7), (7, 9)].iter().enumerate() {
-            assert_eq!(sa.range(i), range);
+            assert_eq!(array.range(i), range);
         }
 
         // For trigrams
-        let sa = &lm.layers[2];
+        let array = &lm.arrays[2];
         for (i, &token_id) in [C, C, D, D, B, C, D].iter().enumerate() {
-            assert_eq!(sa.token_id(i), token_id);
+            assert_eq!(array.token_id(i), token_id);
         }
         for (i, &count_rank) in [2, 1, 0, 0, 1, 0, 0].iter().enumerate() {
-            assert_eq!(sa.count_rank(i), count_rank);
+            assert_eq!(array.count_rank(i), count_rank);
         }
         for (i, &range) in [
             (0, 1),
@@ -168,7 +168,7 @@ D D D\t1
         .iter()
         .enumerate()
         {
-            assert_eq!(sa.range(i), range);
+            assert_eq!(array.range(i), range);
         }
     }
 

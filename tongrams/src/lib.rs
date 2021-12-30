@@ -3,8 +3,8 @@ pub mod grams_sequence;
 pub mod loader;
 pub mod mappers;
 pub mod parser;
+pub mod trie_array;
 pub mod trie_count_lm;
-pub mod trie_layer;
 pub mod vocabulary;
 
 pub use gram::Gram;
