@@ -4,7 +4,7 @@ use crate::grams_sequence::SimpleGramsSequence;
 pub struct SimpleSortedArray {
     token_ids: SimpleGramsSequence,
     count_ranks: Vec<usize>,
-    pub pointers: Vec<usize>,
+    pointers: Vec<usize>,
 }
 
 impl SimpleSortedArray {
@@ -21,7 +21,7 @@ impl SimpleSortedArray {
     }
 
     pub fn position(&self, rng: (usize, usize), id: usize) -> Option<usize> {
-        self.token_ids.find(rng, id)
+        self.token_ids.find(rng, id).map(|i| rng.0 + i)
     }
 }
 

@@ -39,14 +39,12 @@ impl TrieCountLm {
     }
 
     pub fn lookup(&self, gram: Gram) -> Option<usize> {
-        eprintln!("gram = {:?}", gram);
         let mut mapper = SortedArrayMapper::default();
         if let Some(token_ids) = mapper.map_query(gram, &self.vocab) {
             let order = token_ids.len() - 1;
             let mut pos = token_ids[0];
             for i in 1..=order {
                 let rng = self.arrays[i].range(pos);
-                eprintln!("rng = {:?}", rng);
                 if let Some(next_pos) = self.arrays[i].position(rng, token_ids[i]) {
                     pos = next_pos;
                 } else {

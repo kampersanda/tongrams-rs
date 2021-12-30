@@ -22,7 +22,7 @@ pub struct SequenceCollectionBuilder {
     // Mapping from eaten values to their frequencies
     v2f_map: HashMap<usize, usize>,
     // Mappings from eaten values to their ranks
-    pub v2r_maps: Vec<HashMap<usize, usize>>,
+    v2r_maps: Vec<HashMap<usize, usize>>,
     // In which values are sorted in decreasing order of their frequencies
     sorted_sequences: Vec<Vec<usize>>,
 }
