@@ -15,8 +15,7 @@ use crate::trie_count_lm::builder::TrieCountLmBuilder;
 use crate::trie_count_lm::lookuper::TrieCountLmLookuper;
 use crate::vocabulary::Vocabulary;
 
-#[derive(Default)]
-// #[derive(Default, Debug)] // by CompactVector
+#[derive(Default, Debug)]
 pub struct TrieCountLm<T, V>
 where
     T: TrieArray,
