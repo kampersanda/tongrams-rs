@@ -7,13 +7,13 @@ use crate::grams_sequence::SimpleGramsSequence;
 use crate::handle_bincode_error;
 
 #[derive(Default, Debug, Serialize, Deserialize)]
-pub struct SimpleSortedArray {
+pub struct SimpleTrieLayer {
     token_ids: SimpleGramsSequence,
     count_ranks: Vec<usize>,
     pointers: Vec<usize>,
 }
 
-impl SimpleSortedArray {
+impl SimpleTrieLayer {
     pub fn range(&self, pos: usize) -> (usize, usize) {
         (self.pointers[pos], self.pointers[pos + 1])
     }
@@ -46,12 +46,12 @@ impl SimpleSortedArray {
 }
 
 #[derive(Default)]
-pub struct SortedArrayBuilder {
+pub struct TrieLayerBuilder {
     token_ids: Vec<usize>,
     count_ranks: Vec<usize>,
 }
 
-impl SortedArrayBuilder {
+impl TrieLayerBuilder {
     pub fn new(
         num_grams: usize,
         _max_gram_id: usize,
@@ -73,19 +73,19 @@ impl SortedArrayBuilder {
         self.count_ranks.push(rank);
     }
 
-    pub fn release(self, pointers: Vec<usize>) -> SimpleSortedArray {
+    pub fn release(self, pointers: Vec<usize>) -> SimpleTrieLayer {
         // let token_ids = SimpleGramsSequence::new(&self.token_ids, &pointers);
         let token_ids = SimpleGramsSequence::new(&self.token_ids);
         let count_ranks = self.count_ranks;
-        SimpleSortedArray {
+        SimpleTrieLayer {
             token_ids,
             count_ranks,
             pointers,
         }
     }
 
-    pub fn release_counts_ranks(self) -> SimpleSortedArray {
-        SimpleSortedArray {
+    pub fn release_counts_ranks(self) -> SimpleTrieLayer {
+        SimpleTrieLayer {
             token_ids: SimpleGramsSequence::default(),
             count_ranks: self.count_ranks,
             pointers: vec![],

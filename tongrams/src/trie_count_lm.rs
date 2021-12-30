@@ -7,11 +7,10 @@ use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
 use crate::handle_bincode_error;
-
 use crate::loader::{GramsFileLoader, GramsLoader, GramsTextLoader};
 use crate::mappers::SortedArrayMapper;
-use crate::sorted_array::SimpleSortedArray;
 use crate::trie_count_lm::builder::TrieCountLmBuilder;
+use crate::trie_layer::SimpleTrieLayer;
 use crate::vocabulary::SimpleVocabulary;
 use crate::Gram;
 
@@ -19,7 +18,7 @@ use crate::Gram;
 pub struct TrieCountLm {
     max_order: usize,
     vocab: SimpleVocabulary,
-    arrays: Vec<SimpleSortedArray>,
+    layers: Vec<SimpleTrieLayer>,
     counts: Vec<Vec<usize>>,
 }
 
@@ -49,14 +48,14 @@ impl TrieCountLm {
             let order = token_ids.len() - 1;
             let mut pos = token_ids[0];
             for i in 1..=order {
-                let rng = self.arrays[i].range(pos);
-                if let Some(next_pos) = self.arrays[i].position(rng, token_ids[i]) {
+                let rng = self.layers[i].range(pos);
+                if let Some(next_pos) = self.layers[i].position(rng, token_ids[i]) {
                     pos = next_pos;
                 } else {
                     return None;
                 }
             }
-            let count_rank = self.arrays[order].count_rank(pos);
+            let count_rank = self.layers[order].count_rank(pos);
             Some(self.counts[order][count_rank])
         } else {
             None
@@ -130,13 +129,13 @@ D D D\t1
         assert_eq!(vocab.get(Gram::from_str("D")), Some(D));
 
         // For unigrams
-        let sa = &lm.arrays[0];
+        let sa = &lm.layers[0];
         for (i, &count_rank) in [2, 1, 0, 0].iter().enumerate() {
             assert_eq!(sa.count_rank(i), count_rank);
         }
 
         // For bigrams
-        let sa = &lm.arrays[1];
+        let sa = &lm.layers[1];
         for (i, &token_id) in [A, C, B, C, D, A, D, B, D].iter().enumerate() {
             assert_eq!(sa.token_id(i), token_id);
         }
@@ -148,7 +147,7 @@ D D D\t1
         }
 
         // For trigrams
-        let sa = &lm.arrays[2];
+        let sa = &lm.layers[2];
         for (i, &token_id) in [C, C, D, D, B, C, D].iter().enumerate() {
             assert_eq!(sa.token_id(i), token_id);
         }
