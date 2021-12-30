@@ -9,25 +9,25 @@ use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
 use crate::handle_bincode_error;
 use crate::loader::{GramsFileLoader, GramsLoader, GramsTextLoader};
 use crate::mappers::SortedArrayMapper;
-use crate::trie_array::{SimpleTrieArray, TrieArray};
+use crate::trie_array::TrieArray;
 use crate::trie_count_lm::builder::TrieCountLmBuilder;
 use crate::vocabulary::SimpleVocabulary;
 use crate::Gram;
 
 #[derive(Default, Debug)]
-pub struct TrieCountLm<TA>
+pub struct TrieCountLm<T>
 where
-    TA: TrieArray,
+    T: TrieArray,
 {
     max_order: usize,
     vocab: SimpleVocabulary,
-    arrays: Vec<TA>,
+    arrays: Vec<T>,
     counts: Vec<Vec<usize>>,
 }
 
-impl<TA> TrieCountLm<TA>
+impl<T> TrieCountLm<T>
 where
-    TA: TrieArray,
+    T: TrieArray,
 {
     pub fn from_files(filenames: Vec<String>) -> Result<Self> {
         let mut loaders = Vec::with_capacity(filenames.len());
@@ -96,7 +96,7 @@ where
             let len = reader.read_u64::<LittleEndian>()? as usize;
             let mut arrays = Vec::with_capacity(len);
             for _ in 0..len {
-                arrays.push(*TA::deserialize_from(&mut reader)?);
+                arrays.push(*T::deserialize_from(&mut reader)?);
             }
             arrays
         };
@@ -113,6 +113,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::SimpleTrieArray;
 
     const GRAMS_1: &'static str = "4
 A\t10

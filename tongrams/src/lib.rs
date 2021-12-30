@@ -9,6 +9,7 @@ pub mod vocabulary;
 
 pub use gram::Gram;
 pub use grams_sequence::SimpleGramsSequence;
+pub use trie_array::simple::SimpleTrieArray;
 pub use trie_count_lm::TrieCountLm;
 
 pub const MAX_ORDER: usize = 8;

@@ -1,5 +1,4 @@
-use crate::grams_sequence::SimpleGramsSequence;
-use crate::trie_array::{SimpleTrieArray, TrieArray};
+use crate::trie_array::TrieArray;
 
 #[derive(Default)]
 pub struct TrieArrayBuilder {
