@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use std::io::Read;
 
 use anyhow::Result;
+use sucds::{util::needed_bits, CompactVector};
 
 use crate::loader::GramsLoader;
 use crate::trie_array::{TrieArray, TrieArrayBuilder};
@@ -143,12 +144,12 @@ pub struct CountsBuilder {
     // Mappings from eaten values to their ranks
     v2r_maps: Vec<HashMap<usize, usize>>,
     // In which values are sorted in decreasing order of their frequencies
-    sorted_sequences: Vec<Vec<usize>>,
+    sorted_sequences: Vec<CompactVector>,
 }
 
 impl CountsBuilder {
     #[allow(clippy::missing_const_for_fn)]
-    pub fn release(self) -> Vec<Vec<usize>> {
+    pub fn release(self) -> Vec<CompactVector> {
         self.sorted_sequences
     }
 
@@ -164,20 +165,25 @@ impl CountsBuilder {
     pub fn build_sequence(&mut self) {
         if self.v2f_map.is_empty() {
             self.v2r_maps.push(HashMap::new());
-            self.sorted_sequences.push(vec![]);
+            self.sorted_sequences.push(CompactVector::default());
             return;
         }
 
         let mut sorted = vec![];
+        let mut max_value = 0;
+
         for (&value, &freq) in &self.v2f_map {
             sorted.push((value, freq));
+            max_value = std::cmp::max(max_value, value);
         }
         self.v2f_map.clear();
 
         // `then_with` is needed to stably sort
         sorted.sort_by(|(v1, f1), (v2, f2)| f2.cmp(f1).then_with(|| v1.cmp(v2)));
-        self.sorted_sequences
-            .push(sorted.iter().map(|&(v, _)| v).collect());
+
+        let mut values = CompactVector::with_capacity(sorted.len(), needed_bits(max_value));
+        sorted.iter().for_each(|&(v, _)| values.push(v));
+        self.sorted_sequences.push(values);
 
         let mut v2r_map = HashMap::new();
         for (i, &(v, _)) in sorted.iter().enumerate() {
@@ -215,10 +221,10 @@ mod tests {
         assert_eq!(scb.rank(1, 2), Some(1));
 
         let counts = scb.release();
-        assert_eq!(counts[0][0], 2);
-        assert_eq!(counts[0][1], 1);
-        assert_eq!(counts[0][2], 4);
-        assert_eq!(counts[1][0], 1);
-        assert_eq!(counts[1][1], 2);
+        assert_eq!(counts[0].get(0), 2);
+        assert_eq!(counts[0].get(1), 1);
+        assert_eq!(counts[0].get(2), 4);
+        assert_eq!(counts[1].get(0), 1);
+        assert_eq!(counts[1].get(1), 2);
     }
 }

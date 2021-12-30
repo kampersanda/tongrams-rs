@@ -6,6 +6,7 @@ use std::io::{Read, Write};
 
 use anyhow::Result;
 use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
+use sucds::CompactVector;
 
 use crate::handle_bincode_error;
 use crate::loader::{GramsFileLoader, GramsLoader, GramsTextLoader};
@@ -14,7 +15,8 @@ use crate::trie_count_lm::builder::TrieCountLmBuilder;
 use crate::trie_count_lm::lookuper::TrieCountLmLookuper;
 use crate::vocabulary::Vocabulary;
 
-#[derive(Default, Debug)]
+#[derive(Default)]
+// #[derive(Default, Debug)] // by CompactVector
 pub struct TrieCountLm<T, V>
 where
     T: TrieArray,
@@ -22,7 +24,7 @@ where
 {
     vocab: V,
     arrays: Vec<T>,
-    counts: Vec<Vec<usize>>,
+    counts: Vec<CompactVector>,
 }
 
 impl<T, V> TrieCountLm<T, V>

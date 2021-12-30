@@ -38,7 +38,7 @@ where
                 }
             }
             let count_rank = self.trie.arrays[order].count_rank(pos);
-            Some(self.trie.counts[order][count_rank])
+            Some(self.trie.counts[order].get(count_rank))
         } else {
             None
         }
