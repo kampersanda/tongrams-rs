@@ -1,4 +1,3 @@
-pub mod counter;
 pub mod gram;
 pub mod grams_sequence;
 pub mod loader;

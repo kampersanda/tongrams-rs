@@ -1,4 +1,3 @@
-use crate::sorted_array::SimpleSortedArray;
 use crate::vocabulary::SimpleVocabulary;
 use crate::Gram;
 
