@@ -7,4 +7,5 @@ edition = "2018"
 
 [dependencies]
 tongrams =  { path = "../tongrams" }
+anyhow = "1.0"
 structopt = "0.3"  # MIT or Apache-2.0

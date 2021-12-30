@@ -1,5 +1,7 @@
 use std::fs::File;
 use std::io::{stdin, stdout, Write};
+
+use anyhow::Result;
 use structopt::StructOpt;
 
 use tongrams::EliasFanoTrieCountLm;
@@ -11,17 +13,20 @@ struct Opt {
     index_file: String,
 }
 
-fn main() -> std::io::Result<()> {
+fn main() -> Result<()> {
     let opt = Opt::from_args();
-    let reader = File::open(opt.index_file)?;
+    let index_file = opt.index_file;
 
-    let lm = EliasFanoTrieCountLm::deserialize_from(&reader).unwrap();
+    println!("Loading the index from {}...", &index_file);
+    let reader = File::open(&index_file)?;
+    let lm = EliasFanoTrieCountLm::deserialize_from(&reader)?;
     let mut lookuper = lm.lookuper();
 
+    println!("Performing the lookup...");
     let mut buf = String::new();
     loop {
         print!("> ");
-        stdout().flush().unwrap();
+        stdout().flush()?;
 
         buf.clear();
         stdin().read_line(&mut buf)?;
