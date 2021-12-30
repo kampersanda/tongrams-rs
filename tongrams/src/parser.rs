@@ -48,9 +48,7 @@ where
         }
 
         let mut buffer = String::new();
-        if self.reader.read_line(&mut buffer).is_err() {
-            return None;
-        }
+        self.reader.read_line(&mut buffer).ok()?;
 
         let items: Vec<&str> = buffer.trim().split(GRAM_COUNT_SEPARATOR as char).collect();
         if items.len() != 2 {

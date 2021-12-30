@@ -16,7 +16,7 @@ pub struct GramsFileLoader {
 }
 
 impl GramsFileLoader {
-    pub fn new(filename: String) -> Self {
+    pub const fn new(filename: String) -> Self {
         Self { filename }
     }
 }
@@ -24,7 +24,7 @@ impl GramsFileLoader {
 impl GramsLoader<File> for GramsFileLoader {
     fn parser(&self) -> Result<GramsParser<File>> {
         let reader = BufReader::new(File::open(&self.filename)?);
-        Ok(GramsParser::new(reader)?)
+        GramsParser::new(reader)
     }
 }
 
@@ -33,7 +33,7 @@ pub struct GramsTextLoader<'a> {
 }
 
 impl<'a> GramsTextLoader<'a> {
-    pub fn new(text: &'a [u8]) -> Self {
+    pub const fn new(text: &'a [u8]) -> Self {
         Self { text }
     }
 }
@@ -41,6 +41,6 @@ impl<'a> GramsTextLoader<'a> {
 impl<'a> GramsLoader<&'a [u8]> for GramsTextLoader<'a> {
     fn parser(&self) -> Result<GramsParser<&'a [u8]>> {
         let reader = BufReader::new(self.text);
-        Ok(GramsParser::new(reader)?)
+        GramsParser::new(reader)
     }
 }

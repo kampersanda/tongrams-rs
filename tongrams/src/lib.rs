@@ -25,15 +25,15 @@ pub struct Record {
 }
 
 impl Record {
-    pub fn new(gram: String, count: usize) -> Self {
+    pub const fn new(gram: String, count: usize) -> Self {
         Self { gram, count }
     }
 
-    pub fn gram<'a>(&'a self) -> Gram<'a> {
+    pub fn gram(&self) -> Gram {
         Gram::new(self.gram.as_bytes())
     }
 
-    pub fn count(&self) -> usize {
+    pub const fn count(&self) -> usize {
         self.count
     }
 }

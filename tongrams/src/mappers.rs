@@ -24,7 +24,7 @@ impl SortedArrayMapper {
         Some(&self.mapped[..tokens.len()])
     }
 
-    pub fn get(&self, i: usize) -> usize {
+    pub const fn get(&self, i: usize) -> usize {
         self.mapped[i]
     }
 }

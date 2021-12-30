@@ -31,7 +31,7 @@ impl Vocabulary for SimpleVocabulary {
     }
 
     fn get(&self, gram: Gram) -> Option<usize> {
-        self.map.get(&gram.to_string()).map(|x| *x)
+        self.map.get(&gram.to_string()).copied()
     }
 
     fn serialize_into<W>(&self, writer: W) -> Result<()>

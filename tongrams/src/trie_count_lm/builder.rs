@@ -136,6 +136,7 @@ where
     }
 }
 
+#[derive(Default)]
 pub struct CountsBuilder {
     // Mapping from eaten values to their frequencies
     v2f_map: HashMap<usize, usize>,
@@ -145,17 +146,8 @@ pub struct CountsBuilder {
     sorted_sequences: Vec<Vec<usize>>,
 }
 
-impl Default for CountsBuilder {
-    fn default() -> Self {
-        Self {
-            v2f_map: HashMap::new(),
-            v2r_maps: vec![],
-            sorted_sequences: vec![],
-        }
-    }
-}
-
 impl CountsBuilder {
+    #[allow(clippy::missing_const_for_fn)]
     pub fn release(self) -> Vec<Vec<usize>> {
         self.sorted_sequences
     }
@@ -195,7 +187,7 @@ impl CountsBuilder {
     }
 
     pub fn rank(&self, order: usize, value: usize) -> Option<usize> {
-        self.v2r_maps[order].get(&value).map(|x| *x)
+        self.v2r_maps[order].get(&value).copied()
     }
 }
 

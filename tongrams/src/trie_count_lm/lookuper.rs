@@ -28,16 +28,17 @@ where
     pub fn run(&mut self, gram: Gram) -> Option<usize> {
         if let Some(token_ids) = self.mapper.map_query(gram, &self.trie.vocab) {
             let order = token_ids.len() - 1;
+            let arrays = &self.trie.arrays;
             let mut pos = token_ids[0];
-            for i in 1..=order {
-                let rng = self.trie.arrays[i].range(pos);
-                if let Some(next_pos) = self.trie.arrays[i].position(rng, token_ids[i]) {
+            for (&token_id, array) in token_ids[1..].iter().zip(arrays[1..].iter()) {
+                let rng = array.range(pos);
+                if let Some(next_pos) = array.position(rng, token_id) {
                     pos = next_pos;
                 } else {
                     return None;
                 }
             }
-            let count_rank = self.trie.arrays[order].count_rank(pos);
+            let count_rank = arrays[order].count_rank(pos);
             Some(self.trie.counts[order][count_rank])
         } else {
             None

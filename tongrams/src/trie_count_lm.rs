@@ -49,7 +49,7 @@ where
         TrieCountLmBuilder::new(loaders).build()
     }
 
-    pub fn lookuper<'a>(&'a self) -> TrieCountLmLookuper<'a, T, V> {
+    pub fn lookuper(&self) -> TrieCountLmLookuper<T, V> {
         TrieCountLmLookuper::new(self)
     }
 
