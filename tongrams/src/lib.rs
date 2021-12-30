@@ -1,14 +1,16 @@
+pub mod counter;
 pub mod gram;
 pub mod grams_sequence;
 pub mod loader;
 pub mod mappers;
 pub mod parser;
-pub mod sequence_collection;
 pub mod sorted_array;
 pub mod trie_count_lm;
 pub mod vocabulary;
 
 pub use gram::Gram;
+pub use grams_sequence::SimpleGramsSequence;
+pub use trie_count_lm::TrieCountLm;
 
 pub const MAX_ORDER: usize = 8;
 pub const GRAM_SEPARATOR: u8 = b' ';

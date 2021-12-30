@@ -21,7 +21,7 @@ impl SimpleSortedArray {
     }
 
     pub fn position(&self, rng: (usize, usize), id: usize) -> Option<usize> {
-        self.token_ids.find(rng, id).map(|i| rng.0 + i)
+        self.token_ids.position(rng, id)
     }
 }
 
@@ -54,7 +54,8 @@ impl SortedArrayBuilder {
     }
 
     pub fn release(self, pointers: Vec<usize>) -> SimpleSortedArray {
-        let token_ids = SimpleGramsSequence::new(&self.token_ids, &pointers);
+        // let token_ids = SimpleGramsSequence::new(&self.token_ids, &pointers);
+        let token_ids = SimpleGramsSequence::new(&self.token_ids);
         let count_ranks = self.count_ranks;
         SimpleSortedArray {
             token_ids,

@@ -1,12 +1,13 @@
+pub mod builder;
+
 use std::fs::File;
-use std::io::Read;
 
 use anyhow::Result;
 
 use crate::loader::{GramsFileLoader, GramsLoader, GramsTextLoader};
 use crate::mappers::SortedArrayMapper;
-use crate::sequence_collection::{SequenceCollection, SequenceCollectionBuilder};
-use crate::sorted_array::{SimpleSortedArray, SortedArrayBuilder};
+use crate::sorted_array::SimpleSortedArray;
+use crate::trie_count_lm::builder::TrieCountLmBuilder;
 use crate::vocabulary::SimpleVocabulary;
 use crate::Gram;
 
@@ -15,7 +16,7 @@ pub struct TrieCountLm {
     max_order: usize,
     vocab: SimpleVocabulary,
     arrays: Vec<SimpleSortedArray>,
-    counts: SequenceCollection,
+    counts: Vec<Vec<usize>>,
 }
 
 impl TrieCountLm {
@@ -52,7 +53,7 @@ impl TrieCountLm {
                 }
             }
             let count_rank = self.arrays[order].count_rank(pos);
-            Some(self.counts.access(order, count_rank))
+            Some(self.counts[order][count_rank])
         } else {
             None
         }
@@ -60,136 +61,6 @@ impl TrieCountLm {
 
     pub fn max_order(&self) -> usize {
         self.max_order
-    }
-}
-
-pub struct TrieCountLmBuilder<R>
-where
-    R: Read,
-{
-    loaders: Vec<Box<dyn GramsLoader<R>>>,
-    vocab: SimpleVocabulary,
-    arrays: Vec<SimpleSortedArray>,
-    counts_builder: SequenceCollectionBuilder,
-}
-
-impl<R> TrieCountLmBuilder<R>
-where
-    R: Read,
-{
-    pub fn new(loaders: Vec<Box<dyn GramsLoader<R>>>) -> Self {
-        Self {
-            loaders,
-            vocab: SimpleVocabulary::default(),
-            arrays: vec![],
-            counts_builder: SequenceCollectionBuilder::default(),
-        }
-    }
-
-    pub fn build(mut self) -> Result<TrieCountLm> {
-        self.build_counts()?;
-        self.build_vocabulary()?;
-
-        let max_order = self.loaders.len() - 1;
-        for order in 1..=max_order {
-            self.build_sorted_array(order)?;
-        }
-
-        Ok(TrieCountLm {
-            max_order,
-            vocab: self.vocab,
-            arrays: self.arrays,
-            counts: SequenceCollection::new(self.counts_builder),
-        })
-    }
-
-    fn build_counts(&mut self) -> Result<()> {
-        eprintln!("build_counts");
-
-        for loader in &self.loaders {
-            let gp = loader.parser()?;
-            for rec in gp {
-                self.counts_builder.eat_value(rec?.count());
-            }
-            self.counts_builder.build_sequence();
-        }
-
-        Ok(())
-    }
-
-    fn build_vocabulary(&mut self) -> Result<()> {
-        eprintln!("build_vocabulary");
-
-        let records = {
-            let gp = self.loaders[0].parser()?;
-            let mut records = Vec::new();
-            for rec in gp {
-                let rec = rec?;
-                records.push(rec);
-            }
-            records
-        };
-
-        let grams: Vec<Gram> = records.iter().map(|r| Gram::from_str(&r.gram)).collect();
-        self.vocab = SimpleVocabulary::new(&grams);
-
-        let mut sa_builder = SortedArrayBuilder::new(records.len(), 0, 0, 0);
-        for rec in &records {
-            let count_rank = self.counts_builder.rank(0, rec.count).unwrap();
-            sa_builder.add_count_rank(count_rank);
-        }
-
-        let sa = sa_builder.release_counts_ranks();
-        self.arrays.push(sa);
-
-        Ok(())
-    }
-
-    /// Builds the sorted array of `order`.
-    fn build_sorted_array(&mut self, order: usize) -> Result<()> {
-        eprintln!("build_sorted_array (order={})", order);
-
-        let mut prev_gp = self.loaders[order - 1].parser()?;
-        let curr_gp = self.loaders[order].parser()?;
-
-        let mut sa_builder = SortedArrayBuilder::new(curr_gp.num_grams(), 0, 0, 0);
-        let num_pointers = prev_gp.num_grams() + 1;
-
-        let mut pointers = Vec::with_capacity(num_pointers);
-        pointers.push(0);
-
-        let mut pointer = 0;
-        let mut prev_rec = prev_gp.next().unwrap()?;
-
-        for curr_rec in curr_gp {
-            let curr_rec = curr_rec?;
-            let (pattern, token) = curr_rec.gram().pop_token().unwrap(); // TODO: Error handling
-
-            while pattern != prev_rec.gram() {
-                pointers.push(pointer);
-                if let Some(rec) = prev_gp.next() {
-                    prev_rec = rec?;
-                } else {
-                    break;
-                }
-            }
-
-            pointer += 1;
-
-            let token_id = self.vocab.get(token).unwrap();
-            let count_rank = self.counts_builder.rank(order, curr_rec.count()).unwrap();
-            sa_builder.add(token_id, count_rank);
-        }
-
-        for _ in prev_gp {
-            pointers.push(pointer);
-        }
-        pointers.push(pointer);
-
-        let sa = sa_builder.release(pointers);
-        self.arrays.push(sa);
-
-        Ok(())
     }
 }
 
@@ -310,5 +181,9 @@ D D D\t1
             let rec = rec.unwrap();
             assert_eq!(lm.lookup(rec.gram()), Some(rec.count()));
         }
+
+        assert_eq!(lm.lookup(Gram::from_str("E")), None);
+        assert_eq!(lm.lookup(Gram::from_str("B A")), None);
+        assert_eq!(lm.lookup(Gram::from_str("B B A")), None);
     }
 }
