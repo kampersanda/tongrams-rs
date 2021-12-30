@@ -77,7 +77,7 @@ where
         };
 
         let grams: Vec<Gram> = records.iter().map(|r| Gram::from_str(&r.gram)).collect();
-        self.vocab = *V::new(&grams);
+        self.vocab = *V::new(&grams)?;
 
         let mut array_builder = TrieArrayBuilder::new(records.len(), 0, 0, 0);
         for rec in &records {

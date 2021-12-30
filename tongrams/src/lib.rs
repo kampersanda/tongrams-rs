@@ -9,14 +9,14 @@ pub mod vocabulary;
 pub use gram::Gram;
 pub use trie_array::{EliasFanoTrieArray, SimpleTrieArray};
 pub use trie_count_lm::TrieCountLm;
-pub use vocabulary::SimpleVocabulary;
+pub use vocabulary::{DoubleArrayVocabulary, SimpleVocabulary};
 
 pub const MAX_ORDER: usize = 8;
 pub const GRAM_SEPARATOR: u8 = b' ';
 pub const GRAM_COUNT_SEPARATOR: u8 = b'\t';
 
 pub type SimpleTrieCountLm = TrieCountLm<SimpleTrieArray, SimpleVocabulary>;
-pub type EliasFanoTrieCountLm = TrieCountLm<EliasFanoTrieArray, SimpleVocabulary>;
+pub type EliasFanoTrieCountLm = TrieCountLm<EliasFanoTrieArray, DoubleArrayVocabulary>;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Record {
