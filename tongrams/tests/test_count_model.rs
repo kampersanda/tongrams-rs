@@ -2,11 +2,11 @@ use tongrams::loader::{GramsFileLoader, GramsLoader};
 use tongrams::TrieCountLm;
 
 const TEST_FILENAMES: [&str; 5] = [
-    "test_data/1-grams.sorted",
-    "test_data/2-grams.sorted",
-    "test_data/3-grams.sorted",
-    "test_data/4-grams.sorted",
-    "test_data/5-grams.sorted",
+    "../test_data/1-grams.sorted",
+    "../test_data/2-grams.sorted",
+    "../test_data/3-grams.sorted",
+    "../test_data/4-grams.sorted",
+    "../test_data/5-grams.sorted",
 ];
 
 const NUM_GRAMS: [usize; 5] = [8761, 38900, 61516, 70186, 73187];
