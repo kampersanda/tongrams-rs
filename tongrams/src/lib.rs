@@ -1,5 +1,4 @@
 pub mod gram;
-pub mod grams_sequence;
 pub mod loader;
 pub mod mappers;
 pub mod parser;
@@ -8,7 +7,6 @@ pub mod trie_count_lm;
 pub mod vocabulary;
 
 pub use gram::Gram;
-pub use grams_sequence::SimpleGramsSequence;
 pub use trie_array::simple::SimpleTrieArray;
 pub use trie_count_lm::TrieCountLm;
 
