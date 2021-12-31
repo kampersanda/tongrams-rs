@@ -1,5 +1,7 @@
 use std::fs::File;
 use std::io::{prelude::*, BufReader};
+use std::path::PathBuf;
+use std::str::FromStr;
 use std::time::Duration;
 
 const TEST_FILENAMES: [&str; 5] = [
@@ -35,7 +37,10 @@ fn criterion_lookup(c: &mut Criterion) {
     group.measurement_time(MEASURE_TIME);
     group.sampling_mode(SamplingMode::Flat);
 
-    let gram_files = TEST_FILENAMES.iter().map(|f| f.to_string()).collect();
+    let gram_files: Vec<PathBuf> = TEST_FILENAMES
+        .iter()
+        .map(|f| PathBuf::from_str(f).unwrap())
+        .collect();
 
     let queries = load_queries();
     let qgrams: Vec<tongrams::Gram> = queries
@@ -43,12 +48,12 @@ fn criterion_lookup(c: &mut Criterion) {
         .map(|q| tongrams::Gram::from_str(q))
         .collect();
 
-    perform_lookup(&mut group, gram_files, &qgrams);
+    perform_lookup(&mut group, &gram_files, &qgrams);
 }
 
 fn perform_lookup(
     group: &mut BenchmarkGroup<WallTime>,
-    gram_files: Vec<String>,
+    gram_files: &[PathBuf],
     queries: &[tongrams::Gram],
 ) {
     let lm = tongrams::EliasFanoTrieCountLm::from_files(gram_files).unwrap();

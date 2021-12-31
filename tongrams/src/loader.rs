@@ -1,6 +1,8 @@
-use anyhow::Result;
 use std::fs::File;
 use std::io::{BufReader, Read};
+use std::path::PathBuf;
+
+use anyhow::Result;
 
 use crate::parser::GramsParser;
 
@@ -12,18 +14,18 @@ where
 }
 
 pub struct GramsFileLoader {
-    filename: String,
+    filepath: PathBuf,
 }
 
 impl GramsFileLoader {
-    pub const fn new(filename: String) -> Self {
-        Self { filename }
+    pub const fn new(filepath: PathBuf) -> Self {
+        Self { filepath }
     }
 }
 
 impl GramsLoader<File> for GramsFileLoader {
     fn parser(&self) -> Result<GramsParser<File>> {
-        let reader = BufReader::new(File::open(&self.filename)?);
+        let reader = BufReader::new(File::open(&self.filepath)?);
         GramsParser::new(reader)
     }
 }

@@ -21,7 +21,7 @@ fn main() -> Result<()> {
     let lm = EliasFanoTrieCountLm::deserialize_from(&reader)?;
 
     let mem_stats = lm.memory_statistics();
-    println!("{}", mem_stats.to_string());
+    println!("{}", mem_stats);
 
     Ok(())
 }

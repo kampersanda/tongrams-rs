@@ -1,4 +1,5 @@
 use std::fs::File;
+use std::path::PathBuf;
 
 use anyhow::Result;
 use structopt::StructOpt;
@@ -9,7 +10,7 @@ use tongrams::EliasFanoTrieCountLm;
 #[structopt(name = "predict", about = "A program to build and write the index.")]
 struct Opt {
     #[structopt(short = "i")]
-    gram_files: Vec<String>,
+    gram_files: Vec<PathBuf>,
 
     #[structopt(short = "o")]
     index_file: String,
@@ -22,7 +23,7 @@ fn main() -> Result<()> {
 
     println!("Counstructing the index...");
     let start = std::time::Instant::now();
-    let lm = EliasFanoTrieCountLm::from_files(gram_files)?;
+    let lm = EliasFanoTrieCountLm::from_files(&gram_files)?;
     let duration = start.elapsed();
     println!("Elapsed time: {:.3} [sec]", duration.as_secs_f64());
 

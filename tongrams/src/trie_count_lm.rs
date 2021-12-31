@@ -3,6 +3,7 @@ pub mod lookuper;
 
 use std::fs::File;
 use std::io::{Read, Write};
+use std::path::PathBuf;
 
 use anyhow::{anyhow, Result};
 use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
@@ -44,16 +45,17 @@ where
     /// # Notes
     ///
     /// Each file must not be in a compressed format.
-    pub fn from_files(filenames: Vec<String>) -> Result<Self> {
-        if MAX_ORDER < filenames.len() {
+    pub fn from_files(filepaths: &[PathBuf]) -> Result<Self> {
+        if MAX_ORDER < filepaths.len() {
             return Err(anyhow!(
                 "Number of files must be no more than {}",
                 MAX_ORDER
             ));
         }
-        let mut loaders = Vec::with_capacity(filenames.len());
-        for filename in filenames {
-            let loader: Box<dyn GramsLoader<File>> = Box::new(GramsFileLoader::new(filename));
+        let mut loaders = Vec::with_capacity(filepaths.len());
+        for filepath in filepaths {
+            let filepath = filepath.clone();
+            let loader: Box<dyn GramsLoader<File>> = Box::new(GramsFileLoader::new(filepath));
             loaders.push(loader);
         }
         TrieCountLmBuilder::new(loaders)?.build()

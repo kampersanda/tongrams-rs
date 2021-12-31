@@ -43,6 +43,6 @@ fn main() -> Result<()> {
         }
     }
 
-    println!("Thanks!");
+    println!("Good bye!");
     Ok(())
 }

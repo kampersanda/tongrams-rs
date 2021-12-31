@@ -49,10 +49,10 @@ count = 1
 > Elias Fano
 Not found
 > 
-Thanks!
+Good bye!
 ```
 
-### Print memory statistics
+### Memory statistics
 
 The executable `stats` shows the breakdowns of memory usages for each component.
 
@@ -61,3 +61,11 @@ $ cargo run --release -p tools --bin stats -- -i index.bin
 Loading the index from index.bin...
 {"arrays":[{"pointers":5927,"token_ids":55186},{"pointers":19745,"token_ids":92416},{"pointers":25853,"token_ids":107094},{"pointers":28135,"token_ids":111994}],"count_ranks":[{"count_ranks":5350},{"count_ranks":12106},{"count_ranks":13976},{"count_ranks":14582},{"count_ranks":14802}],"counts":[{"count":296},{"count":136},{"count":72},{"count":56},{"count":56}],"vocab":{"data":151560}}
 ```
+
+## Todo
+
+- Support `gzip`
+- Add fast elias-fano and pertitioned elias-fano
+- Add minimal perfect hashing
+- Add remapping
+- Support probability scores
