@@ -15,6 +15,11 @@ use crate::trie_count_lm::lookuper::TrieCountLmLookuper;
 use crate::vocabulary::Vocabulary;
 use crate::MAX_ORDER;
 
+/// Elias-Fano trie for indexing massive *N*-grams with their frequency counts.
+///
+/// This is a Rust port of [`trie_count_lm.hpp`](https://github.com/jermp/tongrams/blob/master/include/trie_count_lm.hpp).
+/// As with the original implementation, the data structure can be built from *N*-gram counts files
+/// following the [Google format](http://storage.googleapis.com/books/ngrams/books/datasetsv2.html).
 #[derive(Default, Debug)]
 pub struct TrieCountLm<T, V, A>
 where
@@ -34,6 +39,11 @@ where
     V: Vocabulary,
     A: RankArray,
 {
+    /// Builds the index from *N*-gram counts files.
+    ///
+    /// # Notes
+    ///
+    /// Each file must not be in a compressed format.
     pub fn from_files(filenames: Vec<String>) -> Result<Self> {
         if MAX_ORDER < filenames.len() {
             return Err(anyhow!(
@@ -49,6 +59,7 @@ where
         TrieCountLmBuilder::new(loaders)?.build()
     }
 
+    /// Builds the index from *N*-gram counts raw texts (for debug).
     pub fn from_texts(texts: Vec<&'static str>) -> Result<Self> {
         if MAX_ORDER < texts.len() {
             return Err(anyhow!(
@@ -65,6 +76,7 @@ where
         TrieCountLmBuilder::new(loaders)?.build()
     }
 
+    /// Serializes the index into the writer.
     pub fn serialize_into<W>(&self, mut writer: W) -> Result<usize>
     where
         W: Write,
@@ -93,6 +105,7 @@ where
         Ok(mem)
     }
 
+    /// Deserializes the index from the reader.
     pub fn deserialize_from<R>(mut reader: R) -> Result<Self>
     where
         R: Read,
@@ -130,6 +143,7 @@ where
         })
     }
 
+    /// Gets the number of bytes to serialize the index.
     pub fn size_in_bytes(&self) -> usize {
         let mut mem = 0;
         // vocab
@@ -152,6 +166,7 @@ where
         mem
     }
 
+    /// Gets breakdowns of memory usages for components.
     pub fn memory_statistics(&self) -> serde_json::Value {
         let vocab = self.vocab.memory_statistics();
         let arrays = {
@@ -188,6 +203,7 @@ where
         TrieCountLmLookuper::new(self)
     }
 
+    /// Gets the maximum of *N*.
     pub fn num_orders(&self) -> usize {
         self.count_ranks.len()
     }

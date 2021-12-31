@@ -13,10 +13,11 @@ pub const GRAM_SEPARATOR: u8 = b' ';
 pub const GRAM_COUNT_SEPARATOR: u8 = b'\t';
 
 pub use gram::Gram;
-pub use rank_array::{EliasFanoRankArray, SimpleRankArray};
 pub use record::Record;
-pub use trie_array::{EliasFanoTrieArray, SimpleTrieArray};
 pub use trie_count_lm::TrieCountLm;
+
+pub use rank_array::{EliasFanoRankArray, SimpleRankArray};
+pub use trie_array::{EliasFanoTrieArray, SimpleTrieArray};
 pub use vocabulary::{DoubleArrayVocabulary, SimpleVocabulary};
 
 pub type SimpleTrieCountLm = TrieCountLm<SimpleTrieArray, SimpleVocabulary, SimpleRankArray>;
