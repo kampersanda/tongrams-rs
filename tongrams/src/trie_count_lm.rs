@@ -40,7 +40,7 @@ where
             let loader: Box<dyn GramsLoader<File>> = Box::new(GramsFileLoader::new(filename));
             loaders.push(loader);
         }
-        TrieCountLmBuilder::new(loaders).build()
+        TrieCountLmBuilder::new(loaders)?.build()
     }
 
     pub fn from_texts(texts: Vec<&'static str>) -> Result<Self> {
@@ -50,7 +50,7 @@ where
                 Box::new(GramsTextLoader::new(text.as_bytes()));
             loaders.push(loader);
         }
-        TrieCountLmBuilder::new(loaders).build()
+        TrieCountLmBuilder::new(loaders)?.build()
     }
 
     pub fn serialize_into<W>(&self, mut writer: W) -> Result<usize>

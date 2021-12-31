@@ -14,6 +14,9 @@ impl SortedArrayMapper {
         V: Vocabulary,
     {
         let tokens = gram.split_to_tokens();
+        if MAX_ORDER < tokens.len() {
+            return None;
+        }
         for (i, &w) in tokens.iter().enumerate() {
             if let Some(mapped_id) = vocab.get(w) {
                 self.mapped[i] = mapped_id;

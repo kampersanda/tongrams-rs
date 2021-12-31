@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::io::Read;
 
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use sucds::{util::needed_bits, CompactVector};
 
 use crate::loader::GramsLoader;
@@ -10,6 +10,7 @@ use crate::trie_array::TrieArray;
 use crate::vocabulary::Vocabulary;
 use crate::Gram;
 use crate::TrieCountLm;
+use crate::MAX_ORDER;
 
 pub struct TrieCountLmBuilder<R, T, V, A>
 where
@@ -32,14 +33,17 @@ where
     V: Vocabulary,
     A: RankArray,
 {
-    pub fn new(loaders: Vec<Box<dyn GramsLoader<R>>>) -> Self {
-        Self {
+    pub fn new(loaders: Vec<Box<dyn GramsLoader<R>>>) -> Result<Self> {
+        if MAX_ORDER < loaders.len() {
+            return Err(anyhow!("loaders.len() must be no more than {}", MAX_ORDER));
+        }
+        Ok(Self {
             loaders,
             vocab: *V::new(),
             arrays: vec![],
             count_ranks: vec![],
             counts_builder: CountsBuilder::default(),
-        }
+        })
     }
 
     pub fn build(mut self) -> Result<TrieCountLm<T, V, A>> {
