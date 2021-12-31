@@ -35,5 +35,8 @@ fn main() -> Result<()> {
         mem as f64 / (1024.0 * 1024.0)
     );
 
+    let mem_stats = lm.memory_statistics();
+    println!("{}", mem_stats.to_string());
+
     Ok(())
 }

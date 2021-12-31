@@ -12,3 +12,4 @@ byteorder = "1.4.3"
 serde = { version = "1.0", features = ["derive"] }
 sucds = "0.1.8"
 yada = "0.5.0"
+serde_json = "1.0"

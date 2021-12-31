@@ -46,6 +46,14 @@ impl TrieArray for SimpleTrieArray {
         Ok(Box::new(x))
     }
 
+    fn size_in_bytes(&self) -> usize {
+        0
+    }
+
+    fn memory_statistics(&self) -> serde_json::Value {
+        serde_json::json!({})
+    }
+
     /// Gets the token id with a given index.
     fn token_id(&self, i: usize) -> usize {
         self.token_ids[i]

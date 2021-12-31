@@ -99,6 +99,46 @@ where
         })
     }
 
+    pub fn size_in_bytes(&self) -> usize {
+        let mut mem = 0;
+        // vocab
+        mem += self.vocab.size_in_bytes();
+        // arrays
+        mem += std::mem::size_of::<u64>();
+        for array in &self.arrays {
+            mem += array.size_in_bytes();
+        }
+        // counts
+        mem += std::mem::size_of::<u64>();
+        for count in &self.counts {
+            mem += count.size_in_bytes();
+        }
+        mem
+    }
+
+    pub fn memory_statistics(&self) -> serde_json::Value {
+        let vocab = self.vocab.memory_statistics();
+        let arrays = {
+            let mut arrays = vec![];
+            for array in &self.arrays {
+                arrays.push(array.memory_statistics());
+            }
+            arrays
+        };
+        let counts = {
+            let mut counts = vec![];
+            for count in &self.counts {
+                counts.push(serde_json::json!({"count": count.size_in_bytes()}));
+            }
+            counts
+        };
+        serde_json::json!({
+            "vocab": vocab,
+            "arrays": arrays,
+            "counts": counts,
+        })
+    }
+
     pub fn lookuper(&self) -> TrieCountLmLookuper<T, V> {
         TrieCountLmLookuper::new(self)
     }

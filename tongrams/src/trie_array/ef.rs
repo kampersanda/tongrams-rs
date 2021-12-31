@@ -64,6 +64,26 @@ impl TrieArray for EliasFanoTrieArray {
         }))
     }
 
+    fn size_in_bytes(&self) -> usize {
+        self.token_ids.size_in_bytes()
+            + self.sampled_ids.size_in_bytes()
+            + self.count_ranks.size_in_bytes()
+            + self.pointers.size_in_bytes()
+    }
+
+    fn memory_statistics(&self) -> serde_json::Value {
+        let token_ids = self.token_ids.size_in_bytes();
+        let sampled_ids = self.sampled_ids.size_in_bytes();
+        let count_ranks = self.count_ranks.size_in_bytes();
+        let pointers = self.pointers.size_in_bytes();
+        serde_json::json!({
+            "token_ids": token_ids,
+            "sampled_ids": sampled_ids,
+            "count_ranks": count_ranks,
+            "pointers": pointers,
+        })
+    }
+
     /// Gets the token id with a given index.
     fn token_id(&self, i: usize) -> usize {
         let pos = self.pointers.rank(i + 1) - 1;

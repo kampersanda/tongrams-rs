@@ -15,6 +15,10 @@ pub trait Vocabulary {
 
     fn deserialize_from<R: Read>(reader: R) -> Result<Box<Self>>;
 
+    fn size_in_bytes(&self) -> usize;
+
+    fn memory_statistics(&self) -> serde_json::Value;
+
     fn new(grams: &[Gram]) -> Result<Box<Self>>;
 
     fn get(&self, gram: Gram) -> Option<usize>;

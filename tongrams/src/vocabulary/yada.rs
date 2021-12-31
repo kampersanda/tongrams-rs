@@ -32,6 +32,15 @@ impl Vocabulary for DoubleArrayVocabulary {
         Ok(Box::new(Self { data }))
     }
 
+    fn size_in_bytes(&self) -> usize {
+        int_vector::size_in_bytes(&self.data)
+    }
+
+    fn memory_statistics(&self) -> serde_json::Value {
+        let data = int_vector::size_in_bytes(&self.data);
+        serde_json::json!({ "data": data })
+    }
+
     fn new(grams: &[Gram]) -> Result<Box<Self>> {
         if (grams.len() >> 31) != 0 {
             return Err(anyhow!(

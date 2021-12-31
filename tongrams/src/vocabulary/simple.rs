@@ -36,6 +36,14 @@ impl Vocabulary for SimpleVocabulary {
         Ok(Box::new(x))
     }
 
+    fn size_in_bytes(&self) -> usize {
+        0
+    }
+
+    fn memory_statistics(&self) -> serde_json::Value {
+        serde_json::json!({})
+    }
+
     fn new(grams: &[Gram]) -> Result<Box<Self>> {
         let mut map = HashMap::new();
         for (id, gram) in grams.iter().enumerate() {

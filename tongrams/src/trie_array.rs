@@ -19,6 +19,10 @@ pub trait TrieArray {
 
     fn deserialize_from<R: Read>(reader: R) -> Result<Box<Self>>;
 
+    fn size_in_bytes(&self) -> usize;
+
+    fn memory_statistics(&self) -> serde_json::Value;
+
     fn token_id(&self, i: usize) -> usize;
 
     fn count_rank(&self, i: usize) -> usize;
