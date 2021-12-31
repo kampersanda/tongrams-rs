@@ -62,6 +62,16 @@ Loading the index from index.bin...
 {"arrays":[{"pointers":5927,"token_ids":55186},{"pointers":19745,"token_ids":92416},{"pointers":25853,"token_ids":107094},{"pointers":28135,"token_ids":111994}],"count_ranks":[{"count_ranks":5350},{"count_ranks":12106},{"count_ranks":13976},{"count_ranks":14582},{"count_ranks":14802}],"counts":[{"count":296},{"count":136},{"count":72},{"count":56},{"count":56}],"vocab":{"data":151560}}
 ```
 
+## Benchmark
+
+You can measure lookup times using *N*-gram data in `test_data` with the following command at directory `bench`:
+
+```
+$ cargo bench
+```
+
+On my laptop PC (i7, 16GB RAM), the average lookup time was 0.81 micro sec per query, although the original tongram performed lookup in 0.44 micro sec per query.
+
 ## Todo
 
 - Support `gzip`
