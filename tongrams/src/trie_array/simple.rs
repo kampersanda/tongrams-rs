@@ -30,6 +30,22 @@ impl TrieArray for SimpleTrieArray {
         })
     }
 
+    fn serialize_into<W>(&self, writer: W) -> Result<usize>
+    where
+        W: Write,
+    {
+        bincode::serialize_into(writer, self).map_err(handle_bincode_error)?;
+        Ok(0)
+    }
+
+    fn deserialize_from<R>(reader: R) -> Result<Box<Self>>
+    where
+        R: Read,
+    {
+        let x: Self = bincode::deserialize_from(reader).map_err(handle_bincode_error)?;
+        Ok(Box::new(x))
+    }
+
     /// Gets the token id with a given index.
     fn token_id(&self, i: usize) -> usize {
         self.token_ids[i]
@@ -57,20 +73,5 @@ impl TrieArray for SimpleTrieArray {
 
     fn num_pointers(&self) -> usize {
         self.pointers.len()
-    }
-
-    fn serialize_into<W>(&self, writer: W) -> Result<()>
-    where
-        W: Write,
-    {
-        bincode::serialize_into(writer, self).map_err(handle_bincode_error)
-    }
-
-    fn deserialize_from<R>(reader: R) -> Result<Box<Self>>
-    where
-        R: Read,
-    {
-        let x: Self = bincode::deserialize_from(reader).map_err(handle_bincode_error)?;
-        Ok(Box::new(x))
     }
 }

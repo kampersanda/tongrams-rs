@@ -1,13 +1,11 @@
 use std::io::{Read, Write};
 
 use anyhow::Result;
-use serde::{Deserialize, Serialize};
 use sucds::{EliasFano, EliasFanoBuilder, EliasFanoList};
 
-use crate::handle_bincode_error;
 use crate::trie_array::TrieArray;
 
-#[derive(Serialize, Deserialize, Default)]
+#[derive(Default)]
 pub struct EliasFanoTrieArray {
     token_ids: EliasFano,
     sampled_ids: EliasFano,
@@ -38,6 +36,32 @@ impl TrieArray for EliasFanoTrieArray {
             count_ranks: EliasFanoList::from_slice(&count_ranks).unwrap(),
             pointers: EliasFano::default(),
         })
+    }
+
+    fn serialize_into<W>(&self, mut writer: W) -> Result<usize>
+    where
+        W: Write,
+    {
+        Ok(self.token_ids.serialize_into(&mut writer)?
+            + self.sampled_ids.serialize_into(&mut writer)?
+            + self.count_ranks.serialize_into(&mut writer)?
+            + self.pointers.serialize_into(&mut writer)?)
+    }
+
+    fn deserialize_from<R>(mut reader: R) -> Result<Box<Self>>
+    where
+        R: Read,
+    {
+        let token_ids = EliasFano::deserialize_from(&mut reader)?;
+        let sampled_ids = EliasFano::deserialize_from(&mut reader)?;
+        let count_ranks = EliasFanoList::deserialize_from(&mut reader)?;
+        let pointers = EliasFano::deserialize_from(&mut reader)?;
+        Ok(Box::new(Self {
+            token_ids,
+            sampled_ids,
+            count_ranks,
+            pointers,
+        }))
     }
 
     /// Gets the token id with a given index.
@@ -75,21 +99,6 @@ impl TrieArray for EliasFanoTrieArray {
 
     fn num_pointers(&self) -> usize {
         self.pointers.len()
-    }
-
-    fn serialize_into<W>(&self, writer: W) -> Result<()>
-    where
-        W: Write,
-    {
-        bincode::serialize_into(writer, self).map_err(handle_bincode_error)
-    }
-
-    fn deserialize_from<R>(reader: R) -> Result<Box<Self>>
-    where
-        R: Read,
-    {
-        let x: Self = bincode::deserialize_from(reader).map_err(handle_bincode_error)?;
-        Ok(Box::new(x))
     }
 }
 

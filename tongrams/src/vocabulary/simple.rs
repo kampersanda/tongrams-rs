@@ -20,6 +20,22 @@ impl Vocabulary for SimpleVocabulary {
         })
     }
 
+    fn serialize_into<W>(&self, writer: W) -> Result<usize>
+    where
+        W: Write,
+    {
+        bincode::serialize_into(writer, self).map_err(handle_bincode_error)?;
+        Ok(0)
+    }
+
+    fn deserialize_from<R>(reader: R) -> Result<Box<Self>>
+    where
+        R: Read,
+    {
+        let x: Self = bincode::deserialize_from(reader).map_err(handle_bincode_error)?;
+        Ok(Box::new(x))
+    }
+
     fn new(grams: &[Gram]) -> Result<Box<Self>> {
         let mut map = HashMap::new();
         for (id, gram) in grams.iter().enumerate() {
@@ -32,20 +48,5 @@ impl Vocabulary for SimpleVocabulary {
 
     fn get(&self, gram: Gram) -> Option<usize> {
         self.map.get(&gram.to_string()).copied()
-    }
-
-    fn serialize_into<W>(&self, writer: W) -> Result<()>
-    where
-        W: Write,
-    {
-        bincode::serialize_into(writer, self).map_err(handle_bincode_error)
-    }
-
-    fn deserialize_from<R>(reader: R) -> Result<Box<Self>>
-    where
-        R: Read,
-    {
-        let x: Self = bincode::deserialize_from(reader).map_err(handle_bincode_error)?;
-        Ok(Box::new(x))
     }
 }

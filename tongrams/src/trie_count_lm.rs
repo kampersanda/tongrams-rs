@@ -8,7 +8,6 @@ use anyhow::Result;
 use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
 use sucds::CompactVector;
 
-use crate::handle_bincode_error;
 use crate::loader::{GramsFileLoader, GramsLoader, GramsTextLoader};
 use crate::trie_array::TrieArray;
 use crate::trie_count_lm::builder::TrieCountLmBuilder;
@@ -50,29 +49,26 @@ where
         TrieCountLmBuilder::new(loaders).build()
     }
 
-    pub fn lookuper(&self) -> TrieCountLmLookuper<T, V> {
-        TrieCountLmLookuper::new(self)
-    }
-
-    pub fn num_orders(&self) -> usize {
-        self.arrays.len()
-    }
-
-    pub fn num_nodes(&self) -> usize {
-        self.arrays.iter().fold(0, |acc, x| acc + x.num_tokens())
-    }
-
-    pub fn serialize_into<W>(&self, mut writer: W) -> Result<()>
+    pub fn serialize_into<W>(&self, mut writer: W) -> Result<usize>
     where
         W: Write,
     {
-        self.vocab.serialize_into(&mut writer)?;
+        let mut mem = 0;
+        // vocab
+        mem += self.vocab.serialize_into(&mut writer)?;
+        // arrays
         writer.write_u64::<LittleEndian>(self.arrays.len() as u64)?;
+        mem += std::mem::size_of::<u64>();
         for array in &self.arrays {
-            array.serialize_into(&mut writer)?;
+            mem += array.serialize_into(&mut writer)?;
         }
-        bincode::serialize_into(&mut writer, &self.counts).map_err(handle_bincode_error)?;
-        Ok(())
+        // counts
+        writer.write_u64::<LittleEndian>(self.counts.len() as u64)?;
+        mem += std::mem::size_of::<u64>();
+        for count in &self.counts {
+            mem += count.serialize_into(&mut writer)?;
+        }
+        Ok(mem)
     }
 
     pub fn deserialize_from<R>(mut reader: R) -> Result<Self>
@@ -88,12 +84,31 @@ where
             }
             arrays
         };
-        let counts = bincode::deserialize_from(&mut reader).map_err(handle_bincode_error)?;
+        let counts = {
+            let len = reader.read_u64::<LittleEndian>()? as usize;
+            let mut counts = Vec::with_capacity(len);
+            for _ in 0..len {
+                counts.push(CompactVector::deserialize_from(&mut reader)?);
+            }
+            counts
+        };
         Ok(Self {
             vocab,
             arrays,
             counts,
         })
+    }
+
+    pub fn lookuper(&self) -> TrieCountLmLookuper<T, V> {
+        TrieCountLmLookuper::new(self)
+    }
+
+    pub fn num_orders(&self) -> usize {
+        self.arrays.len()
+    }
+
+    pub fn num_nodes(&self) -> usize {
+        self.arrays.iter().fold(0, |acc, x| acc + x.num_tokens())
     }
 }
 

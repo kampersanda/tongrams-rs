@@ -11,13 +11,13 @@ use crate::Gram;
 pub trait Vocabulary {
     fn default() -> Box<Self>;
 
+    fn serialize_into<W: Write>(&self, writer: W) -> Result<usize>;
+
+    fn deserialize_from<R: Read>(reader: R) -> Result<Box<Self>>;
+
     fn new(grams: &[Gram]) -> Result<Box<Self>>;
 
     fn get(&self, gram: Gram) -> Option<usize>;
-
-    fn serialize_into<W: Write>(&self, writer: W) -> Result<()>;
-
-    fn deserialize_from<R: Read>(reader: R) -> Result<Box<Self>>;
 }
 
 #[cfg(test)]

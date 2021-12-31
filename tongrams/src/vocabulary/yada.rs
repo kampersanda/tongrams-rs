@@ -1,14 +1,13 @@
 use std::io::{Read, Write};
 
 use anyhow::{anyhow, Result};
-use serde::{Deserialize, Serialize};
+use sucds::util::int_vector;
 use yada::{builder::DoubleArrayBuilder, DoubleArray};
 
-use crate::handle_bincode_error;
 use crate::vocabulary::Vocabulary;
 use crate::Gram;
 
-#[derive(Default, Debug, Serialize, Deserialize)]
+#[derive(Default, Debug)]
 pub struct DoubleArrayVocabulary {
     data: Vec<u8>,
 }
@@ -16,6 +15,21 @@ pub struct DoubleArrayVocabulary {
 impl Vocabulary for DoubleArrayVocabulary {
     fn default() -> Box<Self> {
         Box::new(Self { data: Vec::new() })
+    }
+
+    fn serialize_into<W>(&self, writer: W) -> Result<usize>
+    where
+        W: Write,
+    {
+        int_vector::serialize_into(&self.data, writer)
+    }
+
+    fn deserialize_from<R>(reader: R) -> Result<Box<Self>>
+    where
+        R: Read,
+    {
+        let data = int_vector::deserialize_from(reader)?;
+        Ok(Box::new(Self { data }))
     }
 
     fn new(grams: &[Gram]) -> Result<Box<Self>> {
@@ -46,20 +60,5 @@ impl Vocabulary for DoubleArrayVocabulary {
     fn get(&self, gram: Gram) -> Option<usize> {
         let da = DoubleArray::new(&self.data[..]);
         da.exact_match_search(gram.raw()).map(|x| x as usize)
-    }
-
-    fn serialize_into<W>(&self, writer: W) -> Result<()>
-    where
-        W: Write,
-    {
-        bincode::serialize_into(writer, self).map_err(handle_bincode_error)
-    }
-
-    fn deserialize_from<R>(reader: R) -> Result<Box<Self>>
-    where
-        R: Read,
-    {
-        let x: Self = bincode::deserialize_from(reader).map_err(handle_bincode_error)?;
-        Ok(Box::new(x))
     }
 }

@@ -15,6 +15,10 @@ pub trait TrieArray {
 
     fn with_count_ranks(count_ranks: Vec<usize>) -> Box<Self>;
 
+    fn serialize_into<W: Write>(&self, writer: W) -> Result<usize>;
+
+    fn deserialize_from<R: Read>(reader: R) -> Result<Box<Self>>;
+
     fn token_id(&self, i: usize) -> usize;
 
     fn count_rank(&self, i: usize) -> usize;
@@ -26,10 +30,6 @@ pub trait TrieArray {
     fn num_tokens(&self) -> usize;
 
     fn num_pointers(&self) -> usize;
-
-    fn serialize_into<W: Write>(&self, writer: W) -> Result<()>;
-
-    fn deserialize_from<R: Read>(reader: R) -> Result<Box<Self>>;
 }
 
 #[cfg(test)]
