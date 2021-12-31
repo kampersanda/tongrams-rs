@@ -1,5 +1,6 @@
 # tongrams-rs
-Rust port of tongrams
+
+Rust port of [tongrams](https://github.com/jermp/tongrams).
 
 ```
 $ cargo run --release  -p index -- -i test_data/1-grams.sorted test_data/2-grams.sorted test_data/3-grams.sorted test_data/4-grams.sorted test_data/5-grams.sorted -o index.out

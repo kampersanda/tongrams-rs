@@ -2,7 +2,6 @@ use std::collections::HashMap;
 use std::io::Read;
 
 use anyhow::{anyhow, Result};
-use sucds::{util::needed_bits, CompactVector};
 
 use crate::loader::GramsLoader;
 use crate::rank_array::RankArray;
@@ -102,7 +101,6 @@ where
         let mut prev_gp = self.loaders[order - 1].parser()?;
         let curr_gp = self.loaders[order].parser()?;
 
-        // let mut array_builder = TrieArrayBuilder::new(curr_gp.num_grams(), 0, 0, 0);
         let mut token_ids = Vec::with_capacity(curr_gp.num_grams());
         let mut count_ranks = Vec::with_capacity(curr_gp.num_grams());
 
@@ -114,15 +112,24 @@ where
         let mut prev_rec = prev_gp.next().unwrap()?;
 
         for curr_rec in curr_gp {
+            // NOTE:
+            // in a FORWARD trie, 'pattern' is the predecessor of 'gram'
+            // and 'token' is the last token of 'gram'
             let curr_rec = curr_rec?;
             let (pattern, token) = curr_rec.gram().pop_token().unwrap(); // TODO: Error handling
 
             while pattern != prev_rec.gram() {
+                // NOTE:
+                // this test is here only to
+                // guarantee termination in
+                // case of wrong data:
+                // 'pattern' should ALWAYS
+                // be found within previous order grams
                 pointers.push(pointer);
                 if let Some(rec) = prev_gp.next() {
                     prev_rec = rec?;
                 } else {
-                    break;
+                    return Err(anyhow!("{}-grams data is incomplete.", order + 1));
                 }
             }
 
@@ -152,12 +159,12 @@ pub struct CountsBuilder {
     // Mappings from eaten values to their ranks
     v2r_maps: Vec<HashMap<usize, usize>>,
     // In which values are sorted in decreasing order of their frequencies
-    sorted_sequences: Vec<CompactVector>,
+    sorted_sequences: Vec<sucds::CompactVector>,
 }
 
 impl CountsBuilder {
     #[allow(clippy::missing_const_for_fn)]
-    pub fn release(self) -> Vec<CompactVector> {
+    pub fn release(self) -> Vec<sucds::CompactVector> {
         self.sorted_sequences
     }
 
@@ -173,7 +180,7 @@ impl CountsBuilder {
     pub fn build_sequence(&mut self) {
         if self.v2f_map.is_empty() {
             self.v2r_maps.push(HashMap::new());
-            self.sorted_sequences.push(CompactVector::default());
+            self.sorted_sequences.push(sucds::CompactVector::default());
             return;
         }
 
@@ -189,7 +196,8 @@ impl CountsBuilder {
         // `then_with` is needed to stably sort
         sorted.sort_by(|(v1, f1), (v2, f2)| f2.cmp(f1).then_with(|| v1.cmp(v2)));
 
-        let mut values = CompactVector::with_capacity(sorted.len(), needed_bits(max_value));
+        let mut values =
+            sucds::CompactVector::with_capacity(sorted.len(), sucds::util::needed_bits(max_value));
         sorted.iter().for_each(|&(v, _)| values.push(v));
         self.sorted_sequences.push(values);
 

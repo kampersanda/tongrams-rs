@@ -4,9 +4,8 @@ pub mod lookuper;
 use std::fs::File;
 use std::io::{Read, Write};
 
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
-use sucds::CompactVector;
 
 use crate::loader::{GramsFileLoader, GramsLoader, GramsTextLoader};
 use crate::rank_array::RankArray;
@@ -14,6 +13,7 @@ use crate::trie_array::TrieArray;
 use crate::trie_count_lm::builder::TrieCountLmBuilder;
 use crate::trie_count_lm::lookuper::TrieCountLmLookuper;
 use crate::vocabulary::Vocabulary;
+use crate::MAX_ORDER;
 
 #[derive(Default, Debug)]
 pub struct TrieCountLm<T, V, A>
@@ -25,7 +25,7 @@ where
     vocab: V,
     arrays: Vec<T>,
     count_ranks: Vec<A>,
-    counts: Vec<CompactVector>,
+    counts: Vec<sucds::CompactVector>,
 }
 
 impl<T, V, A> TrieCountLm<T, V, A>
@@ -35,6 +35,12 @@ where
     A: RankArray,
 {
     pub fn from_files(filenames: Vec<String>) -> Result<Self> {
+        if MAX_ORDER < filenames.len() {
+            return Err(anyhow!(
+                "Number of files must be no more than {}",
+                MAX_ORDER
+            ));
+        }
         let mut loaders = Vec::with_capacity(filenames.len());
         for filename in filenames {
             let loader: Box<dyn GramsLoader<File>> = Box::new(GramsFileLoader::new(filename));
@@ -44,6 +50,12 @@ where
     }
 
     pub fn from_texts(texts: Vec<&'static str>) -> Result<Self> {
+        if MAX_ORDER < texts.len() {
+            return Err(anyhow!(
+                "Number of texts must be no more than {}",
+                MAX_ORDER
+            ));
+        }
         let mut loaders = Vec::with_capacity(texts.len());
         for text in texts {
             let loader: Box<dyn GramsLoader<&[u8]>> =
@@ -106,7 +118,7 @@ where
             let len = reader.read_u64::<LittleEndian>()? as usize;
             let mut counts = Vec::with_capacity(len);
             for _ in 0..len {
-                counts.push(CompactVector::deserialize_from(&mut reader)?);
+                counts.push(sucds::CompactVector::deserialize_from(&mut reader)?);
             }
             counts
         };
@@ -171,6 +183,7 @@ where
         })
     }
 
+    /// Makes the lookuper.
     pub fn lookuper(&self) -> TrieCountLmLookuper<T, V, A> {
         TrieCountLmLookuper::new(self)
     }
@@ -179,6 +192,7 @@ where
         self.count_ranks.len()
     }
 
+    /// Gets the number of nodes in the Elias-Fano trie.
     pub fn num_nodes(&self) -> usize {
         self.arrays.iter().fold(0, |acc, x| acc + x.num_tokens())
     }

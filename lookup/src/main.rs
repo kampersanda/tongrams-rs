@@ -36,7 +36,7 @@ fn main() -> Result<()> {
             break;
         }
 
-        if let Some(count) = lookuper.with_str(&query) {
+        if let Some(count) = lookuper.with_str(query) {
             println!("count = {}", count);
         } else {
             println!("Not found");
