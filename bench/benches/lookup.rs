@@ -10,7 +10,7 @@ const TEST_FILENAMES: [&str; 5] = [
     "../test_data/5-grams.sorted",
 ];
 
-const TEST_QUERIES: &str = "../test_data/queries.random.5K";
+const TEST_QUERIES: &str = "../test_data/queries.random.5K.txt";
 
 use criterion::{
     criterion_group, criterion_main, measurement::WallTime, BenchmarkGroup, Criterion, SamplingMode,

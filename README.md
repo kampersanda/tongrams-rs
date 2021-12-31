@@ -5,7 +5,7 @@ This is a Rust port of [tongrams](https://github.com/jermp/tongrams) to index an
  - Giulio Ermanno Pibiri and Rossano Venturini, [Efficient Data Structures for Massive N-Gram Datasets](https://doi.org/10.1145/3077136.3080798). In *Proceedings of the 40-th ACM Conference on Research and Development in Information Retrieval (SIGIR 2017)*, pp. 615-624.
  - Giulio Ermanno Pibiri and Rossano Venturini, [Handling Massive N-Gram Datasets Efficiently](https://doi.org/10.1145/3302913). *ACM Transactions on Information Systems (TOIS)*, 37.2 (2019): 1-41.
 
-The current version supports only the data structure type of `ef_trie_PSEF_ranks_count_lm` whose vocablary is implemented with the double-array trie.
+The current version supports only the data structure type of `ef_trie_PSEF_ranks_count_lm` whose vocablary is implemented with [yada](https://github.com/takuyaa/yada).
 
 ## Input data format
 
