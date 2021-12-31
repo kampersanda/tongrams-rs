@@ -32,7 +32,7 @@ where
         if let Some(token_ids) = self.mapper.map_query(gram, &self.trie.vocab) {
             let order = token_ids.len() - 1;
             let mut pos = token_ids[0];
-            for (&token_id, array) in token_ids[1..].iter().zip(self.trie.arrays[1..].iter()) {
+            for (&token_id, array) in token_ids[1..].iter().zip(self.trie.arrays.iter()) {
                 if let Some(next_pos) = array.find_token(pos, token_id) {
                     pos = next_pos;
                 } else {

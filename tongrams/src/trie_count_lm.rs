@@ -176,7 +176,7 @@ where
     }
 
     pub fn num_orders(&self) -> usize {
-        self.arrays.len()
+        self.count_ranks.len()
     }
 
     pub fn num_nodes(&self) -> usize {
@@ -276,11 +276,10 @@ D D D\t1
     #[test]
     fn test_simple_components() {
         let lm = SimpleTrieCountLm::from_texts(vec![GRAMS_1, GRAMS_2, GRAMS_3]).unwrap();
-        eprintln!("{:?}", &lm);
         test_vocabulary(&lm.vocab);
         test_unigrams(&lm.count_ranks[0]);
-        test_bigrams(&lm.arrays[1], &lm.count_ranks[1]);
-        test_trigrams(&lm.arrays[2], &lm.count_ranks[2]);
+        test_bigrams(&lm.arrays[0], &lm.count_ranks[1]);
+        test_trigrams(&lm.arrays[1], &lm.count_ranks[2]);
     }
 
     #[test]
@@ -288,8 +287,8 @@ D D D\t1
         let lm = EliasFanoTrieCountLm::from_texts(vec![GRAMS_1, GRAMS_2, GRAMS_3]).unwrap();
         test_vocabulary(&lm.vocab);
         test_unigrams(&lm.count_ranks[0]);
-        test_bigrams(&lm.arrays[1], &lm.count_ranks[1]);
-        test_trigrams(&lm.arrays[2], &lm.count_ranks[2]);
+        test_bigrams(&lm.arrays[0], &lm.count_ranks[1]);
+        test_trigrams(&lm.arrays[1], &lm.count_ranks[2]);
     }
 
     #[test]

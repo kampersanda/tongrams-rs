@@ -67,7 +67,6 @@ where
             }
             self.counts_builder.build_sequence();
         }
-
         Ok(())
     }
 
@@ -90,10 +89,7 @@ where
             let count_rank = self.counts_builder.rank(0, rec.count()).unwrap();
             count_ranks.push(count_rank);
         }
-
-        self.arrays.push(*T::new(vec![], vec![]));
         self.count_ranks.push(*A::new(count_ranks));
-
         Ok(())
     }
 
