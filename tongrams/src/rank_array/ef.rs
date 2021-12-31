@@ -43,4 +43,12 @@ impl RankArray for EliasFanoRankArray {
     fn get(&self, i: usize) -> usize {
         self.count_ranks.get(i)
     }
+
+    fn len(&self) -> usize {
+        self.count_ranks.len()
+    }
+
+    fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
 }

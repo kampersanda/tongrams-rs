@@ -20,6 +20,10 @@ pub trait RankArray {
     fn memory_statistics(&self) -> serde_json::Value;
 
     fn get(&self, i: usize) -> usize;
+
+    fn len(&self) -> usize;
+
+    fn is_empty(&self) -> bool;
 }
 
 #[cfg(test)]

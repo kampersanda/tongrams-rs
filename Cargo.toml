@@ -2,7 +2,6 @@
 
 members = [
     "tongrams",
-    "index",
-    "lookup",
+    "tools",
     "bench",
 ]

@@ -1,5 +1,5 @@
 [package]
-name = "index"
+name = "tools"
 version = "0.1.0"
 edition = "2018"
 
@@ -9,3 +9,15 @@ edition = "2018"
 tongrams =  { path = "../tongrams" }
 anyhow = "1.0"
 structopt = "0.3"  # MIT or Apache-2.0
+
+[[bin]]
+name = "index"
+path = "src/index.rs"
+
+[[bin]]
+name = "lookup"
+path = "src/lookup.rs"
+
+[[bin]]
+name = "stats"
+path = "src/stats.rs"

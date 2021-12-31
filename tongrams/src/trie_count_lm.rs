@@ -192,9 +192,9 @@ where
         self.count_ranks.len()
     }
 
-    /// Gets the number of nodes in the Elias-Fano trie.
-    pub fn num_nodes(&self) -> usize {
-        self.arrays.iter().fold(0, |acc, x| acc + x.num_tokens())
+    /// Gets the number of stored grams.
+    pub fn num_grams(&self) -> usize {
+        self.count_ranks.iter().fold(0, |acc, x| acc + x.len())
     }
 }
 

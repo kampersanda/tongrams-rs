@@ -26,6 +26,9 @@ fn main() -> Result<()> {
     let duration = start.elapsed();
     println!("Elapsed time: {:.3} [sec]", duration.as_secs_f64());
 
+    let num_grams = lm.num_grams();
+    println!("{} grams are stored.", num_grams);
+
     println!("Writing the index into {}...", &index_file);
     let mut writer = File::create(&index_file)?;
     let mem = lm.serialize_into(&mut writer)?;
@@ -35,8 +38,7 @@ fn main() -> Result<()> {
         mem as f64 / (1024.0 * 1024.0)
     );
 
-    // let mem_stats = lm.memory_statistics();
-    // println!("{}", mem_stats.to_string());
+    println!("Bytes per gram: {:.3} bytes", mem as f64 / num_grams as f64,);
 
     Ok(())
 }

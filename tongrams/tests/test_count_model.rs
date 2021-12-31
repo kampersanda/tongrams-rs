@@ -49,5 +49,5 @@ fn test_serialization() {
 
     let other = EliasFanoTrieCountLm::deserialize_from(&data[..]).unwrap();
     assert_eq!(lm.num_orders(), other.num_orders());
-    assert_eq!(lm.num_nodes(), other.num_nodes());
+    assert_eq!(lm.num_grams(), other.num_grams());
 }

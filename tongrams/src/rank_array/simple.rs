@@ -41,4 +41,12 @@ impl RankArray for SimpleRankArray {
     fn get(&self, i: usize) -> usize {
         self.count_ranks[i]
     }
+
+    fn len(&self) -> usize {
+        self.count_ranks.len()
+    }
+
+    fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
 }
