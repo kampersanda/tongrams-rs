@@ -5,6 +5,7 @@ use std::io::{Read, Write};
 
 use anyhow::Result;
 
+pub use crate::rank_array::ef::EliasFanoRankArray;
 pub use crate::rank_array::simple::SimpleRankArray;
 
 pub trait RankArray {

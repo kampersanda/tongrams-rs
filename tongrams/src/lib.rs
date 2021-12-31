@@ -9,7 +9,7 @@ pub mod trie_count_lm;
 pub mod vocabulary;
 
 pub use gram::Gram;
-pub use rank_array::SimpleRankArray;
+pub use rank_array::{EliasFanoRankArray, SimpleRankArray};
 pub use record::Record;
 pub use trie_array::{EliasFanoTrieArray, SimpleTrieArray};
 pub use trie_count_lm::TrieCountLm;
@@ -21,7 +21,7 @@ pub const GRAM_COUNT_SEPARATOR: u8 = b'\t';
 
 pub type SimpleTrieCountLm = TrieCountLm<SimpleTrieArray, SimpleVocabulary, SimpleRankArray>;
 pub type EliasFanoTrieCountLm =
-    TrieCountLm<EliasFanoTrieArray, DoubleArrayVocabulary, SimpleRankArray>;
+    TrieCountLm<EliasFanoTrieArray, DoubleArrayVocabulary, EliasFanoRankArray>;
 
 pub fn handle_bincode_error(e: std::boxed::Box<bincode::ErrorKind>) -> anyhow::Error {
     anyhow::anyhow!("{:?}", e)
