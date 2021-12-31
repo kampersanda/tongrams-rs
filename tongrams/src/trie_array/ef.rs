@@ -133,9 +133,10 @@ impl EliasFanoTrieArray {
         let mut sampled_ids = vec![0; pointers.len()];
 
         for i in 0..pointers.len() - 1 {
-            sampled_ids[i] = sampled_id;
             let (b, e) = (pointers[i], pointers[i + 1]);
             debug_assert!(b <= e);
+
+            sampled_ids[i] = sampled_id;
             for token_id in token_ids.iter_mut().take(e).skip(b) {
                 *token_id += sampled_id;
             }

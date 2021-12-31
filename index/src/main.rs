@@ -1,4 +1,4 @@
-use std::fs::{metadata, File};
+use std::fs::File;
 
 use anyhow::Result;
 use structopt::StructOpt;
