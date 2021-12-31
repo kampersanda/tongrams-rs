@@ -1,24 +1,27 @@
 use crate::mappers::SortedArrayMapper;
+use crate::rank_array::RankArray;
 use crate::trie_array::TrieArray;
 use crate::trie_count_lm::TrieCountLm;
 use crate::vocabulary::Vocabulary;
 use crate::Gram;
 
-pub struct TrieCountLmLookuper<'a, T, V>
+pub struct TrieCountLmLookuper<'a, T, V, A>
 where
     T: TrieArray,
     V: Vocabulary,
+    A: RankArray,
 {
-    trie: &'a TrieCountLm<T, V>,
+    trie: &'a TrieCountLm<T, V, A>,
     mapper: SortedArrayMapper,
 }
 
-impl<'a, T, V> TrieCountLmLookuper<'a, T, V>
+impl<'a, T, V, A> TrieCountLmLookuper<'a, T, V, A>
 where
     T: TrieArray,
     V: Vocabulary,
+    A: RankArray,
 {
-    pub fn new(trie: &'a TrieCountLm<T, V>) -> TrieCountLmLookuper<'a, T, V> {
+    pub fn new(trie: &'a TrieCountLm<T, V, A>) -> TrieCountLmLookuper<'a, T, V, A> {
         TrieCountLmLookuper {
             trie,
             mapper: SortedArrayMapper::default(),
@@ -36,7 +39,7 @@ where
                     return None;
                 }
             }
-            let count_rank = self.trie.arrays[order].count_rank(pos);
+            let count_rank = self.trie.count_ranks[order].get(pos);
             Some(self.trie.counts[order].get(count_rank))
         } else {
             None

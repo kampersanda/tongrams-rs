@@ -9,26 +9,30 @@ use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
 use sucds::CompactVector;
 
 use crate::loader::{GramsFileLoader, GramsLoader, GramsTextLoader};
+use crate::rank_array::RankArray;
 use crate::trie_array::TrieArray;
 use crate::trie_count_lm::builder::TrieCountLmBuilder;
 use crate::trie_count_lm::lookuper::TrieCountLmLookuper;
 use crate::vocabulary::Vocabulary;
 
 #[derive(Default, Debug)]
-pub struct TrieCountLm<T, V>
+pub struct TrieCountLm<T, V, A>
 where
     T: TrieArray,
     V: Vocabulary,
+    A: RankArray,
 {
     vocab: V,
     arrays: Vec<T>,
+    count_ranks: Vec<A>,
     counts: Vec<CompactVector>,
 }
 
-impl<T, V> TrieCountLm<T, V>
+impl<T, V, A> TrieCountLm<T, V, A>
 where
     T: TrieArray,
     V: Vocabulary,
+    A: RankArray,
 {
     pub fn from_files(filenames: Vec<String>) -> Result<Self> {
         let mut loaders = Vec::with_capacity(filenames.len());
@@ -62,6 +66,12 @@ where
         for array in &self.arrays {
             mem += array.serialize_into(&mut writer)?;
         }
+        // count_ranks
+        writer.write_u64::<LittleEndian>(self.count_ranks.len() as u64)?;
+        mem += std::mem::size_of::<u64>();
+        for count_rank in &self.count_ranks {
+            mem += count_rank.serialize_into(&mut writer)?;
+        }
         // counts
         writer.write_u64::<LittleEndian>(self.counts.len() as u64)?;
         mem += std::mem::size_of::<u64>();
@@ -84,6 +94,14 @@ where
             }
             arrays
         };
+        let count_ranks = {
+            let len = reader.read_u64::<LittleEndian>()? as usize;
+            let mut count_ranks = Vec::with_capacity(len);
+            for _ in 0..len {
+                count_ranks.push(*A::deserialize_from(&mut reader)?);
+            }
+            count_ranks
+        };
         let counts = {
             let len = reader.read_u64::<LittleEndian>()? as usize;
             let mut counts = Vec::with_capacity(len);
@@ -95,6 +113,7 @@ where
         Ok(Self {
             vocab,
             arrays,
+            count_ranks,
             counts,
         })
     }
@@ -107,6 +126,11 @@ where
         mem += std::mem::size_of::<u64>();
         for array in &self.arrays {
             mem += array.size_in_bytes();
+        }
+        // count_ranks
+        mem += std::mem::size_of::<u64>();
+        for count_rank in &self.count_ranks {
+            mem += count_rank.size_in_bytes();
         }
         // counts
         mem += std::mem::size_of::<u64>();
@@ -125,6 +149,13 @@ where
             }
             arrays
         };
+        let count_ranks = {
+            let mut count_ranks = vec![];
+            for count_rank in &self.count_ranks {
+                count_ranks.push(count_rank.memory_statistics());
+            }
+            count_ranks
+        };
         let counts = {
             let mut counts = vec![];
             for count in &self.counts {
@@ -135,11 +166,12 @@ where
         serde_json::json!({
             "vocab": vocab,
             "arrays": arrays,
+            "count_ranks": count_ranks,
             "counts": counts,
         })
     }
 
-    pub fn lookuper(&self) -> TrieCountLmLookuper<T, V> {
+    pub fn lookuper(&self) -> TrieCountLmLookuper<T, V, A> {
         TrieCountLmLookuper::new(self)
     }
 
@@ -198,30 +230,27 @@ D D D\t1
         assert_eq!(vocab.get(Gram::from_str("D")), Some(D));
     }
 
-    fn test_unigrams<T: TrieArray>(array: &T) {
+    fn test_unigrams<A: RankArray>(ra: &A) {
         for (i, &count_rank) in [2, 1, 0, 0].iter().enumerate() {
-            assert_eq!(array.count_rank(i), count_rank);
+            assert_eq!(ra.get(i), count_rank);
         }
     }
 
-    fn test_bigrams<T: TrieArray>(array: &T) {
+    fn test_bigrams<T: TrieArray, A: RankArray>(ta: &T, ra: &A) {
         for (i, &token_id) in [A, C, B, C, D, A, D, B, D].iter().enumerate() {
-            assert_eq!(array.token_id(i), token_id);
-        }
-        for (i, &count_rank) in [3, 0, 0, 0, 1, 2, 0, 1, 1].iter().enumerate() {
-            assert_eq!(array.count_rank(i), count_rank);
+            assert_eq!(ta.token_id(i), token_id);
         }
         for (i, &range) in [(0, 2), (2, 5), (5, 7), (7, 9)].iter().enumerate() {
-            assert_eq!(array.range(i), range);
+            assert_eq!(ta.range(i), range);
+        }
+        for (i, &count_rank) in [3, 0, 0, 0, 1, 2, 0, 1, 1].iter().enumerate() {
+            assert_eq!(ra.get(i), count_rank);
         }
     }
 
-    fn test_trigrams<T: TrieArray>(array: &T) {
+    fn test_trigrams<T: TrieArray, A: RankArray>(ta: &T, ra: &A) {
         for (i, &token_id) in [C, C, D, D, B, C, D].iter().enumerate() {
-            assert_eq!(array.token_id(i), token_id);
-        }
-        for (i, &count_rank) in [2, 1, 0, 0, 1, 0, 0].iter().enumerate() {
-            assert_eq!(array.count_rank(i), count_rank);
+            assert_eq!(ta.token_id(i), token_id);
         }
         for (i, &range) in [
             (0, 1),
@@ -237,26 +266,30 @@ D D D\t1
         .iter()
         .enumerate()
         {
-            assert_eq!(array.range(i), range);
+            assert_eq!(ta.range(i), range);
+        }
+        for (i, &count_rank) in [2, 1, 0, 0, 1, 0, 0].iter().enumerate() {
+            assert_eq!(ra.get(i), count_rank);
         }
     }
 
     #[test]
     fn test_simple_components() {
         let lm = SimpleTrieCountLm::from_texts(vec![GRAMS_1, GRAMS_2, GRAMS_3]).unwrap();
+        eprintln!("{:?}", &lm);
         test_vocabulary(&lm.vocab);
-        test_unigrams(&lm.arrays[0]);
-        test_bigrams(&lm.arrays[1]);
-        test_trigrams(&lm.arrays[2]);
+        test_unigrams(&lm.count_ranks[0]);
+        test_bigrams(&lm.arrays[1], &lm.count_ranks[1]);
+        test_trigrams(&lm.arrays[2], &lm.count_ranks[2]);
     }
 
     #[test]
     fn test_ef_components() {
         let lm = EliasFanoTrieCountLm::from_texts(vec![GRAMS_1, GRAMS_2, GRAMS_3]).unwrap();
         test_vocabulary(&lm.vocab);
-        test_unigrams(&lm.arrays[0]);
-        test_bigrams(&lm.arrays[1]);
-        test_trigrams(&lm.arrays[2]);
+        test_unigrams(&lm.count_ranks[0]);
+        test_bigrams(&lm.arrays[1], &lm.count_ranks[1]);
+        test_trigrams(&lm.arrays[2], &lm.count_ranks[2]);
     }
 
     #[test]

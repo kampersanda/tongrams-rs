@@ -5,39 +5,44 @@ use anyhow::Result;
 use sucds::{util::needed_bits, CompactVector};
 
 use crate::loader::GramsLoader;
-use crate::trie_array::{TrieArray, TrieArrayBuilder};
+use crate::rank_array::RankArray;
+use crate::trie_array::TrieArray;
 use crate::vocabulary::Vocabulary;
 use crate::Gram;
 use crate::TrieCountLm;
 
-pub struct TrieCountLmBuilder<R, T, V>
+pub struct TrieCountLmBuilder<R, T, V, A>
 where
     R: Read,
     T: TrieArray,
     V: Vocabulary,
+    A: RankArray,
 {
     loaders: Vec<Box<dyn GramsLoader<R>>>,
     vocab: V,
     arrays: Vec<T>,
+    count_ranks: Vec<A>,
     counts_builder: CountsBuilder,
 }
 
-impl<R, T, V> TrieCountLmBuilder<R, T, V>
+impl<R, T, V, A> TrieCountLmBuilder<R, T, V, A>
 where
     R: Read,
     T: TrieArray,
     V: Vocabulary,
+    A: RankArray,
 {
     pub fn new(loaders: Vec<Box<dyn GramsLoader<R>>>) -> Self {
         Self {
             loaders,
             vocab: *V::default(),
             arrays: vec![],
+            count_ranks: vec![],
             counts_builder: CountsBuilder::default(),
         }
     }
 
-    pub fn build(mut self) -> Result<TrieCountLm<T, V>> {
+    pub fn build(mut self) -> Result<TrieCountLm<T, V, A>> {
         self.build_counts()?;
         self.build_vocabulary()?;
 
@@ -49,6 +54,7 @@ where
         Ok(TrieCountLm {
             vocab: self.vocab,
             arrays: self.arrays,
+            count_ranks: self.count_ranks,
             counts: self.counts_builder.release(),
         })
     }
@@ -76,17 +82,17 @@ where
             records
         };
 
-        let grams: Vec<Gram> = records.iter().map(|r| Gram::from_str(&r.gram)).collect();
+        let grams: Vec<Gram> = records.iter().map(|r| r.gram()).collect();
         self.vocab = *V::new(&grams)?;
 
-        let mut array_builder = TrieArrayBuilder::new(records.len(), 0, 0, 0);
+        let mut count_ranks = Vec::with_capacity(records.len());
         for rec in &records {
-            let count_rank = self.counts_builder.rank(0, rec.count).unwrap();
-            array_builder.add_count_rank(count_rank);
+            let count_rank = self.counts_builder.rank(0, rec.count()).unwrap();
+            count_ranks.push(count_rank);
         }
 
-        let array = array_builder.release_counts_ranks();
-        self.arrays.push(array);
+        self.arrays.push(*T::new(vec![], vec![]));
+        self.count_ranks.push(*A::new(count_ranks));
 
         Ok(())
     }
@@ -96,9 +102,11 @@ where
         let mut prev_gp = self.loaders[order - 1].parser()?;
         let curr_gp = self.loaders[order].parser()?;
 
-        let mut array_builder = TrieArrayBuilder::new(curr_gp.num_grams(), 0, 0, 0);
-        let num_pointers = prev_gp.num_grams() + 1;
+        // let mut array_builder = TrieArrayBuilder::new(curr_gp.num_grams(), 0, 0, 0);
+        let mut token_ids = Vec::with_capacity(curr_gp.num_grams());
+        let mut count_ranks = Vec::with_capacity(curr_gp.num_grams());
 
+        let num_pointers = prev_gp.num_grams() + 1;
         let mut pointers = Vec::with_capacity(num_pointers);
         pointers.push(0);
 
@@ -122,7 +130,8 @@ where
 
             let token_id = self.vocab.get(token).unwrap();
             let count_rank = self.counts_builder.rank(order, curr_rec.count()).unwrap();
-            array_builder.add(token_id, count_rank);
+            token_ids.push(token_id);
+            count_ranks.push(count_rank);
         }
 
         for _ in prev_gp {
@@ -130,9 +139,8 @@ where
         }
         pointers.push(pointer);
 
-        let array = array_builder.release(pointers);
-        self.arrays.push(array);
-
+        self.arrays.push(*T::new(token_ids, pointers));
+        self.count_ranks.push(*A::new(count_ranks));
         Ok(())
     }
 }

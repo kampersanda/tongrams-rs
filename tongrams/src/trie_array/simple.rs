@@ -9,24 +9,14 @@ use crate::trie_array::TrieArray;
 #[derive(Default, Debug, Serialize, Deserialize)]
 pub struct SimpleTrieArray {
     token_ids: Vec<usize>,
-    count_ranks: Vec<usize>,
     pointers: Vec<usize>,
 }
 
 impl TrieArray for SimpleTrieArray {
-    fn new(token_ids: Vec<usize>, count_ranks: Vec<usize>, pointers: Vec<usize>) -> Box<Self> {
+    fn new(token_ids: Vec<usize>, pointers: Vec<usize>) -> Box<Self> {
         Box::new(Self {
             token_ids,
-            count_ranks,
             pointers,
-        })
-    }
-
-    fn with_count_ranks(count_ranks: Vec<usize>) -> Box<Self> {
-        Box::new(Self {
-            token_ids: vec![],
-            count_ranks,
-            pointers: vec![],
         })
     }
 
@@ -57,10 +47,6 @@ impl TrieArray for SimpleTrieArray {
     /// Gets the token id with a given index.
     fn token_id(&self, i: usize) -> usize {
         self.token_ids[i]
-    }
-
-    fn count_rank(&self, i: usize) -> usize {
-        self.count_ranks[i]
     }
 
     fn range(&self, pos: usize) -> (usize, usize) {
