@@ -28,14 +28,11 @@ fn main() -> Result<()> {
 
     println!("Writing the index into {}...", &index_file);
     let mut writer = File::create(&index_file)?;
-    lm.serialize_into(&mut writer)?;
-
-    let meta = metadata(&index_file)?;
-    let filesize = meta.len();
+    let mem = lm.serialize_into(&mut writer)?;
     println!(
         "Index size: {} bytes ({:.3} MiB)",
-        filesize,
-        filesize as f64 / (1024.0 * 1024.0)
+        mem,
+        mem as f64 / (1024.0 * 1024.0)
     );
 
     Ok(())
