@@ -11,7 +11,7 @@ pub struct EliasFanoTrieArray {
 }
 
 impl TrieArray for EliasFanoTrieArray {
-    fn new(token_ids: Vec<usize>, pointers: Vec<usize>) -> Box<Self> {
+    fn build(token_ids: Vec<usize>, pointers: Vec<usize>) -> Box<Self> {
         if token_ids.is_empty() {
             return Box::new(Self::default());
         }

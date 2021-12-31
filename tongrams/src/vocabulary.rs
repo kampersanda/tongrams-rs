@@ -9,7 +9,9 @@ pub use crate::vocabulary::{simple::SimpleVocabulary, yada::DoubleArrayVocabular
 use crate::Gram;
 
 pub trait Vocabulary {
-    fn default() -> Box<Self>;
+    fn new() -> Box<Self>;
+
+    fn build(grams: &[Gram]) -> Result<Box<Self>>;
 
     fn serialize_into<W: Write>(&self, writer: W) -> Result<usize>;
 
@@ -18,8 +20,6 @@ pub trait Vocabulary {
     fn size_in_bytes(&self) -> usize;
 
     fn memory_statistics(&self) -> serde_json::Value;
-
-    fn new(grams: &[Gram]) -> Result<Box<Self>>;
 
     fn get(&self, gram: Gram) -> Option<usize>;
 }
@@ -36,13 +36,13 @@ mod tests {
             Gram::from_str("B"),
         ];
 
-        let vocab = SimpleVocabulary::new(&grams).unwrap();
+        let vocab = SimpleVocabulary::build(&grams).unwrap();
         assert_eq!(vocab.get(Gram::from_str("A")), Some(0));
         assert_eq!(vocab.get(Gram::from_str("B")), Some(2));
         assert_eq!(vocab.get(Gram::from_str("C")), None);
         assert_eq!(vocab.get(Gram::from_str("D")), Some(1));
 
-        let vocab = DoubleArrayVocabulary::new(&grams).unwrap();
+        let vocab = DoubleArrayVocabulary::build(&grams).unwrap();
         assert_eq!(vocab.get(Gram::from_str("A")), Some(0));
         assert_eq!(vocab.get(Gram::from_str("B")), Some(2));
         assert_eq!(vocab.get(Gram::from_str("C")), None);

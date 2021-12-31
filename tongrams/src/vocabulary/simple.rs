@@ -14,10 +14,20 @@ pub struct SimpleVocabulary {
 }
 
 impl Vocabulary for SimpleVocabulary {
-    fn default() -> Box<Self> {
+    fn new() -> Box<Self> {
         Box::new(Self {
             map: HashMap::new(),
         })
+    }
+
+    fn build(grams: &[Gram]) -> Result<Box<Self>> {
+        let mut map = HashMap::new();
+        for (id, gram) in grams.iter().enumerate() {
+            if let Some(v) = map.insert(gram.to_string(), id) {
+                return Err(anyhow!("Depulicated key: {:?} => {}", gram, v));
+            }
+        }
+        Ok(Box::new(Self { map }))
     }
 
     fn serialize_into<W>(&self, writer: W) -> Result<usize>
@@ -25,7 +35,7 @@ impl Vocabulary for SimpleVocabulary {
         W: Write,
     {
         bincode::serialize_into(writer, self).map_err(handle_bincode_error)?;
-        Ok(0)
+        Ok(self.size_in_bytes())
     }
 
     fn deserialize_from<R>(reader: R) -> Result<Box<Self>>
@@ -37,21 +47,15 @@ impl Vocabulary for SimpleVocabulary {
     }
 
     fn size_in_bytes(&self) -> usize {
-        0
+        let mut bytes = vec![];
+        bincode::serialize_into(&mut bytes, self)
+            .map_err(handle_bincode_error)
+            .unwrap();
+        bytes.len()
     }
 
     fn memory_statistics(&self) -> serde_json::Value {
         serde_json::json!({})
-    }
-
-    fn new(grams: &[Gram]) -> Result<Box<Self>> {
-        let mut map = HashMap::new();
-        for (id, gram) in grams.iter().enumerate() {
-            if let Some(v) = map.insert(gram.to_string(), id) {
-                return Err(anyhow!("Depulicated key: {:?} => {}", gram, v));
-            }
-        }
-        Ok(Box::new(Self { map }))
     }
 
     fn get(&self, gram: Gram) -> Option<usize> {

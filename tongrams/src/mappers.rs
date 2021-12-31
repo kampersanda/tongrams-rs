@@ -41,7 +41,7 @@ mod tests {
             Gram::from_str("D"),
             Gram::from_str("B"),
         ];
-        let vocab = *SimpleVocabulary::new(&grams).unwrap();
+        let vocab = *SimpleVocabulary::build(&grams).unwrap();
         let mut mapper = SortedArrayMapper::default();
 
         let gram = Gram::from_str("A B D");

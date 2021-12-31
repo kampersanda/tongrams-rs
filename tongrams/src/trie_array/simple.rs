@@ -1,43 +1,48 @@
 use std::io::{Read, Write};
 
 use anyhow::Result;
-use serde::{Deserialize, Serialize};
 
-use crate::handle_bincode_error;
 use crate::trie_array::TrieArray;
 
-#[derive(Default, Debug, Serialize, Deserialize)]
+#[derive(Default, Debug)]
 pub struct SimpleTrieArray {
     token_ids: Vec<usize>,
     pointers: Vec<usize>,
 }
 
 impl TrieArray for SimpleTrieArray {
-    fn new(token_ids: Vec<usize>, pointers: Vec<usize>) -> Box<Self> {
+    fn build(token_ids: Vec<usize>, pointers: Vec<usize>) -> Box<Self> {
         Box::new(Self {
             token_ids,
             pointers,
         })
     }
 
-    fn serialize_into<W>(&self, writer: W) -> Result<usize>
+    fn serialize_into<W>(&self, mut writer: W) -> Result<usize>
     where
         W: Write,
     {
-        bincode::serialize_into(writer, self).map_err(handle_bincode_error)?;
-        Ok(0)
+        Ok(
+            sucds::util::int_vector::serialize_into(&self.token_ids, &mut writer)?
+                + sucds::util::int_vector::serialize_into(&self.pointers, &mut writer)?,
+        )
     }
 
-    fn deserialize_from<R>(reader: R) -> Result<Box<Self>>
+    fn deserialize_from<R>(mut reader: R) -> Result<Box<Self>>
     where
         R: Read,
     {
-        let x: Self = bincode::deserialize_from(reader).map_err(handle_bincode_error)?;
-        Ok(Box::new(x))
+        let token_ids = sucds::util::int_vector::deserialize_from(&mut reader)?;
+        let pointers = sucds::util::int_vector::deserialize_from(&mut reader)?;
+        Ok(Box::new(Self {
+            token_ids,
+            pointers,
+        }))
     }
 
     fn size_in_bytes(&self) -> usize {
-        0
+        sucds::util::int_vector::size_in_bytes(&self.token_ids)
+            + sucds::util::int_vector::size_in_bytes(&self.pointers)
     }
 
     fn memory_statistics(&self) -> serde_json::Value {

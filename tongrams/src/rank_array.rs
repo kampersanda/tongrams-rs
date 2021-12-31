@@ -9,7 +9,7 @@ pub use crate::rank_array::ef::EliasFanoRankArray;
 pub use crate::rank_array::simple::SimpleRankArray;
 
 pub trait RankArray {
-    fn new(count_ranks: Vec<usize>) -> Box<Self>;
+    fn build(count_ranks: Vec<usize>) -> Box<Self>;
 
     fn serialize_into<W: Write>(&self, writer: W) -> Result<usize>;
 
@@ -28,7 +28,7 @@ mod tests {
 
     fn test_basic<A: RankArray>() {
         let count_ranks = vec![3, 0, 0, 0, 1, 2, 0, 1, 1];
-        let ra = A::new(count_ranks.clone());
+        let ra = A::build(count_ranks.clone());
         for (i, &x) in count_ranks.iter().enumerate() {
             assert_eq!(ra.get(i), x);
         }

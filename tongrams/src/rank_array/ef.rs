@@ -10,7 +10,7 @@ pub struct EliasFanoRankArray {
 }
 
 impl RankArray for EliasFanoRankArray {
-    fn new(count_ranks: Vec<usize>) -> Box<Self> {
+    fn build(count_ranks: Vec<usize>) -> Box<Self> {
         Box::new(Self {
             count_ranks: sucds::EliasFanoList::from_slice(&count_ranks).unwrap(),
         })

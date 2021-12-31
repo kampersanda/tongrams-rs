@@ -9,7 +9,7 @@ pub use crate::trie_array::ef::EliasFanoTrieArray;
 pub use crate::trie_array::simple::SimpleTrieArray;
 
 pub trait TrieArray {
-    fn new(token_ids: Vec<usize>, pointers: Vec<usize>) -> Box<Self>;
+    fn build(token_ids: Vec<usize>, pointers: Vec<usize>) -> Box<Self>;
 
     fn serialize_into<W: Write>(&self, writer: W) -> Result<usize>;
 
@@ -37,7 +37,7 @@ mod tests {
     fn test_basic_1<T: TrieArray>() {
         let token_ids = vec![0, 2, 1, 2, 3, 0, 3, 1, 3];
         let pointers = vec![0, 2, 5, 7, 9];
-        let ta = T::new(token_ids.clone(), pointers.clone());
+        let ta = T::build(token_ids.clone(), pointers.clone());
 
         for (i, &x) in token_ids.iter().enumerate() {
             assert_eq!(ta.token_id(i), x);
@@ -57,7 +57,7 @@ mod tests {
     fn test_basic_2<T: TrieArray>() {
         let token_ids = vec![2, 2, 3, 3, 1, 2, 3];
         let pointers = vec![0, 1, 1, 3, 4, 4, 4, 4, 6, 7];
-        let ta = T::new(token_ids.clone(), pointers.clone());
+        let ta = T::build(token_ids.clone(), pointers.clone());
 
         for (i, &x) in token_ids.iter().enumerate() {
             assert_eq!(ta.token_id(i), x);
