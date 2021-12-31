@@ -69,3 +69,5 @@ Loading the index from index.bin...
 - Add minimal perfect hashing
 - Add remapping
 - Support probability scores
+- Make `sucds::EliasFano` faster
+
