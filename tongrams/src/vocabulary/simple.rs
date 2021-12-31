@@ -2,13 +2,12 @@ use std::collections::HashMap;
 use std::io::{Read, Write};
 
 use anyhow::{anyhow, Result};
-use serde::{Deserialize, Serialize};
 
 use crate::handle_bincode_error;
 use crate::vocabulary::Vocabulary;
 use crate::Gram;
 
-#[derive(Default, Debug, Serialize, Deserialize)]
+#[derive(Default, Debug)]
 pub struct SimpleVocabulary {
     map: HashMap<String, usize>,
 }
@@ -34,7 +33,7 @@ impl Vocabulary for SimpleVocabulary {
     where
         W: Write,
     {
-        bincode::serialize_into(writer, self).map_err(handle_bincode_error)?;
+        bincode::serialize_into(writer, &self.map).map_err(handle_bincode_error)?;
         Ok(self.size_in_bytes())
     }
 
@@ -42,16 +41,15 @@ impl Vocabulary for SimpleVocabulary {
     where
         R: Read,
     {
-        let x: Self = bincode::deserialize_from(reader).map_err(handle_bincode_error)?;
-        Ok(Box::new(x))
+        let map = bincode::deserialize_from(reader).map_err(handle_bincode_error)?;
+        Ok(Box::new(Self { map }))
     }
 
     fn size_in_bytes(&self) -> usize {
-        let mut bytes = vec![];
-        bincode::serialize_into(&mut bytes, self)
+        bincode::serialize(&self.map)
             .map_err(handle_bincode_error)
-            .unwrap();
-        bytes.len()
+            .unwrap()
+            .len()
     }
 
     fn memory_statistics(&self) -> serde_json::Value {
