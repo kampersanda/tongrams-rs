@@ -3,6 +3,7 @@
 //! `tongrams` is a crate to index and query large language models in compressed space, in which the data structures are presented in the following papers:
 //!
 //!  - Giulio Ermanno Pibiri and Rossano Venturini, [Efficient Data Structures for Massive N-Gram Datasets](https://doi.org/10.1145/3077136.3080798). In *Proceedings of the 40th ACM Conference on Research and Development in Information Retrieval (SIGIR 2017)*, pp. 615-624.
+//!
 //!  - Giulio Ermanno Pibiri and Rossano Venturini, [Handling Massive N-Gram Datasets Efficiently](https://doi.org/10.1145/3302913). *ACM Transactions on Information Systems (TOIS)*, 37.2 (2019): 1-41.
 //!
 //! This is a Rust port of [`tongrams`](https://github.com/jermp/tongrams) C++ library.
@@ -50,31 +51,44 @@
 //! ```
 pub mod gram;
 pub mod loader;
-pub mod mappers;
 pub mod parser;
-pub mod rank_array;
 pub mod record;
-pub mod trie_array;
 pub mod trie_count_lm;
 pub mod util;
 pub mod vocabulary;
 
+mod mappers;
+mod rank_array;
+mod trie_array;
+
+/// The maximum order of *N*-grams (i.e., `1 <= N <= 8`).
 pub const MAX_ORDER: usize = 8;
-pub const GRAM_SEPARATOR: u8 = b' ';
+/// The separator for tokens.
+pub const TOKEN_SEPARATOR: u8 = b' ';
+/// The separator for grams and count.
 pub const GRAM_COUNT_SEPARATOR: u8 = b'\t';
 
 pub use gram::Gram;
 pub use record::Record;
 pub use trie_count_lm::TrieCountLm;
 
-pub use rank_array::{EliasFanoRankArray, SimpleRankArray};
-pub use trie_array::{EliasFanoTrieArray, SimpleTrieArray};
-pub use vocabulary::{DoubleArrayVocabulary, SimpleVocabulary};
+pub use loader::GramsLoader;
+pub use parser::GramsParser;
+pub use vocabulary::Vocabulary;
 
+use rank_array::{EliasFanoRankArray, SimpleRankArray};
+use trie_array::{EliasFanoTrieArray, SimpleTrieArray};
+use vocabulary::{DoubleArrayVocabulary, SimpleVocabulary};
+
+/// Simple implementation of [`TrieCountLm`].
+/// Note that this is for debug, and do NOT use it for storing massive datasets.
 pub type SimpleTrieCountLm = TrieCountLm<SimpleTrieArray, SimpleVocabulary, SimpleRankArray>;
+
+/// Elias-Fano Trie implementation of [`TrieCountLm`].
+/// This configuration is similar to `ef_trie_PSEF_ranks_count_lm` in the original `tongrams`.
 pub type EliasFanoTrieCountLm =
     TrieCountLm<EliasFanoTrieArray, DoubleArrayVocabulary, EliasFanoRankArray>;
 
-pub fn handle_bincode_error(e: std::boxed::Box<bincode::ErrorKind>) -> anyhow::Error {
+fn handle_bincode_error(e: std::boxed::Box<bincode::ErrorKind>) -> anyhow::Error {
     anyhow::anyhow!("{:?}", e)
 }

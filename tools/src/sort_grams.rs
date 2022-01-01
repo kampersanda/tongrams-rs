@@ -6,7 +6,7 @@ use anyhow::Result;
 use structopt::StructOpt;
 
 use tongrams::util;
-use tongrams::vocabulary::Vocabulary;
+use tongrams::Vocabulary;
 
 #[derive(StructOpt, Debug)]
 #[structopt(name = "sort_grams", about = "A program to sort ngram file.")]

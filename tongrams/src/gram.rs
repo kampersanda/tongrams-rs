@@ -1,38 +1,47 @@
 use std::fmt;
 
-use crate::GRAM_SEPARATOR;
+use crate::TOKEN_SEPARATOR;
 
+/// Handler of a gram.
 #[derive(Clone, Copy, Eq)]
 pub struct Gram<'a> {
     data: &'a [u8],
 }
 
 impl<'a> Gram<'a> {
+    /// Creates a [`Gram`] from a byte slice.
+    #[inline]
     pub const fn new(data: &'a [u8]) -> Self {
         Self { data }
     }
 
+    /// Creates a [`Gram`] from a string.
+    #[inline]
     pub const fn from_str(data: &'a str) -> Self {
         Self {
             data: data.as_bytes(),
         }
     }
 
+    /// Copies `self` into a new `Vec`.
+    #[inline]
     pub fn to_vec(self) -> Vec<u8> {
         self.data.to_vec()
     }
 
+    /// Gets the reference to the byte slice.
+    #[inline]
     pub const fn raw(&self) -> &[u8] {
         self.data
     }
 
-    /// Pops the last word.
+    /// Pops the last token.
     ///
     /// ```
     /// use tongrams::Gram;
     ///
-    /// let words = "abc de f";
-    /// let mut gram = Gram::from_str(words);
+    /// let tokens = "abc de f";
+    /// let mut gram = Gram::from_str(tokens);
     ///
     /// let (gram, last) = gram.pop_token().unwrap();
     /// assert_eq!(gram.raw(), "abc de".as_bytes());
@@ -44,11 +53,12 @@ impl<'a> Gram<'a> {
     ///
     /// assert_eq!(gram.pop_token(), None);
     /// ```
+    #[inline(always)]
     pub fn pop_token(&self) -> Option<(Self, Self)> {
         let data = self.data;
         data.iter()
             .rev()
-            .position(|&x| x == GRAM_SEPARATOR)
+            .position(|&x| x == TOKEN_SEPARATOR)
             .map(|i| {
                 let pos = data.len() - i;
                 let pfx = &data[..pos - 1];
@@ -57,23 +67,24 @@ impl<'a> Gram<'a> {
             })
     }
 
-    /// Pops the last word.
+    /// Splits the gram into tokens.
     ///
     /// ```
     /// use tongrams::Gram;
     ///
-    /// let words = "abc de f";
-    /// let mut gram = Gram::from_str(words);
+    /// let tokens = "abc de f";
+    /// let mut gram = Gram::from_str(tokens);
     ///
-    /// let words = gram.split_to_tokens();
-    /// assert_eq!(words.len(), 3);
-    /// assert_eq!(words[0].raw(), "abc".as_bytes());
-    /// assert_eq!(words[1].raw(), "de".as_bytes());
-    /// assert_eq!(words[2].raw(), "f".as_bytes());
+    /// let tokens = gram.split_to_tokens();
+    /// assert_eq!(tokens.len(), 3);
+    /// assert_eq!(tokens[0].raw(), "abc".as_bytes());
+    /// assert_eq!(tokens[1].raw(), "de".as_bytes());
+    /// assert_eq!(tokens[2].raw(), "f".as_bytes());
     /// ```
+    #[inline(always)]
     pub fn split_to_tokens(&self) -> Vec<Self> {
         self.data
-            .split(|&b| b == GRAM_SEPARATOR)
+            .split(|&b| b == TOKEN_SEPARATOR)
             .map(|data| Self { data })
             .collect()
     }

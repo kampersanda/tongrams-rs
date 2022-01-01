@@ -7,6 +7,7 @@ use yada::{builder::DoubleArrayBuilder, DoubleArray};
 use crate::vocabulary::Vocabulary;
 use crate::Gram;
 
+/// Compact double-array implementation of [`Vocabulary`].
 #[derive(Default, Debug)]
 pub struct DoubleArrayVocabulary {
     data: Vec<u8>,
@@ -17,16 +18,16 @@ impl Vocabulary for DoubleArrayVocabulary {
         Box::new(Self { data: Vec::new() })
     }
 
-    fn build(grams: &[Gram]) -> Result<Box<Self>> {
-        if (grams.len() >> 31) != 0 {
+    fn build(tokens: &[Gram]) -> Result<Box<Self>> {
+        if (tokens.len() >> 31) != 0 {
             return Err(anyhow!(
-                "The number of grams must be represented in 31 bits."
+                "The number of tokens must be represented in 31 bits."
             ));
         }
 
         let mut keyset = vec![];
-        for (id, gram) in grams.iter().enumerate() {
-            keyset.push((gram.raw(), id as u32));
+        for (id, token) in tokens.iter().enumerate() {
+            keyset.push((token.raw(), id as u32));
         }
         keyset.sort_by(|(g1, _), (g2, _)| g1.cmp(g2));
 
@@ -66,8 +67,9 @@ impl Vocabulary for DoubleArrayVocabulary {
         serde_json::json!({ "data": data })
     }
 
-    fn get(&self, gram: Gram) -> Option<usize> {
+    #[inline(always)]
+    fn get(&self, token: Gram) -> Option<usize> {
         let da = DoubleArray::new(&self.data[..]);
-        da.exact_match_search(gram.raw()).map(|x| x as usize)
+        da.exact_match_search(token.raw()).map(|x| x as usize)
     }
 }

@@ -7,6 +7,7 @@ use crate::handle_bincode_error;
 use crate::vocabulary::Vocabulary;
 use crate::Gram;
 
+/// Simple implementation of [`Vocabulary`] with `HashMap`.
 #[derive(Default, Debug)]
 pub struct SimpleVocabulary {
     map: HashMap<String, usize>,
@@ -19,11 +20,11 @@ impl Vocabulary for SimpleVocabulary {
         })
     }
 
-    fn build(grams: &[Gram]) -> Result<Box<Self>> {
+    fn build(tokens: &[Gram]) -> Result<Box<Self>> {
         let mut map = HashMap::new();
-        for (id, gram) in grams.iter().enumerate() {
-            if let Some(v) = map.insert(gram.to_string(), id) {
-                return Err(anyhow!("Depulicated key: {:?} => {}", gram, v));
+        for (id, token) in tokens.iter().enumerate() {
+            if let Some(v) = map.insert(token.to_string(), id) {
+                return Err(anyhow!("Depulicated key: {:?} => {}", token, v));
             }
         }
         Ok(Box::new(Self { map }))
@@ -56,7 +57,7 @@ impl Vocabulary for SimpleVocabulary {
         serde_json::json!({})
     }
 
-    fn get(&self, gram: Gram) -> Option<usize> {
-        self.map.get(&gram.to_string()).copied()
+    fn get(&self, token: Gram) -> Option<usize> {
+        self.map.get(&token.to_string()).copied()
     }
 }

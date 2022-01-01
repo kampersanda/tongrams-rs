@@ -27,6 +27,7 @@ impl SortedArrayMapper {
         Some(&self.mapped[..tokens.len()])
     }
 
+    #[allow(dead_code)]
     pub const fn get(&self, i: usize) -> usize {
         self.mapped[i]
     }

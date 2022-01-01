@@ -1,5 +1,5 @@
-pub mod builder;
-pub mod lookuper;
+mod builder;
+mod lookuper;
 
 use std::io::{Read, Write};
 use std::path::Path;
@@ -18,11 +18,7 @@ use crate::vocabulary::Vocabulary;
 pub use crate::trie_count_lm::builder::TrieCountLmBuilder;
 pub use crate::trie_count_lm::lookuper::TrieCountLmLookuper;
 
-/// Elias-Fano trie for indexing massive *N*-grams with their frequency counts.
-///
-/// This is a Rust port of [`trie_count_lm.hpp`](https://github.com/jermp/tongrams/blob/master/include/trie_count_lm.hpp).
-/// As with the original implementation, the data structure can be built from *N*-gram counts files
-/// following the [Google format](http://storage.googleapis.com/books/ngrams/books/datasetsv2.html).
+/// Elias-Fano trie for indexing *N*-grams with their frequency counts.
 #[derive(Default, Debug)]
 pub struct TrieCountLm<T, V, A>
 where

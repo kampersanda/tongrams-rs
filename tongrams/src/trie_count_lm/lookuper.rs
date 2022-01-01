@@ -5,6 +5,7 @@ use crate::trie_count_lm::TrieCountLm;
 use crate::vocabulary::Vocabulary;
 use crate::Gram;
 
+/// Lookuper for [`TrieCountLm`].
 pub struct TrieCountLmLookuper<'a, T, V, A>
 where
     T: TrieArray,
@@ -21,6 +22,7 @@ where
     V: Vocabulary,
     A: RankArray,
 {
+    /// Creates [`TrieCountLmLookuper`] from [`TrieCountLm`].
     pub fn new(trie: &'a TrieCountLm<T, V, A>) -> TrieCountLmLookuper<'a, T, V, A> {
         TrieCountLmLookuper {
             trie,
@@ -28,6 +30,7 @@ where
         }
     }
 
+    /// Looks up a gram, returning the count.
     pub fn run(&mut self, gram: Gram) -> Option<usize> {
         if let Some(token_ids) = self.mapper.map_query(gram, &self.trie.vocab) {
             let order = token_ids.len() - 1;
@@ -46,6 +49,7 @@ where
         }
     }
 
+    /// Looks up a gram in `&str`, returning the count.
     pub fn with_str(&mut self, gram: &str) -> Option<usize> {
         self.run(Gram::from_str(gram))
     }
