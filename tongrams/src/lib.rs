@@ -6,6 +6,7 @@ pub mod rank_array;
 pub mod record;
 pub mod trie_array;
 pub mod trie_count_lm;
+pub mod util;
 pub mod vocabulary;
 
 pub const MAX_ORDER: usize = 8;

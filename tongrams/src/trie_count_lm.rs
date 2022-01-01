@@ -2,7 +2,7 @@ pub mod builder;
 pub mod lookuper;
 
 use std::io::{Read, Write};
-use std::path::PathBuf;
+use std::path::Path;
 
 use anyhow::Result;
 use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
@@ -42,7 +42,10 @@ where
     A: RankArray,
 {
     /// Builds the index from *N*-gram counts files in a plain text format.
-    pub fn from_files(filepaths: &[PathBuf]) -> Result<Self> {
+    pub fn from_files<P>(filepaths: &[P]) -> Result<Self>
+    where
+        P: AsRef<Path>,
+    {
         let mut loaders = Vec::with_capacity(filepaths.len());
         for filepath in filepaths {
             let filepath = filepath.clone();
@@ -53,7 +56,10 @@ where
     }
 
     /// Builds the index from *N*-gram counts files in a gzip compressed format .
-    pub fn from_gz_files(filepaths: &[PathBuf]) -> Result<Self> {
+    pub fn from_gz_files<P>(filepaths: &[P]) -> Result<Self>
+    where
+        P: AsRef<Path>,
+    {
         let mut loaders = Vec::with_capacity(filepaths.len());
         for filepath in filepaths {
             let filepath = filepath.clone();
@@ -64,7 +70,10 @@ where
     }
 
     /// Builds the index from *N*-gram counts files in a deflate compressed format .
-    pub fn from_deflate_files(filepaths: &[PathBuf]) -> Result<Self> {
+    pub fn from_deflate_files<P>(filepaths: &[P]) -> Result<Self>
+    where
+        P: AsRef<Path>,
+    {
         let mut loaders = Vec::with_capacity(filepaths.len());
         for filepath in filepaths {
             let filepath = filepath.clone();
@@ -75,7 +84,10 @@ where
     }
 
     /// Builds the index from *N*-gram counts files in a zlib compressed format .
-    pub fn from_zlib_files(filepaths: &[PathBuf]) -> Result<Self> {
+    pub fn from_zlib_files<P>(filepaths: &[P]) -> Result<Self>
+    where
+        P: AsRef<Path>,
+    {
         let mut loaders = Vec::with_capacity(filepaths.len());
         for filepath in filepaths {
             let filepath = filepath.clone();

@@ -7,7 +7,7 @@ use structopt::StructOpt;
 use tongrams::EliasFanoTrieCountLm;
 
 #[derive(StructOpt, Debug)]
-#[structopt(name = "predict", about = "A program to build and write the index.")]
+#[structopt(name = "index", about = "A program to build and write the index.")]
 struct Opt {
     #[structopt(short = "i")]
     grams_dirpath: PathBuf,
