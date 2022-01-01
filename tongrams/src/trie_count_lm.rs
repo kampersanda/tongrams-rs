@@ -1,20 +1,21 @@
 pub mod builder;
 pub mod lookuper;
 
-use std::fs::File;
 use std::io::{Read, Write};
 use std::path::PathBuf;
 
-use anyhow::{anyhow, Result};
+use anyhow::Result;
 use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
 
-use crate::loader::{GramsFileLoader, GramsLoader, GramsTextLoader};
+use crate::loader::{
+    GramsDeflateFileLoader, GramsFileLoader, GramsGzFileLoader, GramsLoader, GramsTextLoader,
+    GramsZlibFileLoader,
+};
 use crate::rank_array::RankArray;
 use crate::trie_array::TrieArray;
 use crate::trie_count_lm::builder::TrieCountLmBuilder;
 use crate::trie_count_lm::lookuper::TrieCountLmLookuper;
 use crate::vocabulary::Vocabulary;
-use crate::MAX_ORDER;
 
 /// Elias-Fano trie for indexing massive *N*-grams with their frequency counts.
 ///
@@ -40,39 +41,55 @@ where
     V: Vocabulary,
     A: RankArray,
 {
-    /// Builds the index from *N*-gram counts files.
-    ///
-    /// # Notes
-    ///
-    /// Each file must not be in a compressed format.
+    /// Builds the index from *N*-gram counts files in a plain text format.
     pub fn from_files(filepaths: &[PathBuf]) -> Result<Self> {
-        if MAX_ORDER < filepaths.len() {
-            return Err(anyhow!(
-                "Number of files must be no more than {}",
-                MAX_ORDER
-            ));
-        }
         let mut loaders = Vec::with_capacity(filepaths.len());
         for filepath in filepaths {
             let filepath = filepath.clone();
-            let loader: Box<dyn GramsLoader<File>> = Box::new(GramsFileLoader::new(filepath));
+            let loader: Box<dyn GramsLoader<_>> = Box::new(GramsFileLoader::new(filepath));
             loaders.push(loader);
         }
         TrieCountLmBuilder::new(loaders)?.build()
     }
 
-    /// Builds the index from *N*-gram counts raw texts (for debug).
-    pub fn from_texts(texts: Vec<&'static str>) -> Result<Self> {
-        if MAX_ORDER < texts.len() {
-            return Err(anyhow!(
-                "Number of texts must be no more than {}",
-                MAX_ORDER
-            ));
+    /// Builds the index from *N*-gram counts files in a gzip compressed format .
+    pub fn from_gz_files(filepaths: &[PathBuf]) -> Result<Self> {
+        let mut loaders = Vec::with_capacity(filepaths.len());
+        for filepath in filepaths {
+            let filepath = filepath.clone();
+            let loader: Box<dyn GramsLoader<_>> = Box::new(GramsGzFileLoader::new(filepath));
+            loaders.push(loader);
         }
+        TrieCountLmBuilder::new(loaders)?.build()
+    }
+
+    /// Builds the index from *N*-gram counts files in a deflate compressed format .
+    pub fn from_deflate_files(filepaths: &[PathBuf]) -> Result<Self> {
+        let mut loaders = Vec::with_capacity(filepaths.len());
+        for filepath in filepaths {
+            let filepath = filepath.clone();
+            let loader: Box<dyn GramsLoader<_>> = Box::new(GramsDeflateFileLoader::new(filepath));
+            loaders.push(loader);
+        }
+        TrieCountLmBuilder::new(loaders)?.build()
+    }
+
+    /// Builds the index from *N*-gram counts files in a zlib compressed format .
+    pub fn from_zlib_files(filepaths: &[PathBuf]) -> Result<Self> {
+        let mut loaders = Vec::with_capacity(filepaths.len());
+        for filepath in filepaths {
+            let filepath = filepath.clone();
+            let loader: Box<dyn GramsLoader<_>> = Box::new(GramsZlibFileLoader::new(filepath));
+            loaders.push(loader);
+        }
+        TrieCountLmBuilder::new(loaders)?.build()
+    }
+
+    /// Builds the index from *N*-gram counts of raw texts (for debug).
+    pub fn from_texts(texts: Vec<&'static str>) -> Result<Self> {
         let mut loaders = Vec::with_capacity(texts.len());
         for text in texts {
-            let loader: Box<dyn GramsLoader<&[u8]>> =
-                Box::new(GramsTextLoader::new(text.as_bytes()));
+            let loader: Box<dyn GramsLoader<_>> = Box::new(GramsTextLoader::new(text.as_bytes()));
             loaders.push(loader);
         }
         TrieCountLmBuilder::new(loaders)?.build()

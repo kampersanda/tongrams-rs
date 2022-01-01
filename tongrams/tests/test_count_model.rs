@@ -1,15 +1,15 @@
 use std::path::PathBuf;
 use std::str::FromStr;
 
-use tongrams::loader::{GramsFileLoader, GramsLoader};
+use tongrams::loader::{GramsGzFileLoader, GramsLoader};
 use tongrams::EliasFanoTrieCountLm;
 
 const TEST_FILENAMES: [&str; 5] = [
-    "../test_data/1-grams.sorted",
-    "../test_data/2-grams.sorted",
-    "../test_data/3-grams.sorted",
-    "../test_data/4-grams.sorted",
-    "../test_data/5-grams.sorted",
+    "../test_data/1-grams.sorted.gz",
+    "../test_data/2-grams.sorted.gz",
+    "../test_data/3-grams.sorted.gz",
+    "../test_data/4-grams.sorted.gz",
+    "../test_data/5-grams.sorted.gz",
 ];
 
 const NUM_GRAMS: [usize; 5] = [8761, 38900, 61516, 70186, 73187];
@@ -17,7 +17,7 @@ const NUM_GRAMS: [usize; 5] = [8761, 38900, 61516, 70186, 73187];
 #[test]
 fn test_parser() {
     for (&filename, &num_grams) in TEST_FILENAMES.iter().zip(NUM_GRAMS.iter()) {
-        let loader = GramsFileLoader::new(PathBuf::from_str(filename).unwrap());
+        let loader = GramsGzFileLoader::new(PathBuf::from_str(filename).unwrap());
         let parser = loader.parser().unwrap();
         assert_eq!(parser.num_grams(), num_grams);
     }
@@ -29,12 +29,12 @@ fn test_lookup() {
         .iter()
         .map(|f| PathBuf::from_str(f).unwrap())
         .collect();
-    let lm = EliasFanoTrieCountLm::from_files(&filepaths).unwrap();
+    let lm = EliasFanoTrieCountLm::from_gz_files(&filepaths).unwrap();
     assert_eq!(lm.num_orders(), 5);
 
     let mut lookuper = lm.lookuper();
     for filepath in filepaths {
-        let loader = GramsFileLoader::new(filepath);
+        let loader = GramsGzFileLoader::new(filepath);
         let parser = loader.parser().unwrap();
         for rec in parser {
             let rec = rec.unwrap();
@@ -51,7 +51,7 @@ fn test_serialization() {
         .iter()
         .map(|f| PathBuf::from_str(f).unwrap())
         .collect();
-    let lm = EliasFanoTrieCountLm::from_files(&filepaths).unwrap();
+    let lm = EliasFanoTrieCountLm::from_gz_files(&filepaths).unwrap();
 
     let mut data = vec![];
     lm.serialize_into(&mut data).unwrap();

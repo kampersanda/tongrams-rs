@@ -10,7 +10,7 @@ In the current version, `tongrams-rs` implements only the data structure type of
 ## Input data format
 
 As with the original library, the *N*-gram counts files follow the [Google format](http://storage.googleapis.com/books/ngrams/books/datasetsv2.html).
-For the details, please see the [README of tongrams](https://github.com/jermp/tongrams/blob/master/README.md), although the current version does not support `gzip` compressed files.
+For the details, please visit [`tongrams`](https://github.com/jermp/tongrams/blob/master/README.md).
 
 ## Command line tools
 
@@ -24,9 +24,9 @@ For example, the following command builds a language model from *N*-gram counts 
 
 ```
 $ cargo run --release -p tools --bin index -- -n 5 -i test_data -o index.bin
-Input files: ["test_data/1-grams.sorted", "test_data/2-grams.sorted", "test_data/3-grams.sorted", "test_data/4-grams.sorted", "test_data/5-grams.sorted"]
+Input files: ["test_data/1-grams.sorted.gz", "test_data/2-grams.sorted.gz", "test_data/3-grams.sorted.gz", "test_data/4-grams.sorted.gz", "test_data/5-grams.sorted.gz"]
 Counstructing the index...
-Elapsed time: 0.144 [sec]
+Elapsed time: 0.195 [sec]
 252550 grams are stored.
 Writing the index into index.bin...
 Index size: 659366 bytes (0.629 MiB)
@@ -79,7 +79,6 @@ On my laptop PC (i7, 16GB RAM), the average lookup time was 0.79 micro sec per q
 
 ## Todo
 
-- Support `gzip`
 - Add fast elias-fano and pertitioned elias-fano
 - Add minimal perfect hashing
 - Add remapping

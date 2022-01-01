@@ -5,11 +5,11 @@ use std::str::FromStr;
 use std::time::Duration;
 
 const TEST_FILENAMES: [&str; 5] = [
-    "../test_data/1-grams.sorted",
-    "../test_data/2-grams.sorted",
-    "../test_data/3-grams.sorted",
-    "../test_data/4-grams.sorted",
-    "../test_data/5-grams.sorted",
+    "../test_data/1-grams.sorted.gz",
+    "../test_data/2-grams.sorted.gz",
+    "../test_data/3-grams.sorted.gz",
+    "../test_data/4-grams.sorted.gz",
+    "../test_data/5-grams.sorted.gz",
 ];
 
 const TEST_QUERIES: &str = "../test_data/queries.random.5K.txt";
@@ -56,7 +56,7 @@ fn perform_lookup(
     gram_files: &[PathBuf],
     queries: &[tongrams::Gram],
 ) {
-    let lm = tongrams::EliasFanoTrieCountLm::from_files(gram_files).unwrap();
+    let lm = tongrams::EliasFanoTrieCountLm::from_gz_files(gram_files).unwrap();
     group.bench_function("tongrams/EliasFanoTrieCountLm", |b| {
         let mut lookuper = lm.lookuper();
         b.iter(|| {
