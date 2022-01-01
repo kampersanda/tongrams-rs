@@ -44,11 +44,14 @@ fn main() -> Result<()> {
 
     for (i, rec) in records.iter().enumerate() {
         let tokens = rec.gram().split_to_tokens();
-        if let Some(ord) = order {
-            assert_eq!(ord, tokens.len());
-        } else {
-            order = Some(tokens.len());
-        }
+        order.map_or_else(
+            || {
+                order = Some(tokens.len());
+            },
+            |ord| {
+                assert_eq!(ord, tokens.len());
+            },
+        );
 
         let mut mapped_ids = Vec::with_capacity(tokens.len());
         for token in tokens {
