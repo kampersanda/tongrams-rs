@@ -68,14 +68,14 @@ Loading the index from index.bin...
 At the directory `bench`, you can measure lookup times using *N*-gram data in `test_data` with the following command:
 
 ```
-$ cargo bench
+$ RUSTFLAGS="-C target-cpu=native" cargo bench
 count_lookup/tongrams/EliasFanoTrieCountLm                                                                            
-                        time:   [3.9481 ms 3.9540 ms 3.9605 ms]
+                        time:   [3.1818 ms 3.1867 ms 3.1936 ms]
 ```
 
 The reported time is the total elapsed time for looking up 5K random grams.
 
-On my laptop PC (i7, 16GB RAM), the average lookup time was 0.79 micro sec per query, although the original tongram performed lookup in 0.44 micro sec per query.
+On my laptop PC (i7, 16GB RAM), the average lookup time was 0.64 micro sec per query, although the original tongram performed lookup in 0.44 micro sec per query.
 
 ## Todo
 
