@@ -6,8 +6,6 @@ This is a Rust port of [`tongrams`](https://github.com/jermp/tongrams) to index 
  
  - Giulio Ermanno Pibiri and Rossano Venturini, [Handling Massive N-Gram Datasets Efficiently](https://doi.org/10.1145/3302913). *ACM Transactions on Information Systems (TOIS)*, 37.2 (2019): 1-41.
 
-In the current version, `tongrams-rs` implements only the data structure type of `ef_trie_PSEF_ranks_count_lm` whose vocablary is implemented with [yada](https://github.com/takuyaa/yada).
-
 ## Features
 
  - **Compressed language model.** `tongrams-rs` can store large *N*-gram language models in very compressed space. For example, the word *N*-gram datasets (*N*=1..5) in `test_data` are stored in only 2.6 bytes per gram.
