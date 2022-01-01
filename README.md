@@ -139,7 +139,7 @@ At the directory `bench`, you can measure lookup times using *N*-gram data in `t
 
 ```
 $ RUSTFLAGS="-C target-cpu=native" cargo bench
-count_lookup/tongrams/EliasFanoTrieCountLm                                                                            
+count_lookup/tongrams/EliasFanoTrieCountLm
                         time:   [3.1818 ms 3.1867 ms 3.1936 ms]
 ```
 
