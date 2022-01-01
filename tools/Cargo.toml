@@ -9,6 +9,7 @@ edition = "2018"
 tongrams =  { path = "../tongrams" }
 anyhow = "1.0"
 structopt = "0.3"  # MIT or Apache-2.0
+rand = "0.8.4"
 
 [[bin]]
 name = "index"
@@ -25,3 +26,7 @@ path = "src/stats.rs"
 [[bin]]
 name = "sort_grams"
 path = "src/sort_grams.rs"
+
+[[bin]]
+name = "make_noexist_queries"
+path = "src/make_noexist_queries.rs"

@@ -1,3 +1,5 @@
+use std::fs::File;
+use std::io::{prelude::*, BufReader};
 use std::path::PathBuf;
 use std::str::FromStr;
 
@@ -12,7 +14,17 @@ const TEST_FILENAMES: [&str; 5] = [
     "../test_data/5-grams.sorted.gz",
 ];
 
+const NOEXIST_FILENAME: &str = "../test_data/queries.noexist.5K.txt";
+
 const NUM_GRAMS: [usize; 5] = [8761, 38900, 61516, 70186, 73187];
+
+fn load_noexist_queries() -> Vec<String> {
+    let file = File::open(NOEXIST_FILENAME).expect("No such file");
+    let buf = BufReader::new(file);
+    buf.lines()
+        .map(|l| l.expect("Could not parse line"))
+        .collect()
+}
 
 #[test]
 fn test_parser() {
@@ -37,8 +49,18 @@ fn test_lookup() {
             assert_eq!(lookuper.run(rec.gram()), Some(rec.count()));
         }
     }
+}
 
-    // TODO: Add not-found test
+#[test]
+fn test_noexist_lookup() {
+    let lm = EliasFanoTrieCountLm::from_gz_files(&TEST_FILENAMES).unwrap();
+    assert_eq!(lm.num_orders(), 5);
+
+    let mut lookuper = lm.lookuper();
+    let queries = load_noexist_queries();
+    for query in &queries {
+        assert_eq!(lookuper.with_str(query), None);
+    }
 }
 
 #[test]
