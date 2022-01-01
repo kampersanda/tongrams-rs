@@ -16,3 +16,10 @@ Cargo.lock
 
 index.out
 index.bin
+
+# Uncompressed files
+1-grams.sorted
+2-grams.sorted
+3-grams.sorted
+4-grams.sorted
+5-grams.sorted

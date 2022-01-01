@@ -25,16 +25,12 @@ fn test_parser() {
 
 #[test]
 fn test_lookup() {
-    let filepaths: Vec<PathBuf> = TEST_FILENAMES
-        .iter()
-        .map(|f| PathBuf::from_str(f).unwrap())
-        .collect();
-    let lm = EliasFanoTrieCountLm::from_gz_files(&filepaths).unwrap();
+    let lm = EliasFanoTrieCountLm::from_gz_files(&TEST_FILENAMES).unwrap();
     assert_eq!(lm.num_orders(), 5);
 
     let mut lookuper = lm.lookuper();
-    for filepath in filepaths {
-        let loader = GramsGzFileLoader::new(filepath);
+    for filename in TEST_FILENAMES {
+        let loader = GramsGzFileLoader::new(filename);
         let parser = loader.parser().unwrap();
         for rec in parser {
             let rec = rec.unwrap();
@@ -47,11 +43,7 @@ fn test_lookup() {
 
 #[test]
 fn test_serialization() {
-    let filepaths: Vec<PathBuf> = TEST_FILENAMES
-        .iter()
-        .map(|f| PathBuf::from_str(f).unwrap())
-        .collect();
-    let lm = EliasFanoTrieCountLm::from_gz_files(&filepaths).unwrap();
+    let lm = EliasFanoTrieCountLm::from_gz_files(&TEST_FILENAMES).unwrap();
 
     let mut data = vec![];
     lm.serialize_into(&mut data).unwrap();
