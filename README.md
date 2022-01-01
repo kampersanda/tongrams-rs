@@ -7,6 +7,14 @@ This is a Rust port of [`tongrams`](https://github.com/jermp/tongrams) to index 
 
 In the current version, `tongrams-rs` implements only the data structure type of `ef_trie_PSEF_ranks_count_lm` whose vocablary is implemented with [yada](https://github.com/takuyaa/yada).
 
+## Features
+
+ - **Compressed language model.** `tongrams-rs` can store large *N*-gram language models in very compressed space. For example, the word *N*-gram datasets (*N*=1..5) in `test_data` are stored in only 2.6 bytes per gram.
+  
+ - **Time and memory efficiency.** `tongrams-rs` employs *Elias-Fano Trie*, which cleverly encodes a trie data structure consisting of *N*-grams through *Elias-Fano codes*, enabling fast lookups in compressed space.
+  
+ - **Pure Rust.** `tongrams-rs` is written only in Rust and can be easily pluged into your Rust codes.
+
 ## Input data format
 
 As with the original library, the *N*-gram counts files follow the [Google format](http://storage.googleapis.com/books/ngrams/books/datasetsv2.html).
@@ -74,8 +82,8 @@ count_lookup/tongrams/EliasFanoTrieCountLm
 ```
 
 The reported time is the total elapsed time for looking up 5K random grams.
-
-On my laptop PC (i7, 16GB RAM), the average lookup time was 0.64 micro sec per query, although the original tongram performed lookup in 0.44 micro sec per query.
+The above result was actually obtained on my laptop PC (Intel i7, 16GB RAM),
+i.e., `EliasFanoTrieCountLm` can look up a gram in 0.64 micro sec on average.
 
 ## Todo
 
@@ -86,3 +94,6 @@ On my laptop PC (i7, 16GB RAM), the average lookup time was 0.64 micro sec per q
 - Make `sucds::EliasFano` faster
 - Use secondary memory for massive files
 
+## Licensing
+
+This library is free software provided under MIT.
