@@ -3,6 +3,7 @@
 `tongrams` is a crate to index and query large language models in compressed space, in which the data structures are presented in the following papers:
 
  - Giulio Ermanno Pibiri and Rossano Venturini, [Efficient Data Structures for Massive N-Gram Datasets](https://doi.org/10.1145/3077136.3080798). In *Proceedings of the 40th ACM Conference on Research and Development in Information Retrieval (SIGIR 2017)*, pp. 615-624.
+ 
  - Giulio Ermanno Pibiri and Rossano Venturini, [Handling Massive N-Gram Datasets Efficiently](https://doi.org/10.1145/3302913). *ACM Transactions on Information Systems (TOIS)*, 37.2 (2019): 1-41.
 
 This is a Rust port of [`tongrams`](https://github.com/jermp/tongrams) C++ library.
