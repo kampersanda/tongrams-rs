@@ -21,3 +21,7 @@ path = "src/lookup.rs"
 [[bin]]
 name = "stats"
 path = "src/stats.rs"
+
+[[bin]]
+name = "sort_grams"
+path = "src/sort_grams.rs"

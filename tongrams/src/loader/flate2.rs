@@ -1,6 +1,6 @@
 use std::fs::File;
 use std::io::BufReader;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use anyhow::Result;
 use flate2::read::{DeflateDecoder, GzDecoder, ZlibDecoder};
@@ -13,8 +13,13 @@ pub struct GramsGzFileLoader {
 }
 
 impl GramsGzFileLoader {
-    pub const fn new(filepath: PathBuf) -> Self {
-        Self { filepath }
+    pub fn new<P>(filepath: P) -> Self
+    where
+        P: AsRef<Path>,
+    {
+        Self {
+            filepath: PathBuf::from(filepath.as_ref()),
+        }
     }
 }
 
@@ -30,8 +35,13 @@ pub struct GramsDeflateFileLoader {
 }
 
 impl GramsDeflateFileLoader {
-    pub const fn new(filepath: PathBuf) -> Self {
-        Self { filepath }
+    pub fn new<P>(filepath: P) -> Self
+    where
+        P: AsRef<Path>,
+    {
+        Self {
+            filepath: PathBuf::from(filepath.as_ref()),
+        }
     }
 }
 
@@ -47,8 +57,13 @@ pub struct GramsZlibFileLoader {
 }
 
 impl GramsZlibFileLoader {
-    pub const fn new(filepath: PathBuf) -> Self {
-        Self { filepath }
+    pub fn new<P>(filepath: P) -> Self
+    where
+        P: AsRef<Path>,
+    {
+        Self {
+            filepath: PathBuf::from(filepath.as_ref()),
+        }
     }
 }
 
