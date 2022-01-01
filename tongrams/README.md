@@ -8,6 +8,12 @@
 
 This is a Rust port of [`tongrams`](https://github.com/jermp/tongrams) C++ library.
 
+## What can do
+
+ - Store *N*-gram language models with frequency counts.
+
+ - Look up *N*-grams to get the frequency  counts.
+
 ## Features
 
  - **Compressed language model.** `tongrams-rs` can store large *N*-gram language models in very compressed space. For example, the word *N*-gram datasets (*N*=1..5) in `test_data` are stored in only 2.6 bytes per gram.
