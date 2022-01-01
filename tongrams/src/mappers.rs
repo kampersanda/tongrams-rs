@@ -9,6 +9,7 @@ pub struct SortedArrayMapper {
 }
 
 impl SortedArrayMapper {
+    #[inline(always)]
     pub fn map_query<V>(&mut self, gram: Gram, vocab: &V) -> Option<&[usize]>
     where
         V: Vocabulary,
