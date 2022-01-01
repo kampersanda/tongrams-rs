@@ -48,7 +48,6 @@ where
     {
         let mut loaders = Vec::with_capacity(filepaths.len());
         for filepath in filepaths {
-            let filepath = filepath.clone();
             let loader: Box<dyn GramsLoader<_>> = Box::new(GramsFileLoader::new(filepath));
             loaders.push(loader);
         }
@@ -62,7 +61,6 @@ where
     {
         let mut loaders = Vec::with_capacity(filepaths.len());
         for filepath in filepaths {
-            let filepath = filepath.clone();
             let loader: Box<dyn GramsLoader<_>> = Box::new(GramsGzFileLoader::new(filepath));
             loaders.push(loader);
         }
@@ -76,7 +74,6 @@ where
     {
         let mut loaders = Vec::with_capacity(filepaths.len());
         for filepath in filepaths {
-            let filepath = filepath.clone();
             let loader: Box<dyn GramsLoader<_>> = Box::new(GramsDeflateFileLoader::new(filepath));
             loaders.push(loader);
         }
@@ -90,7 +87,6 @@ where
     {
         let mut loaders = Vec::with_capacity(filepaths.len());
         for filepath in filepaths {
-            let filepath = filepath.clone();
             let loader: Box<dyn GramsLoader<_>> = Box::new(GramsZlibFileLoader::new(filepath));
             loaders.push(loader);
         }
