@@ -1,5 +1,5 @@
-pub mod ef;
-pub mod simple;
+mod ef;
+mod simple;
 
 use std::io::{Read, Write};
 

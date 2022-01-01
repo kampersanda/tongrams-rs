@@ -3,9 +3,16 @@
 This is a Rust port of [`tongrams`](https://github.com/jermp/tongrams) to index and query large language models in compressed space, in which the data structures are presented in the following papers:
 
  - Giulio Ermanno Pibiri and Rossano Venturini, [Efficient Data Structures for Massive N-Gram Datasets](https://doi.org/10.1145/3077136.3080798). In *Proceedings of the 40th ACM Conference on Research and Development in Information Retrieval (SIGIR 2017)*, pp. 615-624.
+ 
  - Giulio Ermanno Pibiri and Rossano Venturini, [Handling Massive N-Gram Datasets Efficiently](https://doi.org/10.1145/3302913). *ACM Transactions on Information Systems (TOIS)*, 37.2 (2019): 1-41.
 
-In the current version, `tongrams-rs` implements only the data structure type of `ef_trie_PSEF_ranks_count_lm` whose vocablary is implemented with [yada](https://github.com/takuyaa/yada).
+## Features
+
+ - **Compressed language model.** `tongrams-rs` can store large *N*-gram language models in very compressed space. For example, the word *N*-gram datasets (*N*=1..5) in `test_data` are stored in only 2.6 bytes per gram.
+  
+ - **Time and memory efficiency.** `tongrams-rs` employs *Elias-Fano Trie*, which cleverly encodes a trie data structure consisting of *N*-grams through *Elias-Fano codes*, enabling fast lookups in compressed space.
+  
+ - **Pure Rust.** `tongrams-rs` is written only in Rust and can be easily pluged into your Rust codes.
 
 ## Input data format
 
@@ -14,11 +21,68 @@ For the details, please visit [`tongrams`](https://github.com/jermp/tongrams/blo
 
 ## Command line tools
 
-`tools` provides some command line tools. In the following, the example usages are described using *N*-gram data in `test_data` copied from [`tongrams`](https://github.com/jermp/tongrams).
+`tools` provides some command line tools to enjoy this library. In the following, the example usages are presented using *N*-gram counts files in `test_data` copied from [`tongrams`](https://github.com/jermp/tongrams).
 
-### Indexing
+### 1. Sorting
 
-The executable `index` builds a language model from *N*-gram counts files and writes it into a file.
+**NOTE: The current implementation of `sort_grams` consumes a lot amount of memory. When you apply massive datasets, please use the executable `sort_grams` in the original [`tongrams`](https://github.com/jermp/tongrams), which will generate the equivalent dataset.**
+
+To build the trie index, you need to sort your *N*-gram counts files.
+First of all, prepare unigram counts files sorted by the counts for making the resulting index smaller, as
+
+```
+8761
+the	3681
+is	1869
+a	1778
+of	1672
+to	1638
+and	1202
+...
+```
+
+By using the unigram file as a vocabulary, the executable `sort_grams` sorts a *N*-gram counts file.
+
+Here, we assume to sort an unsorted bigram counts file, as
+
+```
+38900
+ways than	1
+may come	1
+frequent causes	1
+way has	1
+in which	14
+...
+```
+
+Let the above unigram and unsorted bigram files in a gzip format be `test_data/1-grams.sorted.gz` and `test_data/2-grams.gz`, respectively.
+You can sort the bigram file and write `test_data/2-grams.sorted` with the following command:
+
+```
+$ cargo run --release -p tools --bin sort_grams -- -i test_data/2-grams.gz -v test_data/1-grams.sorted.gz -o test_data/2-grams.sorted
+WARNING: The current implementation will use a lot of memory.
+Loading the vocabulary: "test_data/1-grams.sorted.gz"
+Loading the records: "test_data/2-grams.gz"
+Sorting the records
+Writing the index into "test_data/2-grams.sorted"
+```
+
+The resulting `test_data/2-grams.sorted` will be
+
+```
+38900
+the //	1
+the function	94
+the if	3
+the code	126
+the compiler	117
+...
+```
+
+
+### 2. Indexing
+
+The executable `index` builds a language model from (sorted) *N*-gram counts files and writes it into a binary file.
 
 For example, the following command builds a language model from *N*-gram counts files placed in `test_data` and writes it into `index.bin`. The specified files must be ordered as 1-gram, 2-gram, and so on.
 
@@ -35,7 +99,7 @@ Bytes per gram: 2.611 bytes
 
 As the standard output shows, the model file takes only 2.6 bytes per gram.
 
-### Lookup
+### 3. Lookup
 
 The executable `lookup` provides a demo to lookup *N*-grams, as follows.
 
@@ -53,7 +117,7 @@ Not found
 Good bye!
 ```
 
-### Memory statistics
+### 4. Memory statistics
 
 The executable `stats` shows the breakdowns of memory usages for each component.
 
@@ -74,8 +138,8 @@ count_lookup/tongrams/EliasFanoTrieCountLm
 ```
 
 The reported time is the total elapsed time for looking up 5K random grams.
-
-On my laptop PC (i7, 16GB RAM), the average lookup time was 0.64 micro sec per query, although the original tongram performed lookup in 0.44 micro sec per query.
+The above result was actually obtained on my laptop PC (Intel i7, 16GB RAM),
+i.e., `EliasFanoTrieCountLm` can look up a gram in 0.64 micro sec on average.
 
 ## Todo
 
@@ -86,3 +150,6 @@ On my laptop PC (i7, 16GB RAM), the average lookup time was 0.64 micro sec per q
 - Make `sucds::EliasFano` faster
 - Use secondary memory for massive files
 
+## Licensing
+
+This library is free software provided under MIT.

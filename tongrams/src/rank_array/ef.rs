@@ -40,6 +40,7 @@ impl RankArray for EliasFanoRankArray {
         serde_json::json!({ "count_ranks": count_ranks })
     }
 
+    #[inline(always)]
     fn get(&self, i: usize) -> usize {
         self.count_ranks.get(i)
     }

@@ -11,6 +11,7 @@ use crate::Gram;
 use crate::TrieCountLm;
 use crate::MAX_ORDER;
 
+/// Builder for [`TrieCountLm`].
 pub struct TrieCountLmBuilder<R, T, V, A>
 where
     R: Read,
@@ -32,6 +33,7 @@ where
     V: Vocabulary,
     A: RankArray,
 {
+    /// Creates [`TrieCountLmBuilder`] from loaders.
     pub fn new(loaders: Vec<Box<dyn GramsLoader<R>>>) -> Result<Self> {
         if MAX_ORDER < loaders.len() {
             return Err(anyhow!("loaders.len() must be no more than {}", MAX_ORDER));
@@ -45,6 +47,7 @@ where
         })
     }
 
+    /// Builds [`TrieCountLm`].
     pub fn build(mut self) -> Result<TrieCountLm<T, V, A>> {
         self.build_counts()?;
         self.build_vocabulary()?;

@@ -4,6 +4,9 @@ use std::io::{BufRead, BufReader, Read};
 use crate::Record;
 use crate::GRAM_COUNT_SEPARATOR;
 
+/// Parser for a *N*-gram counts file.
+/// It assumes the input format of the
+/// [Google format](http://storage.googleapis.com/books/ngrams/books/datasetsv2.html).
 pub struct GramsParser<R>
 where
     R: Read,
@@ -17,6 +20,7 @@ impl<R> GramsParser<R>
 where
     R: Read,
 {
+    /// Creates [`GramsParser`] from `BufReader` of a *N*-gram counts file.
     pub fn new(mut reader: BufReader<R>) -> Result<Self> {
         let num_grams = {
             let mut header = String::new();
@@ -30,6 +34,7 @@ where
         })
     }
 
+    /// Gets the number of input grams.
     pub fn num_grams(&self) -> usize {
         self.num_grams
     }

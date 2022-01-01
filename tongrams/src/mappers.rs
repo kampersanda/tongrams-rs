@@ -9,6 +9,7 @@ pub struct SortedArrayMapper {
 }
 
 impl SortedArrayMapper {
+    #[inline(always)]
     pub fn map_query<V>(&mut self, gram: Gram, vocab: &V) -> Option<&[usize]>
     where
         V: Vocabulary,
@@ -27,6 +28,7 @@ impl SortedArrayMapper {
         Some(&self.mapped[..tokens.len()])
     }
 
+    #[allow(dead_code)]
     pub const fn get(&self, i: usize) -> usize {
         self.mapped[i]
     }

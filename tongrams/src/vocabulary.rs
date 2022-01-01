@@ -1,5 +1,5 @@
-pub mod simple;
-pub mod yada;
+mod simple;
+mod yada;
 
 use std::io::{Read, Write};
 
@@ -8,20 +8,28 @@ use anyhow::Result;
 pub use crate::vocabulary::{simple::SimpleVocabulary, yada::DoubleArrayVocabulary};
 use crate::Gram;
 
+/// Trait for mapping tokens to unique identifiers.
 pub trait Vocabulary {
+    /// Creates an empty [`Vocabulary`].
     fn new() -> Box<Self>;
 
-    fn build(grams: &[Gram]) -> Result<Box<Self>>;
+    /// Builds a [`Vocabulary`] from a sequence of tokens.
+    fn build(tokens: &[Gram]) -> Result<Box<Self>>;
 
+    /// Serializes the index into the writer.
     fn serialize_into<W: Write>(&self, writer: W) -> Result<usize>;
 
+    /// Deserializes the index from the reader.
     fn deserialize_from<R: Read>(reader: R) -> Result<Box<Self>>;
 
+    /// Gets the number of bytes to serialize the index.
     fn size_in_bytes(&self) -> usize;
 
+    /// Gets breakdowns of memory usages for components.
     fn memory_statistics(&self) -> serde_json::Value;
 
-    fn get(&self, gram: Gram) -> Option<usize>;
+    /// Looks up a token.
+    fn get(&self, token: Gram) -> Option<usize>;
 }
 
 #[cfg(test)]

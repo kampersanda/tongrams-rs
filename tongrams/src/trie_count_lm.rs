@@ -1,5 +1,5 @@
-pub mod builder;
-pub mod lookuper;
+mod builder;
+mod lookuper;
 
 use std::io::{Read, Write};
 use std::path::Path;
@@ -13,15 +13,12 @@ use crate::loader::{
 };
 use crate::rank_array::RankArray;
 use crate::trie_array::TrieArray;
-use crate::trie_count_lm::builder::TrieCountLmBuilder;
-use crate::trie_count_lm::lookuper::TrieCountLmLookuper;
 use crate::vocabulary::Vocabulary;
 
-/// Elias-Fano trie for indexing massive *N*-grams with their frequency counts.
-///
-/// This is a Rust port of [`trie_count_lm.hpp`](https://github.com/jermp/tongrams/blob/master/include/trie_count_lm.hpp).
-/// As with the original implementation, the data structure can be built from *N*-gram counts files
-/// following the [Google format](http://storage.googleapis.com/books/ngrams/books/datasetsv2.html).
+pub use crate::trie_count_lm::builder::TrieCountLmBuilder;
+pub use crate::trie_count_lm::lookuper::TrieCountLmLookuper;
+
+/// Elias-Fano trie for indexing *N*-grams with their frequency counts.
 #[derive(Default, Debug)]
 pub struct TrieCountLm<T, V, A>
 where
@@ -94,6 +91,7 @@ where
     }
 
     /// Builds the index from *N*-gram counts of raw texts (for debug).
+    #[doc(hidden)]
     pub fn from_texts(texts: Vec<&'static str>) -> Result<Self> {
         let mut loaders = Vec::with_capacity(texts.len());
         for text in texts {
