@@ -13,9 +13,10 @@ use crate::loader::{
 };
 use crate::rank_array::RankArray;
 use crate::trie_array::TrieArray;
-use crate::trie_count_lm::builder::TrieCountLmBuilder;
-use crate::trie_count_lm::lookuper::TrieCountLmLookuper;
 use crate::vocabulary::Vocabulary;
+
+pub use crate::trie_count_lm::builder::TrieCountLmBuilder;
+pub use crate::trie_count_lm::lookuper::TrieCountLmLookuper;
 
 /// Elias-Fano trie for indexing massive *N*-grams with their frequency counts.
 ///
@@ -94,6 +95,7 @@ where
     }
 
     /// Builds the index from *N*-gram counts of raw texts (for debug).
+    #[doc(hidden)]
     pub fn from_texts(texts: Vec<&'static str>) -> Result<Self> {
         let mut loaders = Vec::with_capacity(texts.len());
         for text in texts {
