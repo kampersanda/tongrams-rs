@@ -75,6 +75,7 @@ impl TrieArray for EliasFanoTrieArray {
     }
 
     /// Searches for an element within a given range, returning its index.
+    /// TODO: Make faster
     fn find_token(&self, pos: usize, id: usize) -> Option<usize> {
         let (b, e) = self.range(pos);
         let base = if b == 0 {
@@ -82,11 +83,12 @@ impl TrieArray for EliasFanoTrieArray {
         } else {
             self.token_ids.select(b - 1)
         };
-        // TODO: Make faster
         for i in b..e {
             let token_id = self.token_ids.select(i) - base;
             if token_id == id {
                 return Some(i);
+            } else if token_id > id {
+                break;
             }
         }
         None
