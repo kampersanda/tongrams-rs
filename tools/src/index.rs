@@ -28,14 +28,14 @@ fn main() -> Result<()> {
     let mut input_files = vec![];
     for i in 1..=order {
         let mut input_file = input_dir.clone();
-        input_file.push(format!("{}-grams.sorted", i));
+        input_file.push(format!("{}-grams.sorted.gz", i));
         input_files.push(input_file);
     }
     println!("Input files: {:?}", input_files);
 
     println!("Counstructing the index...");
     let start = std::time::Instant::now();
-    let lm = EliasFanoTrieCountLm::from_files(&input_files)?;
+    let lm = EliasFanoTrieCountLm::from_gz_files(&input_files)?;
     let duration = start.elapsed();
     println!("Elapsed time: {:.3} [sec]", duration.as_secs_f64());
 
