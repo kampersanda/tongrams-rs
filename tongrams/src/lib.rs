@@ -18,6 +18,8 @@
 //!
 //! ## Examples
 //!
+//! The following code uses datasets in [`test_data`](https://github.com/kampersanda/tongrams-rs/tree/main/test_data) at the root of this repository.
+//!
 //! ```
 //! use tongrams::EliasFanoTrieCountLm;
 //!
