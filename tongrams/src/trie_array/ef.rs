@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 use std::io::{Read, Write};
 
 use anyhow::Result;
@@ -85,10 +86,10 @@ impl TrieArray for EliasFanoTrieArray {
         };
         for i in b..e {
             let token_id = self.token_ids.select(i) - base;
-            if token_id == id {
-                return Some(i);
-            } else if token_id > id {
-                break;
+            match token_id.cmp(&id) {
+                Ordering::Equal => return Some(i),
+                Ordering::Greater => break,
+                _ => {}
             }
         }
         None
