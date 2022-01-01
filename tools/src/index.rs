@@ -10,7 +10,10 @@ use tongrams::EliasFanoTrieCountLm;
 #[structopt(name = "predict", about = "A program to build and write the index.")]
 struct Opt {
     #[structopt(short = "i")]
-    gram_files: Vec<PathBuf>,
+    input_dir: PathBuf,
+
+    #[structopt(short = "n")]
+    order: usize,
 
     #[structopt(short = "o")]
     index_file: String,
@@ -18,12 +21,21 @@ struct Opt {
 
 fn main() -> Result<()> {
     let opt = Opt::from_args();
-    let gram_files = opt.gram_files;
+    let order = opt.order;
+    let input_dir = opt.input_dir;
     let index_file = opt.index_file;
+
+    let mut input_files = vec![];
+    for i in 1..=order {
+        let mut input_file = input_dir.clone();
+        input_file.push(format!("{}-grams.sorted", i));
+        input_files.push(input_file);
+    }
+    println!("Input files: {:?}", input_files);
 
     println!("Counstructing the index...");
     let start = std::time::Instant::now();
-    let lm = EliasFanoTrieCountLm::from_files(&gram_files)?;
+    let lm = EliasFanoTrieCountLm::from_files(&input_files)?;
     let duration = start.elapsed();
     println!("Elapsed time: {:.3} [sec]", duration.as_secs_f64());
 
