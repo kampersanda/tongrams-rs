@@ -24,15 +24,21 @@ struct Opt {
 // TODO: Make space-efficient with secondary memory
 
 fn main() -> Result<()> {
+    println!("WARNING: The current implementation will use a lot of memory.");
+
     let opt = Opt::from_args();
     let grams_filepath = opt.grams_filepath;
     let vocab_filepath = opt.vocab_filepath;
     let output_filepath = opt.output_filepath;
 
+    println!("Loading the vocabulary: {:?}", vocab_filepath);
     let vocab = util::build_vocabulary_from_gz(vocab_filepath)?;
+
+    println!("Loading the records: {:?}", grams_filepath);
     let records = util::load_records_from_gz(grams_filepath)?;
     let num_grams = records.len();
 
+    println!("Sorting the records");
     let mut mapped_records = Vec::with_capacity(num_grams);
     let mut order: Option<usize> = None;
 
@@ -53,6 +59,7 @@ fn main() -> Result<()> {
     }
     mapped_records.sort();
 
+    println!("Writing the index into {:?}", output_filepath);
     let mut out_file = File::create(output_filepath)?;
     out_file.write_fmt(format_args!("{}\n", mapped_records.len()))?;
     for (_, i) in mapped_records {
