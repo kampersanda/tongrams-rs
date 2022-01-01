@@ -84,4 +84,5 @@ On my laptop PC (i7, 16GB RAM), the average lookup time was 0.64 micro sec per q
 - Add remapping
 - Support probability scores
 - Make `sucds::EliasFano` faster
+- Use secondary memory for massive files
 
