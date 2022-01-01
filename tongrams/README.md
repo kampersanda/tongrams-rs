@@ -27,6 +27,11 @@ To use `tongrams`, depend on it in your Cargo manifest:
 tongrams = "0.1"
 ```
 
+## Input data format
+
+As with the original library, the *N*-gram counts files follow the [Google format](http://storage.googleapis.com/books/ngrams/books/datasetsv2.html).
+For the details, please visit [`tongrams`](https://github.com/jermp/tongrams/blob/master/README.md).
+
 ## Examples
 
 The following code uses datasets in [`test_data`](https://github.com/kampersanda/tongrams-rs/tree/main/test_data) at the root of this repository.

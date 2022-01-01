@@ -23,11 +23,68 @@ For the details, please visit [`tongrams`](https://github.com/jermp/tongrams/blo
 
 ## Command line tools
 
-`tools` provides some command line tools. In the following, the example usages are described using *N*-gram data in `test_data` copied from [`tongrams`](https://github.com/jermp/tongrams).
+`tools` provides some command line tools to enjoy this library. In the following, the example usages are presented using *N*-gram counts files in `test_data` copied from [`tongrams`](https://github.com/jermp/tongrams).
 
-### Indexing
+### 1. Sorting
 
-The executable `index` builds a language model from *N*-gram counts files and writes it into a file.
+**NOTE: The current implementation of `sort_grams` consumes a lot amount of memory. When you apply massive datasets, please use the executable `sort_grams` in the original [`tongrams`](https://github.com/jermp/tongrams), which will generate the equivalent dataset.**
+
+To build the trie index, you need to sort your *N*-gram counts files.
+First of all, prepare unigram counts files sorted by the counts for making the resulting index smaller, as
+
+```
+8761
+the	3681
+is	1869
+a	1778
+of	1672
+to	1638
+and	1202
+...
+```
+
+By using the unigram file as a vocabulary, the executable `sort_grams` sorts a *N*-gram counts file.
+
+Here, we assume to sort an unsorted bigram counts file, as
+
+```
+38900
+ways than	1
+may come	1
+frequent causes	1
+way has	1
+in which	14
+...
+```
+
+Let the above unigram and unsorted bigram files in a gzip format be `test_data/1-grams.sorted.gz` and `test_data/2-grams.gz`, respectively.
+You can sort the bigram file and write `test_data/2-grams.sorted` with the following command:
+
+```
+$ cargo run --release -p tools --bin sort_grams -- -i test_data/2-grams.gz -v test_data/1-grams.sorted.gz -o test_data/2-grams.sorted
+WARNING: The current implementation will use a lot of memory.
+Loading the vocabulary: "test_data/1-grams.sorted.gz"
+Loading the records: "test_data/2-grams.gz"
+Sorting the records
+Writing the index into "test_data/2-grams.sorted"
+```
+
+The resulting `test_data/2-grams.sorted` will be
+
+```
+38900
+the //	1
+the function	94
+the if	3
+the code	126
+the compiler	117
+...
+```
+
+
+### 2. Indexing
+
+The executable `index` builds a language model from (sorted) *N*-gram counts files and writes it into a binary file.
 
 For example, the following command builds a language model from *N*-gram counts files placed in `test_data` and writes it into `index.bin`. The specified files must be ordered as 1-gram, 2-gram, and so on.
 
@@ -44,7 +101,7 @@ Bytes per gram: 2.611 bytes
 
 As the standard output shows, the model file takes only 2.6 bytes per gram.
 
-### Lookup
+### 3. Lookup
 
 The executable `lookup` provides a demo to lookup *N*-grams, as follows.
 
@@ -62,7 +119,7 @@ Not found
 Good bye!
 ```
 
-### Memory statistics
+### 4. Memory statistics
 
 The executable `stats` shows the breakdowns of memory usages for each component.
 
