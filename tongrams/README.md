@@ -30,7 +30,7 @@ tongrams = "0.1"
 ## Input data format
 
 As with the original library, the *N*-gram counts files follow the [Google format](http://storage.googleapis.com/books/ngrams/books/datasetsv2.html).
-For the details, please see the README at the root of this repository.
+For the details, please see [README](https://github.com/kampersanda/tongrams-rs/blob/main/README.md) of this repository.
 
 ## Examples
 

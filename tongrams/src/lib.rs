@@ -16,6 +16,11 @@
 //!   
 //!  - **Pure Rust.** `tongrams-rs` is written only in Rust and can be easily pluged into your Rust codes.
 //!
+//! ## Input data format
+//!
+//! As with the original library, the *N*-gram counts files follow the [Google format](http://storage.googleapis.com/books/ngrams/books/datasetsv2.html).
+//! For the details, please see [README](https://github.com/kampersanda/tongrams-rs/blob/main/README.md) of this repository.
+//!
 //! ## Examples
 //!
 //! The following code uses datasets in [`test_data`](https://github.com/kampersanda/tongrams-rs/tree/main/test_data) at the root of this repository.
