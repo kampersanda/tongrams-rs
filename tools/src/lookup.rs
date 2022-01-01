@@ -1,5 +1,6 @@
 use std::fs::File;
 use std::io::{stdin, stdout, Write};
+use std::path::PathBuf;
 
 use anyhow::Result;
 use structopt::StructOpt;
@@ -10,15 +11,15 @@ use tongrams::EliasFanoTrieCountLm;
 #[structopt(name = "lookup", about = "A demo program to lookup ngrams.")]
 struct Opt {
     #[structopt(short = "i")]
-    index_file: String,
+    index_filepath: PathBuf,
 }
 
 fn main() -> Result<()> {
     let opt = Opt::from_args();
-    let index_file = opt.index_file;
+    let index_filepath = opt.index_filepath;
 
-    println!("Loading the index from {}...", &index_file);
-    let reader = File::open(&index_file)?;
+    println!("Loading the index from {:?}...", &index_filepath);
+    let reader = File::open(&index_filepath)?;
     let lm = EliasFanoTrieCountLm::deserialize_from(&reader)?;
     let mut lookuper = lm.lookuper();
 

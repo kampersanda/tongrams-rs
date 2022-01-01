@@ -26,9 +26,9 @@ For example, the following command builds a language model from *N*-gram counts 
 $ cargo run --release -p tools --bin index -- -n 5 -i test_data -o index.bin
 Input files: ["test_data/1-grams.sorted.gz", "test_data/2-grams.sorted.gz", "test_data/3-grams.sorted.gz", "test_data/4-grams.sorted.gz", "test_data/5-grams.sorted.gz"]
 Counstructing the index...
-Elapsed time: 0.195 [sec]
+Elapsed time: 0.190 [sec]
 252550 grams are stored.
-Writing the index into index.bin...
+Writing the index into "index.bin"...
 Index size: 659366 bytes (0.629 MiB)
 Bytes per gram: 2.611 bytes
 ```
@@ -41,7 +41,7 @@ The executable `lookup` provides a demo to lookup *N*-grams, as follows.
 
 ```
 $ cargo run --release -p tools --bin lookup -- -i index.bin 
-Loading the index from index.bin...
+Loading the index from "index.bin"...
 Performing the lookup...
 > take advantage
 count = 8
@@ -59,7 +59,7 @@ The executable `stats` shows the breakdowns of memory usages for each component.
 
 ```
 $ cargo run --release -p tools --bin stats -- -i index.bin
-Loading the index from index.bin...
+Loading the index from "index.bin"...
 {"arrays":[{"pointers":5927,"token_ids":55186},{"pointers":19745,"token_ids":92416},{"pointers":25853,"token_ids":107094},{"pointers":28135,"token_ids":111994}],"count_ranks":[{"count_ranks":5350},{"count_ranks":12106},{"count_ranks":13976},{"count_ranks":14582},{"count_ranks":14802}],"counts":[{"count":296},{"count":136},{"count":72},{"count":56},{"count":56}],"vocab":{"data":151560}}
 ```
 

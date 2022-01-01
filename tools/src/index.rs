@@ -10,40 +10,40 @@ use tongrams::EliasFanoTrieCountLm;
 #[structopt(name = "predict", about = "A program to build and write the index.")]
 struct Opt {
     #[structopt(short = "i")]
-    input_dir: PathBuf,
+    grams_dirpath: PathBuf,
 
     #[structopt(short = "n")]
     order: usize,
 
     #[structopt(short = "o")]
-    index_file: String,
+    index_filepath: PathBuf,
 }
 
 fn main() -> Result<()> {
     let opt = Opt::from_args();
     let order = opt.order;
-    let input_dir = opt.input_dir;
-    let index_file = opt.index_file;
+    let grams_dirpath = opt.grams_dirpath;
+    let index_filepath = opt.index_filepath;
 
-    let mut input_files = vec![];
+    let mut grams_filepaths = vec![];
     for i in 1..=order {
-        let mut input_file = input_dir.clone();
-        input_file.push(format!("{}-grams.sorted.gz", i));
-        input_files.push(input_file);
+        let mut grams_filepath = grams_dirpath.clone();
+        grams_filepath.push(format!("{}-grams.sorted.gz", i));
+        grams_filepaths.push(grams_filepath);
     }
-    println!("Input files: {:?}", input_files);
+    println!("Input files: {:?}", grams_filepaths);
 
     println!("Counstructing the index...");
     let start = std::time::Instant::now();
-    let lm = EliasFanoTrieCountLm::from_gz_files(&input_files)?;
+    let lm = EliasFanoTrieCountLm::from_gz_files(&grams_filepaths)?;
     let duration = start.elapsed();
     println!("Elapsed time: {:.3} [sec]", duration.as_secs_f64());
 
     let num_grams = lm.num_grams();
     println!("{} grams are stored.", num_grams);
 
-    println!("Writing the index into {}...", &index_file);
-    let mut writer = File::create(&index_file)?;
+    println!("Writing the index into {:?}...", &index_filepath);
+    let mut writer = File::create(&index_filepath)?;
     let mem = lm.serialize_into(&mut writer)?;
     println!(
         "Index size: {} bytes ({:.3} MiB)",

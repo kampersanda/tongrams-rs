@@ -1,4 +1,5 @@
 use std::fs::File;
+use std::path::PathBuf;
 
 use anyhow::Result;
 use structopt::StructOpt;
@@ -9,15 +10,15 @@ use tongrams::EliasFanoTrieCountLm;
 #[structopt(name = "stats", about = "A program to print memory statistics.")]
 struct Opt {
     #[structopt(short = "i")]
-    index_file: String,
+    index_filepath: PathBuf,
 }
 
 fn main() -> Result<()> {
     let opt = Opt::from_args();
-    let index_file = opt.index_file;
+    let index_filepath = opt.index_filepath;
 
-    eprintln!("Loading the index from {}...", &index_file);
-    let reader = File::open(&index_file)?;
+    eprintln!("Loading the index from {:?}...", &index_filepath);
+    let reader = File::open(&index_filepath)?;
     let lm = EliasFanoTrieCountLm::deserialize_from(&reader)?;
 
     let mem_stats = lm.memory_statistics();
