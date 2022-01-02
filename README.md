@@ -104,7 +104,7 @@ the compiler	117
 
 The executable `index` builds a language model from (sorted) *N*-gram counts files, named `<order>-grams.sorted.gz`, and writes it into a binary file.
 
-For example, the following command builds a language model from *N*-gram counts files (`1 <= N <= 5`) placed in directory `test_data` and writes it into `index.bin`.
+For example, the following command builds a language model from *N*-gram counts files (*N*=1..5) placed in directory `test_data` and writes it into `index.bin`.
 
 ```
 $ cargo run --release -p tools --bin index -- -n 5 -i test_data -o index.bin
