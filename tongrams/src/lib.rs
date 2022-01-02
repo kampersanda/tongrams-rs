@@ -111,6 +111,8 @@ use rank_array::{EliasFanoRankArray, SimpleRankArray};
 use trie_array::{EliasFanoTrieArray, SimpleTrieArray};
 use vocabulary::{DoubleArrayVocabulary, SimpleVocabulary};
 
+pub use loader::GramsFileFormats;
+
 /// Simple implementation of [`TrieCountLm`].
 /// Note that this is for debug, and do NOT use it for storing massive datasets.
 pub type SimpleTrieCountLm = TrieCountLm<SimpleTrieArray, SimpleVocabulary, SimpleRankArray>;
