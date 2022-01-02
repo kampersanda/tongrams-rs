@@ -4,6 +4,7 @@ use anyhow::Result;
 
 use crate::rank_array::RankArray;
 
+/// Simple implementation of [`RankArray`] with `Vec<usize>`.
 #[derive(Default, Debug)]
 pub struct SimpleRankArray {
     count_ranks: Vec<usize>,

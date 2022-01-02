@@ -5,6 +5,7 @@ use anyhow::Result;
 
 use crate::trie_array::TrieArray;
 
+/// Spece-efficient implementation of [`TrieArray`] with Elias-Fano encording.
 #[derive(Default)]
 pub struct EliasFanoTrieArray {
     token_ids: sucds::EliasFano,

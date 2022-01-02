@@ -50,6 +50,18 @@ The file format of *N*-gram counts files is the same as that used in [`tongrams`
 ...
 ```
 
+For example,
+
+```text
+61516
+the // parent	1
+the function is	22
+the function a	4
+the function to	1
+the function and	1
+...
+```
+
 ## Examples
 
 The following code uses datasets in [`test_data`](https://github.com/kampersanda/tongrams-rs/tree/main/test_data) at the root of this repository.
@@ -75,6 +87,12 @@ assert_eq!(lookuper.with_str("vector"), Some(182));
 assert_eq!(lookuper.with_str("in order"), Some(47));
 assert_eq!(lookuper.with_str("the same memory"), Some(8));
 assert_eq!(lookuper.with_str("vector is array"), None);
+
+// Gets the count of a query N-gram formed by a string array.
+assert_eq!(lookuper.with_tokens(&["vector"]), Some(182));
+assert_eq!(lookuper.with_tokens(&["in", "order"]), Some(47));
+assert_eq!(lookuper.with_tokens(&["the", "same", "memory"]), Some(8));
+assert_eq!(lookuper.with_tokens(&["vector", "is", "array"]), None);
 
 // Serializes the index into a writable stream.
 let mut data = vec![];

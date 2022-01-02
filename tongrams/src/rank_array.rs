@@ -8,21 +8,30 @@ use anyhow::Result;
 pub use crate::rank_array::ef::EliasFanoRankArray;
 pub use crate::rank_array::simple::SimpleRankArray;
 
+/// Trait for a data structure for storing count ranks.
 pub trait RankArray {
+    /// Builds a [`RankArray`] from a sequence of count ranks.
     fn build(count_ranks: Vec<usize>) -> Box<Self>;
 
+    /// Serializes the data structure into the writer.
     fn serialize_into<W: Write>(&self, writer: W) -> Result<usize>;
 
+    /// Deserializes the data structure from the reader.
     fn deserialize_from<R: Read>(reader: R) -> Result<Box<Self>>;
 
+    /// Gets the number of bytes to serialize the data structure.
     fn size_in_bytes(&self) -> usize;
 
+    /// Gets breakdowns of memory usages for components.
     fn memory_statistics(&self) -> serde_json::Value;
 
+    /// Gets the `i`-th count rank.
     fn get(&self, i: usize) -> usize;
 
+    /// Gets the number of count ranks stored.
     fn len(&self) -> usize;
 
+    /// Checks if the data structure is empty.
     fn is_empty(&self) -> bool;
 }
 

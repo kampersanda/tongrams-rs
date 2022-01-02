@@ -8,8 +8,11 @@ edition = "2018"
 [dependencies]
 tongrams =  { path = "../tongrams" }
 anyhow = "1.0"
-structopt = "0.3"  # MIT or Apache-2.0
+byteorder = "1.4.3"
+extsort = "0.4.2"
+flate2 = "1.0"
 rand = "0.8.4"
+structopt = "0.3"  # MIT or Apache-2.0
 
 [[bin]]
 name = "index"

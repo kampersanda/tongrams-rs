@@ -14,6 +14,7 @@ use crate::loader::{
 use crate::rank_array::RankArray;
 use crate::trie_array::TrieArray;
 use crate::vocabulary::Vocabulary;
+use crate::GramsFileFormats;
 
 pub use crate::trie_count_lm::builder::TrieCountLmBuilder;
 pub use crate::trie_count_lm::lookuper::TrieCountLmLookuper;
@@ -38,8 +39,30 @@ where
     V: Vocabulary,
     A: RankArray,
 {
+    /// Builds the index from *N*-gram counts files.
+    ///
+    /// # Arguments
+    ///
+    ///  - `filepaths`: Paths of *N*-gram counts files that should be sorted by *N* = 1, 2, ...
+    ///  - `fmt`: File format.
+    pub fn from_files<P>(filepaths: &[P], fmt: GramsFileFormats) -> Result<Self>
+    where
+        P: AsRef<Path>,
+    {
+        match fmt {
+            GramsFileFormats::Plain => Self::from_plain_files(filepaths),
+            GramsFileFormats::Gzip => Self::from_gz_files(filepaths),
+            GramsFileFormats::Deflate => Self::from_deflate_files(filepaths),
+            GramsFileFormats::Zlib => Self::from_zlib_files(filepaths),
+        }
+    }
+
     /// Builds the index from *N*-gram counts files in a plain text format.
-    pub fn from_files<P>(filepaths: &[P]) -> Result<Self>
+    ///
+    /// # Arguments
+    ///
+    ///  - `filepaths`: Paths of *N*-gram counts files that should be sorted by *N* = 1, 2, ...
+    pub fn from_plain_files<P>(filepaths: &[P]) -> Result<Self>
     where
         P: AsRef<Path>,
     {
@@ -51,7 +74,11 @@ where
         TrieCountLmBuilder::new(loaders)?.build()
     }
 
-    /// Builds the index from *N*-gram counts files in a gzip compressed format .
+    /// Builds the index from *N*-gram counts files in a gzip compressed format.
+    ///
+    /// # Arguments
+    ///
+    ///  - `filepaths`: Paths of *N*-gram counts files that should be sorted by *N* = 1, 2, ...
     pub fn from_gz_files<P>(filepaths: &[P]) -> Result<Self>
     where
         P: AsRef<Path>,
@@ -64,7 +91,11 @@ where
         TrieCountLmBuilder::new(loaders)?.build()
     }
 
-    /// Builds the index from *N*-gram counts files in a deflate compressed format .
+    /// Builds the index from *N*-gram counts files in a deflate compressed format.
+    ///
+    /// # Arguments
+    ///
+    ///  - `filepaths`: Paths of *N*-gram counts files that should be sorted by *N* = 1, 2, ...
     pub fn from_deflate_files<P>(filepaths: &[P]) -> Result<Self>
     where
         P: AsRef<Path>,
@@ -77,7 +108,11 @@ where
         TrieCountLmBuilder::new(loaders)?.build()
     }
 
-    /// Builds the index from *N*-gram counts files in a zlib compressed format .
+    /// Builds the index from *N*-gram counts files in a zlib compressed format.
+    ///
+    /// # Arguments
+    ///
+    ///  - `filepaths`: Paths of *N*-gram counts files that should be sorted by *N* = 1, 2, ...
     pub fn from_zlib_files<P>(filepaths: &[P]) -> Result<Self>
     where
         P: AsRef<Path>,

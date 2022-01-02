@@ -4,6 +4,7 @@ use anyhow::Result;
 
 use crate::rank_array::RankArray;
 
+/// Spece-efficient implementation of [`RankArray`] with Elias-Fano gapped encording.
 #[derive(Default)]
 pub struct EliasFanoRankArray {
     count_ranks: sucds::EliasFanoList,
