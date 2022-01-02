@@ -5,8 +5,7 @@ use anyhow::{anyhow, Result};
 use rand::prelude::*;
 use structopt::StructOpt;
 
-use tongrams::util;
-use tongrams::EliasFanoTrieCountLm;
+use tongrams::{util, EliasFanoTrieCountLm, GramsFileFormats};
 
 #[derive(StructOpt, Debug)]
 #[structopt(
@@ -14,6 +13,14 @@ use tongrams::EliasFanoTrieCountLm;
     about = "A program to make queries not contained in the index."
 )]
 struct Opt {
+    #[structopt(
+        short = "f",
+        long,
+        default_value = "gzip",
+        help = "Input file format from plain, gzip, deflate, and zlib."
+    )]
+    file_format: GramsFileFormats,
+
     #[structopt(short = "i")]
     index_filepath: PathBuf,
 
@@ -26,6 +33,7 @@ struct Opt {
 
 fn main() -> Result<()> {
     let opt = Opt::from_args();
+    let file_format = opt.file_format;
     let index_filepath = opt.index_filepath;
     let vocab_filepath = opt.vocab_filepath;
     let num_queirs = opt.num_queirs;
@@ -38,7 +46,7 @@ fn main() -> Result<()> {
         let reader = File::open(&index_filepath)?;
         EliasFanoTrieCountLm::deserialize_from(&reader)?
     };
-    let records = util::load_records_from_gz(vocab_filepath)?;
+    let records = util::load_records_from_file(vocab_filepath, file_format)?;
 
     let max_order = lm.num_orders();
     let mut lookuper = lm.lookuper();

@@ -2,6 +2,7 @@ mod flate2;
 mod plain;
 
 use std::io::Read;
+use std::str::FromStr;
 
 use anyhow::Result;
 
@@ -20,9 +21,24 @@ where
 }
 
 /// File formats supported.
+#[derive(Clone, Copy, Debug)]
 pub enum GramsFileFormats {
     Plain,
     Gzip,
     Deflate,
     Zlib,
+}
+
+impl FromStr for GramsFileFormats {
+    type Err = &'static str;
+
+    fn from_str(fmt: &str) -> Result<Self, Self::Err> {
+        match fmt {
+            "plain" => Ok(Self::Plain),
+            "gzip" => Ok(Self::Gzip),
+            "deflate" => Ok(Self::Deflate),
+            "zlib" => Ok(Self::Zlib),
+            _ => Err("Invalid format"),
+        }
+    }
 }

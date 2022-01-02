@@ -5,14 +5,23 @@ use std::path::PathBuf;
 use anyhow::Result;
 use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
 use extsort::{ExternalSorter, Sortable};
+use flate2::write::{DeflateEncoder, GzEncoder, ZlibEncoder};
+use flate2::Compression;
 use structopt::StructOpt;
 
-use tongrams::util;
-use tongrams::Vocabulary;
+use tongrams::{util, GramsFileFormats, Vocabulary};
 
 #[derive(StructOpt, Debug)]
 #[structopt(name = "sort_grams", about = "A program to sort ngram file.")]
 struct Opt {
+    #[structopt(
+        short = "f",
+        long,
+        default_value = "gzip",
+        help = "Output file format from plain, gzip, deflate, and zlib."
+    )]
+    file_format: GramsFileFormats,
+
     #[structopt(short = "i")]
     grams_filepath: PathBuf,
 
@@ -46,7 +55,6 @@ impl Sortable for MappedRecord {
         for _ in 0..len {
             mapped_ids.push(reader.read_u64::<LittleEndian>().ok()? as usize);
         }
-        // let mapped_ids = sucds::util::int_vector::deserialize_from(reader).ok()?;
         let record_id = reader.read_u64::<LittleEndian>().ok()? as usize;
         Some(Self {
             mapped_ids,
@@ -57,15 +65,16 @@ impl Sortable for MappedRecord {
 
 fn main() -> Result<()> {
     let opt = Opt::from_args();
+    let file_format = opt.file_format;
     let grams_filepath = opt.grams_filepath;
     let vocab_filepath = opt.vocab_filepath;
     let output_filepath = opt.output_filepath;
 
     println!("Loading the vocabulary: {:?}", vocab_filepath);
-    let vocab = util::build_vocabulary_from_gz(vocab_filepath)?;
+    let vocab = util::build_vocabulary_from_file(vocab_filepath, file_format)?;
 
     println!("Loading the records: {:?}", grams_filepath);
-    let records = util::load_records_from_gz(grams_filepath)?;
+    let records = util::load_records_from_file(grams_filepath, file_format)?;
     let num_grams = records.len();
 
     println!("Sorting the records");
@@ -97,13 +106,36 @@ fn main() -> Result<()> {
     let sorter = ExternalSorter::new();
     let sorted_iter = sorter.sort(mapped_records.into_iter())?;
 
-    println!("Writing the index into {:?}", output_filepath);
-    let mut out_file = File::create(output_filepath)?;
-    out_file.write_fmt(format_args!("{}\n", num_grams))?;
-    for mr in sorted_iter {
-        let rec = &records[mr.record_id];
-        out_file.write_fmt(format_args!("{}\t{}\n", rec.gram(), rec.count()))?;
+    let mut output_filename = output_filepath.into_os_string().into_string().unwrap();
+    if let Some(ext) = util::get_format_extension(file_format) {
+        output_filename.push_str(&format!(".{}", ext));
     }
+    println!("Writing the index into {:?}", output_filename);
+
+    let write_records = |mut writer: Box<dyn Write>| -> Result<()> {
+        writer.write_fmt(format_args!("{}\n", num_grams))?;
+        for mr in sorted_iter {
+            let rec = &records[mr.record_id];
+            writer.write_fmt(format_args!("{}\t{}\n", rec.gram(), rec.count()))?;
+        }
+        Ok(())
+    };
+
+    match file_format {
+        GramsFileFormats::Plain => write_records(Box::new(File::create(output_filename)?))?,
+        GramsFileFormats::Gzip => {
+            let f = File::create(output_filename)?;
+            write_records(Box::new(GzEncoder::new(f, Compression::default())))?;
+        }
+        GramsFileFormats::Deflate => {
+            let f = File::create(output_filename)?;
+            write_records(Box::new(DeflateEncoder::new(f, Compression::default())))?;
+        }
+        GramsFileFormats::Zlib => {
+            let f = File::create(output_filename)?;
+            write_records(Box::new(ZlibEncoder::new(f, Compression::default())))?;
+        }
+    };
 
     Ok(())
 }

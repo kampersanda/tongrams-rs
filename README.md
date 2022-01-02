@@ -34,11 +34,23 @@ The file format of *N*-gram counts files is the same as that used in [`tongrams`
  - tokens in a gram `<gram>` are sparated by a space (e.g., `the same time`), and
  - a gram `<gram>` and the count `<count>` are sparated by a horizontal tab.
 
-```
+```text
 <number_of_grams>
 <gram1><TAB><count1>
 <gram2><TAB><count2>
 <gram3><TAB><count3>
+...
+```
+
+For example,
+
+```text
+61516
+the // parent	1
+the function is	22
+the function a	4
+the function to	1
+the function and	1
 ...
 ```
 
@@ -82,14 +94,13 @@ You can sort the bigram file (in a gzip format) and write `test_data/2-grams.sor
 
 ```
 $ cargo run --release -p tools --bin sort_grams -- -i test_data/2-grams.gz -v test_data/1-grams.sorted.gz -o test_data/2-grams.sorted
-WARNING: The current implementation will use a lot of memory.
 Loading the vocabulary: "test_data/1-grams.sorted.gz"
 Loading the records: "test_data/2-grams.gz"
 Sorting the records
-Writing the index into "test_data/2-grams.sorted"
+Writing the index into "test_data/2-grams.sorted.gz"
 ```
 
-The resulting file will be
+The output file format can be specified with `-f`, and the default setting is `.gz`. The resulting file will be
 
 ```
 $ cat test_data/2-grams.sorted
@@ -105,7 +116,7 @@ the compiler	117
 
 ### 2. Indexing
 
-The executable `index` builds a language model from (sorted) *N*-gram counts files, named `<order>-grams.sorted.gz`, and writes it into a binary file.
+The executable `index` builds a language model from (sorted) *N*-gram counts files, named `<order>-grams.sorted.gz`, and writes it into a binary file. The input file format can be specified with `-f`, and the default setting is `.gz`.
 
 For example, the following command builds a language model from *N*-gram counts files (*N*=1..5) placed in directory `test_data` and writes it into `index.bin`.
 
