@@ -4,6 +4,7 @@ use anyhow::Result;
 
 use crate::trie_array::TrieArray;
 
+/// Simple implementation of [`TrieArray`] with `Vec<usize>`.
 #[derive(Default, Debug)]
 pub struct SimpleTrieArray {
     token_ids: Vec<usize>,

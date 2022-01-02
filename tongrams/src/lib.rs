@@ -117,11 +117,10 @@ pub use trie_count_lm::TrieCountLm;
 
 pub use loader::GramsLoader;
 pub use parser::GramsParser;
-pub use vocabulary::Vocabulary;
 
-use rank_array::{EliasFanoRankArray, SimpleRankArray};
-use trie_array::{EliasFanoTrieArray, SimpleTrieArray};
-use vocabulary::{DoubleArrayVocabulary, SimpleVocabulary};
+pub use rank_array::{EliasFanoRankArray, RankArray, SimpleRankArray};
+pub use trie_array::{EliasFanoTrieArray, SimpleTrieArray, TrieArray};
+pub use vocabulary::{DoubleArrayVocabulary, SimpleVocabulary, Vocabulary};
 
 pub use loader::GramsFileFormats;
 

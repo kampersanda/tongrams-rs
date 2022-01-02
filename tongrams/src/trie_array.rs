@@ -8,25 +8,36 @@ use anyhow::Result;
 pub use crate::trie_array::ef::EliasFanoTrieArray;
 pub use crate::trie_array::simple::SimpleTrieArray;
 
+/// Trait for a data structure for sorted arrays of each trie level.
 pub trait TrieArray {
+    /// Builds a [`TrieArray`] from sequences of token ids and pointers.
     fn build(token_ids: Vec<usize>, pointers: Vec<usize>) -> Box<Self>;
 
+    /// Serializes the data structure into the writer.
     fn serialize_into<W: Write>(&self, writer: W) -> Result<usize>;
 
+    /// Deserializes the data structure from the reader.
     fn deserialize_from<R: Read>(reader: R) -> Result<Box<Self>>;
 
+    /// Gets the number of bytes to serialize the data structure.
     fn size_in_bytes(&self) -> usize;
 
+    /// Gets breakdowns of memory usages for components.
     fn memory_statistics(&self) -> serde_json::Value;
 
+    /// Gets the `i`-th token id.
     fn token_id(&self, i: usize) -> usize;
 
+    /// Gets the range `pointers[pos]..pointers[pos+1]`.
     fn range(&self, pos: usize) -> (usize, usize);
 
+    /// Finds the position `i` such that `token_id(i) = id` and `i in range(pos)`.
     fn find_token(&self, pos: usize, id: usize) -> Option<usize>;
 
+    /// Gets the number of tokens stored.
     fn num_tokens(&self) -> usize;
 
+    /// Gets the number of pointers stored.
     fn num_pointers(&self) -> usize;
 }
 
