@@ -56,8 +56,6 @@ impl Sortable for MappedRecord {
 }
 
 fn main() -> Result<()> {
-    println!("WARNING: The current implementation will use a lot of memory.");
-
     let opt = Opt::from_args();
     let grams_filepath = opt.grams_filepath;
     let vocab_filepath = opt.vocab_filepath;

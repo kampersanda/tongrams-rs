@@ -171,7 +171,6 @@ i.e., `EliasFanoTrieCountLm` can look up a gram in 0.64 micro sec on average.
 - Add remapping
 - Support probability scores
 - Make `sucds::EliasFano` faster
-- Use secondary memory for massive files
 
 ## Licensing
 
