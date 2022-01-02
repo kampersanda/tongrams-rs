@@ -1,5 +1,10 @@
 # `tongrams-rs`: Tons of *N*-grams in Rust
 
+![](https://github.com/kampersanda/tongrams-rs/actions/workflows/rust.yml/badge.svg)
+[![Documentation](https://docs.rs/tongrams/badge.svg)](https://docs.rs/tongrams)
+[![Crates.io](https://img.shields.io/crates/v/tongrams.svg)](https://crates.io/crates/tongrams)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/kampersanda/tongrams-rs/blob/master/LICENSE)
+
 This is a Rust port of [`tongrams`](https://github.com/jermp/tongrams) to index and query large language models in compressed space, in which the data structures are presented in the following papers:
 
  - Giulio Ermanno Pibiri and Rossano Venturini, [Efficient Data Structures for Massive N-Gram Datasets](https://doi.org/10.1145/3077136.3080798). In *Proceedings of the 40th ACM Conference on Research and Development in Information Retrieval (SIGIR 2017)*, pp. 615-624.

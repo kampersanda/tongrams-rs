@@ -1,12 +1,12 @@
 [package]
 name = "tongrams"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2018"
 authors = ["Shunsuke Kanda (kampersanda) <shnsk.knd@gmail.com>"]
-description = "Tons of *N*-grams"
+description = "Tons of N-grams"
 license = "MIT"
 readme = "README.md"
-documentation = "https://docs.rs/tongrams-rs"
+documentation = "https://docs.rs/tongrams"
 repository = "https://github.com/kampersanda/tongrams-rs"
 homepage = "https://github.com/kampersanda/tongrams-rs"
 keywords = ["n-gram", "language-model", "trie", "compressed", "nlp"]
