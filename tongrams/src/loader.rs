@@ -18,10 +18,3 @@ where
     /// Creates [`GramsParser`].
     fn parser(&self) -> Result<GramsParser<R>>;
 }
-
-// pub enum FileFormats {
-//     Plain,
-//     Gz,
-//     Deflate,
-//     Zlib,
-// }
