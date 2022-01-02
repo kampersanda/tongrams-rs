@@ -115,14 +115,12 @@ pub use gram::Gram;
 pub use record::Record;
 pub use trie_count_lm::TrieCountLm;
 
-pub use loader::GramsLoader;
+pub use loader::{GramsFileFormats, GramsLoader};
 pub use parser::GramsParser;
 
 pub use rank_array::{EliasFanoRankArray, RankArray, SimpleRankArray};
 pub use trie_array::{EliasFanoTrieArray, SimpleTrieArray, TrieArray};
 pub use vocabulary::{DoubleArrayVocabulary, SimpleVocabulary, Vocabulary};
-
-pub use loader::GramsFileFormats;
 
 /// Simple implementation of [`TrieCountLm`].
 /// Note that this is for debug, and do NOT use it for storing massive datasets.
