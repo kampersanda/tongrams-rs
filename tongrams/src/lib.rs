@@ -39,6 +39,18 @@
 //! ...
 //! ```
 //!
+//! For example,
+//!
+//! ```text
+//! 61516
+//! the // parent       1
+//! the function is     22
+//! the function a      4
+//! the function to     1
+//! the function and    1
+//! ...
+//! ```
+//!
 //! ## Examples
 //!
 //! The following code uses datasets in [`test_data`](https://github.com/kampersanda/tongrams-rs/tree/main/test_data) at the root of this repository.
