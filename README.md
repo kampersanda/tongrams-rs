@@ -10,7 +10,7 @@ This is a Rust port of [`tongrams`](https://github.com/jermp/tongrams) to index 
 
  - Store *N*-gram language models with frequency counts.
 
- - Look up *N*-grams to get the frequency  counts.
+ - Look up *N*-grams to get the frequency counts.
 
 ## Features
 
@@ -22,8 +22,20 @@ This is a Rust port of [`tongrams`](https://github.com/jermp/tongrams) to index 
 
 ## Input data format
 
-As with the original library, the *N*-gram counts files follow the [Google format](http://storage.googleapis.com/books/ngrams/books/datasetsv2.html).
-For the details, please visit [`tongrams`](https://github.com/jermp/tongrams/blob/master/README.md).
+The file format of *N*-gram counts files is the same as that used in [`tongrams`](https://github.com/jermp/tongrams), a modified [Google format](http://storage.googleapis.com/books/ngrams/books/datasetsv2.html), where
+
+ - one separate file for each distinct value of *N* (order) lists one gram per row,
+ - each header row `<number_of_grams>` indicates the number of *N*-grams in the file,
+ - tokens in a gram `<gram>` is sparated by a space (e.g., `the same time`), and
+ - a gram `<gram>` and the count `<count>` is sparated by a horizontal tab.
+
+```
+<number_of_grams>
+<gram1><TAB><count1>
+<gram2><TAB><count2>
+<gram3><TAB><count3>
+...
+```
 
 ## Command line tools
 
@@ -34,9 +46,10 @@ For the details, please visit [`tongrams`](https://github.com/jermp/tongrams/blo
 **NOTE: The current implementation of `sort_grams` consumes a lot amount of memory. When you apply massive datasets, please use the executable `sort_grams` in the original [`tongrams`](https://github.com/jermp/tongrams), which will generate the equivalent dataset.**
 
 To build the trie index, you need to sort your *N*-gram counts files.
-First of all, prepare unigram counts files sorted by the counts for making the resulting index smaller, as
+First, prepare unigram counts files sorted by the counts for making a resulting index smaller, as
 
 ```
+$ cat test_data/1-grams.sorted
 8761
 the	3681
 is	1869
@@ -49,9 +62,10 @@ and	1202
 
 By using the unigram file as a vocabulary, the executable `sort_grams` sorts a *N*-gram counts file.
 
-Here, we assume to sort an unsorted bigram counts file, as
+Here, we sort an unsorted bigram counts file, as
 
 ```
+$ cat test_data/2-grams
 38900
 ways than	1
 may come	1
@@ -61,8 +75,7 @@ in which	14
 ...
 ```
 
-Let the above unigram and unsorted bigram files in a gzip format be `test_data/1-grams.sorted.gz` and `test_data/2-grams.gz`, respectively.
-You can sort the bigram file and write `test_data/2-grams.sorted` with the following command:
+You can sort the bigram file (in a gzip format) and write `test_data/2-grams.sorted` with the following command:
 
 ```
 $ cargo run --release -p tools --bin sort_grams -- -i test_data/2-grams.gz -v test_data/1-grams.sorted.gz -o test_data/2-grams.sorted
@@ -73,9 +86,10 @@ Sorting the records
 Writing the index into "test_data/2-grams.sorted"
 ```
 
-The resulting `test_data/2-grams.sorted` will be
+The resulting file will be
 
 ```
+$ cat test_data/2-grams.sorted
 38900
 the //	1
 the function	94
@@ -88,9 +102,9 @@ the compiler	117
 
 ### 2. Indexing
 
-The executable `index` builds a language model from (sorted) *N*-gram counts files and writes it into a binary file.
+The executable `index` builds a language model from (sorted) *N*-gram counts files, named `<order>-grams.sorted.gz`, and writes it into a binary file.
 
-For example, the following command builds a language model from *N*-gram counts files placed in `test_data` and writes it into `index.bin`. The specified files must be ordered as 1-gram, 2-gram, and so on.
+For example, the following command builds a language model from *N*-gram counts files (`1 <= N <= 5`) placed in directory `test_data` and writes it into `index.bin`.
 
 ```
 $ cargo run --release -p tools --bin index -- -n 5 -i test_data -o index.bin

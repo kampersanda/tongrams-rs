@@ -35,8 +35,20 @@ tongrams = "0.1"
 
 ## Input data format
 
-As with the original library, the *N*-gram counts files follow the [Google format](http://storage.googleapis.com/books/ngrams/books/datasetsv2.html).
-For the details, please see [README](https://github.com/kampersanda/tongrams-rs/blob/main/README.md) of this repository.
+The file format of *N*-gram counts files is the same as that used in [`tongrams`](https://github.com/jermp/tongrams), a modified [Google format](http://storage.googleapis.com/books/ngrams/books/datasetsv2.html), where
+
+ - one separate file for each distinct value of *N* (order) lists one gram per row,
+ - each header row `<number_of_grams>` indicates the number of *N*-grams in the file,
+ - tokens in a gram `<gram>` is sparated by a space (e.g., `the same time`), and
+ - a gram `<gram>` and the count `<count>` is sparated by a horizontal tab.
+
+```
+<number_of_grams>
+<gram1><TAB><count1>
+<gram2><TAB><count2>
+<gram3><TAB><count3>
+...
+```
 
 ## Examples
 
