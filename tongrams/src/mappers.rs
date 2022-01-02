@@ -6,31 +6,52 @@ use crate::MAX_ORDER;
 #[derive(Default)]
 pub struct SortedArrayMapper {
     mapped: [usize; MAX_ORDER],
+    len: usize,
 }
 
 impl SortedArrayMapper {
     #[inline(always)]
-    pub fn map_query<V>(&mut self, gram: Gram, vocab: &V) -> Option<&[usize]>
+    pub fn from_gram<V>(&mut self, gram: Gram, vocab: &V) -> bool
     where
         V: Vocabulary,
     {
         let tokens = gram.split_to_tokens();
         if MAX_ORDER < tokens.len() {
-            return None;
+            return false;
         }
         for (i, &w) in tokens.iter().enumerate() {
             if let Some(mapped_id) = vocab.get(w) {
                 self.mapped[i] = mapped_id;
             } else {
-                return None;
+                return false;
             }
         }
-        Some(&self.mapped[..tokens.len()])
+        self.len = tokens.len();
+        true
     }
 
-    #[allow(dead_code)]
-    pub const fn get(&self, i: usize) -> usize {
-        self.mapped[i]
+    #[inline(always)]
+    pub fn from_tokens<V>(&mut self, tokens: &[&str], vocab: &V) -> bool
+    where
+        V: Vocabulary,
+    {
+        if MAX_ORDER < tokens.len() {
+            return false;
+        }
+        for (i, &w) in tokens.iter().enumerate() {
+            if let Some(mapped_id) = vocab.get(Gram::from_str(w)) {
+                self.mapped[i] = mapped_id;
+            } else {
+                return false;
+            }
+        }
+        self.len = tokens.len();
+        true
+    }
+
+    #[inline(always)]
+    pub fn get(&self) -> &[usize] {
+        &self.mapped[..self.len]
     }
 }
 
@@ -49,10 +70,12 @@ mod tests {
         let vocab = *SimpleVocabulary::build(&grams).unwrap();
         let mut mapper = SortedArrayMapper::default();
 
-        let gram = Gram::from_str("A B D");
-        assert_eq!(mapper.map_query(gram, &vocab), Some(&[0, 2, 1][..]));
+        assert_eq!(mapper.from_gram(Gram::from_str("A B D"), &vocab), true);
+        assert_eq!(mapper.get(), &[0, 2, 1][..]);
+        assert_eq!(mapper.from_gram(Gram::from_str("E B"), &vocab), false);
 
-        let gram = Gram::from_str("E B");
-        assert_eq!(mapper.map_query(gram, &vocab), None);
+        assert_eq!(mapper.from_tokens(&["A", "B", "D"], &vocab), true);
+        assert_eq!(mapper.get(), &[0, 2, 1][..]);
+        assert_eq!(mapper.from_tokens(&["E", "B"], &vocab), false);
     }
 }

@@ -355,26 +355,26 @@ D D D\t1
         let gp = loader.parser().unwrap();
         for rec in gp {
             let rec = rec.unwrap();
-            assert_eq!(lookuper.run(rec.gram()), Some(rec.count()));
+            assert_eq!(lookuper.with_gram(rec.gram()), Some(rec.count()));
         }
 
         let loader = GramsTextLoader::new(GRAMS_2.as_bytes());
         let gp = loader.parser().unwrap();
         for rec in gp {
             let rec = rec.unwrap();
-            assert_eq!(lookuper.run(rec.gram()), Some(rec.count()));
+            assert_eq!(lookuper.with_gram(rec.gram()), Some(rec.count()));
         }
 
         let loader = GramsTextLoader::new(GRAMS_3.as_bytes());
         let gp = loader.parser().unwrap();
         for rec in gp {
             let rec = rec.unwrap();
-            assert_eq!(lookuper.run(rec.gram()), Some(rec.count()));
+            assert_eq!(lookuper.with_gram(rec.gram()), Some(rec.count()));
         }
 
-        assert_eq!(lookuper.run(Gram::from_str("E")), None);
-        assert_eq!(lookuper.run(Gram::from_str("B A")), None);
-        assert_eq!(lookuper.run(Gram::from_str("B B A")), None);
+        assert_eq!(lookuper.with_gram(Gram::from_str("E")), None);
+        assert_eq!(lookuper.with_gram(Gram::from_str("B A")), None);
+        assert_eq!(lookuper.with_gram(Gram::from_str("B B A")), None);
     }
 
     #[test]
@@ -386,25 +386,25 @@ D D D\t1
         let gp = loader.parser().unwrap();
         for rec in gp {
             let rec = rec.unwrap();
-            assert_eq!(lookuper.run(rec.gram()), Some(rec.count()));
+            assert_eq!(lookuper.with_gram(rec.gram()), Some(rec.count()));
         }
 
         let loader = GramsTextLoader::new(GRAMS_2.as_bytes());
         let gp = loader.parser().unwrap();
         for rec in gp {
             let rec = rec.unwrap();
-            assert_eq!(lookuper.run(rec.gram()), Some(rec.count()));
+            assert_eq!(lookuper.with_gram(rec.gram()), Some(rec.count()));
         }
 
         let loader = GramsTextLoader::new(GRAMS_3.as_bytes());
         let gp = loader.parser().unwrap();
         for rec in gp {
             let rec = rec.unwrap();
-            assert_eq!(lookuper.run(rec.gram()), Some(rec.count()));
+            assert_eq!(lookuper.with_gram(rec.gram()), Some(rec.count()));
         }
 
-        assert_eq!(lookuper.run(Gram::from_str("E")), None);
-        assert_eq!(lookuper.run(Gram::from_str("B A")), None);
-        assert_eq!(lookuper.run(Gram::from_str("B B A")), None);
+        assert_eq!(lookuper.with_gram(Gram::from_str("E")), None);
+        assert_eq!(lookuper.with_gram(Gram::from_str("B A")), None);
+        assert_eq!(lookuper.with_gram(Gram::from_str("B B A")), None);
     }
 }

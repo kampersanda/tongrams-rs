@@ -46,7 +46,7 @@ fn test_lookup() {
         let parser = loader.parser().unwrap();
         for rec in parser {
             let rec = rec.unwrap();
-            assert_eq!(lookuper.run(rec.gram()), Some(rec.count()));
+            assert_eq!(lookuper.with_gram(rec.gram()), Some(rec.count()));
         }
     }
 }
