@@ -62,7 +62,7 @@ fn perform_lookup(
         b.iter(|| {
             let mut sum = 0;
             for &q in queries {
-                sum += lookuper.run(q).unwrap_or(1);
+                sum += lookuper.with_gram(q).unwrap_or(1);
             }
             if sum == 0 {
                 panic!();

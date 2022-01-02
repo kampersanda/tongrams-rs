@@ -20,6 +20,12 @@ fn main() {
     assert_eq!(lookuper.with_str("the same memory"), Some(8));
     assert_eq!(lookuper.with_str("vector is array"), None);
 
+    // Gets the count of a query N-gram formed by a string array.
+    assert_eq!(lookuper.with_tokens(&["vector"]), Some(182));
+    assert_eq!(lookuper.with_tokens(&["in", "order"]), Some(47));
+    assert_eq!(lookuper.with_tokens(&["the", "same", "memory"]), Some(8));
+    assert_eq!(lookuper.with_tokens(&["vector", "is", "array"]), None);
+
     // Serializes the index into a writable stream.
     let mut data = vec![];
     lm.serialize_into(&mut data).unwrap();

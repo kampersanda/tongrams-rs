@@ -39,10 +39,10 @@ The file format of *N*-gram counts files is the same as that used in [`tongrams`
 
  - one separate file for each distinct value of *N* (order) lists one gram per row,
  - each header row `<number_of_grams>` indicates the number of *N*-grams in the file,
- - tokens in a gram `<gram>` is sparated by a space (e.g., `the same time`), and
- - a gram `<gram>` and the count `<count>` is sparated by a horizontal tab.
+ - tokens in a gram `<gram>` are sparated by a space (e.g., `the same time`), and
+ - a gram `<gram>` and the count `<count>` are sparated by a horizontal tab.
 
-```
+```text
 <number_of_grams>
 <gram1><TAB><count1>
 <gram2><TAB><count2>
