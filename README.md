@@ -48,8 +48,6 @@ The file format of *N*-gram counts files is the same as that used in [`tongrams`
 
 ### 1. Sorting
 
-**NOTE: The current implementation of `sort_grams` consumes a lot amount of memory. When you apply massive datasets, please use the executable `sort_grams` in the original [`tongrams`](https://github.com/jermp/tongrams), which will generate the equivalent dataset.**
-
 To build the trie index, you need to sort your *N*-gram counts files.
 First, prepare unigram counts files sorted by the counts for making a resulting index smaller, as
 

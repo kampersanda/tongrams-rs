@@ -55,8 +55,6 @@ impl Sortable for MappedRecord {
     }
 }
 
-// TODO: Make space-efficient with secondary memory
-
 fn main() -> Result<()> {
     println!("WARNING: The current implementation will use a lot of memory.");
 
