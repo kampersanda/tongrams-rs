@@ -55,16 +55,19 @@ where
         let mut buffer = String::new();
         self.reader.read_line(&mut buffer).ok()?;
 
-        let items: Vec<&str> = buffer.trim().split(GRAM_COUNT_SEPARATOR as char).collect();
+        let items: Vec<&str> = buffer
+            .trim_end()
+            .split(GRAM_COUNT_SEPARATOR as char)
+            .collect();
         if items.len() != 2 {
-            return Some(Err(anyhow!("Invalid line")));
+            return Some(Err(anyhow!("Invalid line, {:?}", items)));
         }
 
         let gram = items[0].to_string();
         if let Ok(count) = items[1].parse() {
             Some(Ok(Record::new(gram, count)))
         } else {
-            Some(Err(anyhow!("Parse error")))
+            Some(Err(anyhow!("Parse error, {:?}", items)))
         }
     }
 
