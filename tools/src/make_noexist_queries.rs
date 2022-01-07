@@ -1,4 +1,5 @@
 use std::fs::File;
+use std::io::BufReader;
 use std::path::PathBuf;
 
 use anyhow::{anyhow, Result};
@@ -43,8 +44,8 @@ fn main() -> Result<()> {
     }
 
     let lm = {
-        let reader = File::open(&index_filepath)?;
-        EliasFanoTrieCountLm::deserialize_from(&reader)?
+        let mut reader = BufReader::new(File::open(&index_filepath)?);
+        EliasFanoTrieCountLm::deserialize_from(&mut reader)?
     };
     let records = util::load_records_from_file(vocab_filepath, file_format)?;
 

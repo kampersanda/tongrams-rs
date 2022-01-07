@@ -1,4 +1,5 @@
 use std::fs::File;
+use std::io::BufReader;
 use std::io::{stdin, stdout, Write};
 use std::path::PathBuf;
 
@@ -19,8 +20,8 @@ fn main() -> Result<()> {
     let index_filepath = opt.index_filepath;
 
     println!("Loading the index from {:?}...", &index_filepath);
-    let reader = File::open(&index_filepath)?;
-    let lm = EliasFanoTrieCountLm::deserialize_from(&reader)?;
+    let mut reader = BufReader::new(File::open(&index_filepath)?);
+    let lm = EliasFanoTrieCountLm::deserialize_from(&mut reader)?;
     let mut lookuper = lm.lookuper();
 
     println!("Performing the lookup...");
