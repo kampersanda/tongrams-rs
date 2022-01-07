@@ -1,4 +1,5 @@
 use std::fs::File;
+use std::io::BufWriter;
 use std::path::PathBuf;
 
 use anyhow::Result;
@@ -56,7 +57,7 @@ fn main() -> Result<()> {
     println!("{} grams are stored.", num_grams);
 
     println!("Writing the index into {:?}...", &index_filepath);
-    let mut writer = File::create(&index_filepath)?;
+    let mut writer = BufWriter::new(File::create(&index_filepath)?);
     let mem = lm.serialize_into(&mut writer)?;
     println!(
         "Index size: {} bytes ({:.3} MiB)",
