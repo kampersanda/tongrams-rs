@@ -1,6 +1,6 @@
 [package]
 name = "tongrams"
-version = "0.1.2"
+version = "0.1.3"
 edition = "2018"
 authors = ["Shunsuke Kanda (kampersanda) <shnsk.knd@gmail.com>"]
 description = "Tons of N-grams"
@@ -20,5 +20,5 @@ bincode = "1.3.3"
 byteorder = "1.4.3"
 flate2 = "1.0"
 serde_json = "1.0"
-sucds = { version = "0.2.2", features = ["intrinsics"] }
+sucds = { version = "0.2.3", features = ["intrinsics"] }
 yada = "0.5.0"
