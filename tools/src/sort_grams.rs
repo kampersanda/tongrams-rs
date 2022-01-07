@@ -1,5 +1,5 @@
 use std::fs::File;
-use std::io::prelude::*;
+use std::io::{prelude::*, BufWriter};
 use std::path::PathBuf;
 
 use anyhow::Result;
@@ -122,17 +122,20 @@ fn main() -> Result<()> {
     };
 
     match file_format {
-        GramsFileFormats::Plain => write_records(Box::new(File::create(output_filename)?))?,
+        GramsFileFormats::Plain => {
+            let f = BufWriter::new(File::create(output_filename)?);
+            write_records(Box::new(f))?
+        }
         GramsFileFormats::Gzip => {
-            let f = File::create(output_filename)?;
+            let f = BufWriter::new(File::create(output_filename)?);
             write_records(Box::new(GzEncoder::new(f, Compression::default())))?;
         }
         GramsFileFormats::Deflate => {
-            let f = File::create(output_filename)?;
+            let f = BufWriter::new(File::create(output_filename)?);
             write_records(Box::new(DeflateEncoder::new(f, Compression::default())))?;
         }
         GramsFileFormats::Zlib => {
-            let f = File::create(output_filename)?;
+            let f = BufWriter::new(File::create(output_filename)?);
             write_records(Box::new(ZlibEncoder::new(f, Compression::default())))?;
         }
     };
