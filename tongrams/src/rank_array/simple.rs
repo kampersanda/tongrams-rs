@@ -19,23 +19,23 @@ impl RankArray for SimpleRankArray {
     where
         W: Write,
     {
-        sucds::util::int_vector::serialize_into(&self.count_ranks, writer)
+        sucds::util::vec_io::serialize_usize(&self.count_ranks, writer)
     }
 
     fn deserialize_from<R>(reader: R) -> Result<Box<Self>>
     where
         R: Read,
     {
-        let count_ranks = sucds::util::int_vector::deserialize_from(reader)?;
+        let count_ranks = sucds::util::vec_io::deserialize_usize(reader)?;
         Ok(Box::new(Self { count_ranks }))
     }
 
     fn size_in_bytes(&self) -> usize {
-        sucds::util::int_vector::size_in_bytes(&self.count_ranks)
+        sucds::util::vec_io::size_in_bytes(&self.count_ranks)
     }
 
     fn memory_statistics(&self) -> serde_json::Value {
-        let count_ranks = sucds::util::int_vector::size_in_bytes(&self.count_ranks);
+        let count_ranks = sucds::util::vec_io::size_in_bytes(&self.count_ranks);
         serde_json::json!({ "count_ranks": count_ranks })
     }
 
