@@ -2,13 +2,13 @@ use crate::Gram;
 
 /// Handler of a pair of a gram and its count.
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct Record {
+pub struct CountRecord {
     gram: String, // TODO: Store as a byte slice to another buffer
     count: usize,
 }
 
-impl Record {
-    /// Creates a [`Record`].
+impl CountRecord {
+    /// Creates a [`CountRecord`].
     #[inline]
     pub const fn new(gram: String, count: usize) -> Self {
         Self { gram, count }

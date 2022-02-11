@@ -1,7 +1,7 @@
 use anyhow::{anyhow, Result};
 use std::io::{BufRead, BufReader, Read};
 
-use crate::Record;
+use crate::CountRecord;
 use crate::GRAM_COUNT_SEPARATOR;
 
 /// Parser for a *N*-gram counts file.
@@ -44,7 +44,7 @@ impl<R> Iterator for GramsParser<R>
 where
     R: Read,
 {
-    type Item = Result<Record>;
+    type Item = Result<CountRecord>;
 
     fn next(&mut self) -> Option<Self::Item> {
         self.count += 1;
@@ -65,7 +65,7 @@ where
 
         let gram = items[0].to_string();
         if let Ok(count) = items[1].parse() {
-            Some(Ok(Record::new(gram, count)))
+            Some(Ok(CountRecord::new(gram, count)))
         } else {
             Some(Err(anyhow!("Parse error, {:?}", items)))
         }
@@ -106,7 +106,7 @@ D D D\t1
         assert_eq!(gp.num_grams(), 4);
         for (gram, count) in [("A", 10), ("B", 7), ("C", 4), ("D", 1)] {
             let gram = gram.to_string();
-            assert_eq!(gp.next().unwrap().unwrap(), Record::new(gram, count));
+            assert_eq!(gp.next().unwrap().unwrap(), CountRecord::new(gram, count));
         }
         assert!(gp.next().is_none());
     }
@@ -117,7 +117,7 @@ D D D\t1
         assert_eq!(gp.num_grams(), 4);
         for (gram, count) in [("A A", 1), ("A C", 2), ("B B", 3), ("D C", 1)] {
             let gram = gram.to_string();
-            assert_eq!(gp.next().unwrap().unwrap(), Record::new(gram, count));
+            assert_eq!(gp.next().unwrap().unwrap(), CountRecord::new(gram, count));
         }
         assert!(gp.next().is_none());
     }
@@ -128,7 +128,7 @@ D D D\t1
         assert_eq!(gp.num_grams(), 3);
         for (gram, count) in [("A A C", 2), ("B B C", 1), ("D D D", 1)] {
             let gram = gram.to_string();
-            assert_eq!(gp.next().unwrap().unwrap(), Record::new(gram, count));
+            assert_eq!(gp.next().unwrap().unwrap(), CountRecord::new(gram, count));
         }
         assert!(gp.next().is_none());
     }

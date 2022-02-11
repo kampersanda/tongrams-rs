@@ -7,15 +7,15 @@ use crate::loader::{
     GramsDeflateFileLoader, GramsFileLoader, GramsGzFileLoader, GramsLoader, GramsZlibFileLoader,
 };
 use crate::vocabulary::{DoubleArrayVocabulary, Vocabulary};
-use crate::{Gram, GramsFileFormats, Record};
+use crate::{CountRecord, Gram, GramsFileFormats};
 
-/// Loads all of [`Record`] from a file.
+/// Loads all of [`CountRecord`] from a file.
 ///
 /// # Arguments
 ///
 ///  - `filepath`: *N*-gram counts file.
 ///  - `fmt`: File format.
-pub fn load_records_from_file<P>(filepath: P, fmt: GramsFileFormats) -> Result<Vec<Record>>
+pub fn load_records_from_file<P>(filepath: P, fmt: GramsFileFormats) -> Result<Vec<CountRecord>>
 where
     P: AsRef<Path>,
 {
@@ -39,8 +39,8 @@ where
     }
 }
 
-/// Loads all of [`Record`] from a gzipped gram-count file.
-fn load_records<R: Read>(loader: Box<dyn GramsLoader<R>>) -> Result<Vec<Record>>
+/// Loads all of [`CountRecord`] from a gzipped gram-count file.
+fn load_records<R: Read>(loader: Box<dyn GramsLoader<R>>) -> Result<Vec<CountRecord>>
 where
     R: Read,
 {

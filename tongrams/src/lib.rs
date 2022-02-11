@@ -112,7 +112,7 @@ pub const TOKEN_SEPARATOR: u8 = b' ';
 pub const GRAM_COUNT_SEPARATOR: u8 = b'\t';
 
 pub use gram::Gram;
-pub use record::Record;
+pub use record::CountRecord;
 pub use trie_count_lm::TrieCountLm;
 
 pub use loader::{GramsFileFormats, GramsLoader};
