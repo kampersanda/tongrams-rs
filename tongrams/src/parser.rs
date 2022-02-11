@@ -1,8 +1,8 @@
 use anyhow::{anyhow, Result};
 use std::io::{BufRead, BufReader, Read};
 
-use crate::CountRecord;
 use crate::GRAM_COUNT_SEPARATOR;
+use crate::{CountRecord, ProbRecord};
 
 /// Parser for a *N*-gram file of counts.
 /// It assumes the input format of the
@@ -56,6 +56,47 @@ where
         let gram = items[0].to_string();
         if let Ok(count) = items[1].parse() {
             Some(Ok(CountRecord::new(gram, count)))
+        } else {
+            Some(Err(anyhow!("Parse error, {:?}", items)))
+        }
+    }
+
+    pub fn next_prob_record(&mut self) -> Option<Result<ProbRecord>> {
+        self.count += 1;
+        if self.count > self.num_grams {
+            return None;
+        }
+
+        let mut buffer = String::new();
+        self.reader.read_line(&mut buffer).ok()?;
+
+        let items: Vec<&str> = buffer
+            .trim_end()
+            .split(GRAM_COUNT_SEPARATOR as char)
+            .collect();
+        if items.len() != 2 && items.len() != 3 {
+            return Some(Err(anyhow!("Invalid line, {:?}", items)));
+        }
+
+        let gram = items[1].to_string();
+        if let Ok(prob) = items[0].parse() {
+            let prob = if prob > 0.0 {
+                prob
+            } else {
+                eprintln!(
+                    "Warning: positive log10 probability detected. This will be mapped to 0."
+                );
+                0.0
+            };
+            if let Some(x) = items.get(2) {
+                if let Ok(backoff) = x.parse() {
+                    Some(Ok(ProbRecord::new(gram, prob, backoff)))
+                } else {
+                    Some(Err(anyhow!("Parse error, {:?}", items)))
+                }
+            } else {
+                Some(Ok(ProbRecord::new(gram, prob, 0.0)))
+            }
         } else {
             Some(Err(anyhow!("Parse error, {:?}", items)))
         }
