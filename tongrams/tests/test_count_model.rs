@@ -43,8 +43,8 @@ fn test_lookup() {
     let mut lookuper = lm.lookuper();
     for filename in TEST_FILENAMES {
         let loader = GramsGzFileLoader::new(filename);
-        let parser = loader.parser().unwrap();
-        for rec in parser {
+        let mut parser = loader.parser().unwrap();
+        while let Some(rec) = parser.next_count_record() {
             let rec = rec.unwrap();
             assert_eq!(lookuper.with_gram(rec.gram()), Some(rec.count()));
         }

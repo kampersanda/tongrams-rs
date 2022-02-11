@@ -4,13 +4,10 @@ use std::io::{BufRead, BufReader, Read};
 use crate::CountRecord;
 use crate::GRAM_COUNT_SEPARATOR;
 
-/// Parser for a *N*-gram counts file.
+/// Parser for a *N*-gram file of counts.
 /// It assumes the input format of the
 /// [Google format](http://storage.googleapis.com/books/ngrams/books/datasetsv2.html).
-pub struct GramsParser<R>
-where
-    R: Read,
-{
+pub struct GramsParser<R> {
     reader: BufReader<R>,
     num_grams: usize,
     count: usize,
@@ -20,7 +17,7 @@ impl<R> GramsParser<R>
 where
     R: Read,
 {
-    /// Creates [`GramsParser`] from `BufReader` of a *N*-gram counts file.
+    /// Creates [`GramsParser`] from `BufReader` of a *N*-gram file of counts.
     pub fn new(mut reader: BufReader<R>) -> Result<Self> {
         let num_grams = {
             let mut header = String::new();
@@ -38,15 +35,8 @@ where
     pub fn num_grams(&self) -> usize {
         self.num_grams
     }
-}
 
-impl<R> Iterator for GramsParser<R>
-where
-    R: Read,
-{
-    type Item = Result<CountRecord>;
-
-    fn next(&mut self) -> Option<Self::Item> {
+    pub fn next_count_record(&mut self) -> Option<Result<CountRecord>> {
         self.count += 1;
         if self.count > self.num_grams {
             return None;
@@ -69,10 +59,6 @@ where
         } else {
             Some(Err(anyhow!("Parse error, {:?}", items)))
         }
-    }
-
-    fn size_hint(&self) -> (usize, Option<usize>) {
-        (self.num_grams, Some(self.num_grams))
     }
 }
 
@@ -106,9 +92,12 @@ D D D\t1
         assert_eq!(gp.num_grams(), 4);
         for (gram, count) in [("A", 10), ("B", 7), ("C", 4), ("D", 1)] {
             let gram = gram.to_string();
-            assert_eq!(gp.next().unwrap().unwrap(), CountRecord::new(gram, count));
+            assert_eq!(
+                gp.next_count_record().unwrap().unwrap(),
+                CountRecord::new(gram, count)
+            );
         }
-        assert!(gp.next().is_none());
+        assert!(gp.next_count_record().is_none());
     }
 
     #[test]
@@ -117,9 +106,12 @@ D D D\t1
         assert_eq!(gp.num_grams(), 4);
         for (gram, count) in [("A A", 1), ("A C", 2), ("B B", 3), ("D C", 1)] {
             let gram = gram.to_string();
-            assert_eq!(gp.next().unwrap().unwrap(), CountRecord::new(gram, count));
+            assert_eq!(
+                gp.next_count_record().unwrap().unwrap(),
+                CountRecord::new(gram, count)
+            );
         }
-        assert!(gp.next().is_none());
+        assert!(gp.next_count_record().is_none());
     }
 
     #[test]
@@ -128,8 +120,11 @@ D D D\t1
         assert_eq!(gp.num_grams(), 3);
         for (gram, count) in [("A A C", 2), ("B B C", 1), ("D D D", 1)] {
             let gram = gram.to_string();
-            assert_eq!(gp.next().unwrap().unwrap(), CountRecord::new(gram, count));
+            assert_eq!(
+                gp.next_count_record().unwrap().unwrap(),
+                CountRecord::new(gram, count)
+            );
         }
-        assert!(gp.next().is_none());
+        assert!(gp.next_count_record().is_none());
     }
 }

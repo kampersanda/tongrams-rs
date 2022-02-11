@@ -387,22 +387,22 @@ D D D\t1
         let mut lookuper = lm.lookuper();
 
         let loader = GramsTextLoader::new(GRAMS_1.as_bytes());
-        let gp = loader.parser().unwrap();
-        for rec in gp {
+        let mut gp = loader.parser().unwrap();
+        while let Some(rec) = gp.next_count_record() {
             let rec = rec.unwrap();
             assert_eq!(lookuper.with_gram(rec.gram()), Some(rec.count()));
         }
 
         let loader = GramsTextLoader::new(GRAMS_2.as_bytes());
-        let gp = loader.parser().unwrap();
-        for rec in gp {
+        let mut gp = loader.parser().unwrap();
+        while let Some(rec) = gp.next_count_record() {
             let rec = rec.unwrap();
             assert_eq!(lookuper.with_gram(rec.gram()), Some(rec.count()));
         }
 
         let loader = GramsTextLoader::new(GRAMS_3.as_bytes());
-        let gp = loader.parser().unwrap();
-        for rec in gp {
+        let mut gp = loader.parser().unwrap();
+        while let Some(rec) = gp.next_count_record() {
             let rec = rec.unwrap();
             assert_eq!(lookuper.with_gram(rec.gram()), Some(rec.count()));
         }
@@ -418,22 +418,22 @@ D D D\t1
         let mut lookuper = lm.lookuper();
 
         let loader = GramsTextLoader::new(GRAMS_1.as_bytes());
-        let gp = loader.parser().unwrap();
-        for rec in gp {
+        let mut gp = loader.parser().unwrap();
+        while let Some(rec) = gp.next_count_record() {
             let rec = rec.unwrap();
             assert_eq!(lookuper.with_gram(rec.gram()), Some(rec.count()));
         }
 
         let loader = GramsTextLoader::new(GRAMS_2.as_bytes());
-        let gp = loader.parser().unwrap();
-        for rec in gp {
+        let mut gp = loader.parser().unwrap();
+        while let Some(rec) = gp.next_count_record() {
             let rec = rec.unwrap();
             assert_eq!(lookuper.with_gram(rec.gram()), Some(rec.count()));
         }
 
         let loader = GramsTextLoader::new(GRAMS_3.as_bytes());
-        let gp = loader.parser().unwrap();
-        for rec in gp {
+        let mut gp = loader.parser().unwrap();
+        while let Some(rec) = gp.next_count_record() {
             let rec = rec.unwrap();
             assert_eq!(lookuper.with_gram(rec.gram()), Some(rec.count()));
         }

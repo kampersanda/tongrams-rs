@@ -44,9 +44,9 @@ fn load_records<R: Read>(loader: Box<dyn GramsLoader<R>>) -> Result<Vec<CountRec
 where
     R: Read,
 {
-    let gp = loader.parser()?;
+    let mut gp = loader.parser()?;
     let mut records = Vec::new();
-    for rec in gp {
+    while let Some(rec) = gp.next_count_record() {
         let rec = rec?;
         records.push(rec);
     }
