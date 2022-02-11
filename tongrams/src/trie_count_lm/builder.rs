@@ -67,8 +67,8 @@ where
 
     fn build_counts(&mut self) -> Result<()> {
         for loader in &self.loaders {
-            let gp = loader.parser()?;
-            for rec in gp {
+            let mut gp = loader.parser()?;
+            while let Some(rec) = gp.next_count_record() {
                 self.counts_builder.eat_value(rec?.count());
             }
             self.counts_builder.build_sequence();
@@ -78,9 +78,9 @@ where
 
     fn build_vocabulary(&mut self) -> Result<()> {
         let records = {
-            let gp = self.loaders[0].parser()?;
+            let mut gp = self.loaders[0].parser()?;
             let mut records = Vec::new();
-            for rec in gp {
+            while let Some(rec) = gp.next_count_record() {
                 let rec = rec?;
                 records.push(rec);
             }
@@ -102,7 +102,7 @@ where
     /// Builds the sorted array of `order`.
     fn build_sorted_array(&mut self, order: usize) -> Result<()> {
         let mut prev_gp = self.loaders[order - 1].parser()?;
-        let curr_gp = self.loaders[order].parser()?;
+        let mut curr_gp = self.loaders[order].parser()?;
 
         let mut token_ids = Vec::with_capacity(curr_gp.num_grams());
         let mut count_ranks = Vec::with_capacity(curr_gp.num_grams());
@@ -112,9 +112,9 @@ where
         pointers.push(0);
 
         let mut pointer = 0;
-        let mut prev_rec = prev_gp.next().unwrap()?;
+        let mut prev_rec = prev_gp.next_count_record().unwrap()?;
 
-        for curr_rec in curr_gp {
+        while let Some(curr_rec) = curr_gp.next_count_record() {
             // NOTE:
             // in a FORWARD trie, 'pattern' is the predecessor of 'gram'
             // and 'token' is the last token of 'gram'
@@ -129,7 +129,7 @@ where
                 // 'pattern' should ALWAYS
                 // be found within previous order grams
                 pointers.push(pointer);
-                if let Some(rec) = prev_gp.next() {
+                if let Some(rec) = prev_gp.next_count_record() {
                     prev_rec = rec?;
                 } else {
                     return Err(anyhow!("{}-grams data is incomplete.", order + 1));
@@ -144,7 +144,7 @@ where
             count_ranks.push(count_rank);
         }
 
-        for _ in prev_gp {
+        while prev_gp.next_count_record().is_some() {
             pointers.push(pointer);
         }
         pointers.push(pointer);
