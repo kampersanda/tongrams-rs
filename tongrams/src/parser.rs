@@ -81,12 +81,12 @@ where
         let gram = items[1].to_string();
         if let Ok(prob) = items[0].parse() {
             let prob = if prob > 0.0 {
-                prob
-            } else {
                 eprintln!(
                     "Warning: positive log10 probability detected. This will be mapped to 0."
                 );
                 0.0
+            } else {
+                prob
             };
             if let Some(x) = items.get(2) {
                 if let Ok(backoff) = x.parse() {
@@ -125,6 +125,26 @@ D C\t1
 A A C\t2
 B B C\t1
 D D D\t1
+";
+
+    const PROB_GRAMS_1: &'static str = "4
+-1.83\tA\t-0.74
+-2.01\tB\t-0.69
+-2.22\tC
+-1.91\tD\t-0.62
+";
+
+    const PROB_GRAMS_2: &'static str = "4
+-1.43\tA A\t-0.33
+-0.59\tA C\t-0.43
+-1.03\tB B\t-0.32
+-1.08\tD C
+";
+
+    const PROB_GRAMS_3: &'static str = "3
+-1.12\tA A C
+-0.53\tB B C
+-0.98\tD D D
 ";
 
     #[test]
@@ -167,5 +187,61 @@ D D D\t1
             );
         }
         assert!(gp.next_count_record().is_none());
+    }
+
+    #[test]
+    fn test_prob_grams_1() {
+        let mut gp = GramsParser::new(BufReader::new(PROB_GRAMS_1.as_bytes())).unwrap();
+        assert_eq!(gp.num_grams(), 4);
+        for (gram, prob, backoff) in [
+            ("A", -1.83, -0.74),
+            ("B", -2.01, -0.69),
+            ("C", -2.22, 0.0),
+            ("D", -1.91, -0.62),
+        ] {
+            let gram = gram.to_string();
+            assert_eq!(
+                gp.next_prob_record().unwrap().unwrap(),
+                ProbRecord::new(gram, prob, backoff)
+            );
+        }
+        assert!(gp.next_prob_record().is_none());
+    }
+
+    #[test]
+    fn test_prob_grams_2() {
+        let mut gp = GramsParser::new(BufReader::new(PROB_GRAMS_2.as_bytes())).unwrap();
+        assert_eq!(gp.num_grams(), 4);
+        for (gram, prob, backoff) in [
+            ("A A", -1.43, -0.33),
+            ("A C", -0.59, -0.43),
+            ("B B", -1.03, -0.32),
+            ("D C", -1.08, 0.0),
+        ] {
+            let gram = gram.to_string();
+            assert_eq!(
+                gp.next_prob_record().unwrap().unwrap(),
+                ProbRecord::new(gram, prob, backoff)
+            );
+        }
+        assert!(gp.next_prob_record().is_none());
+    }
+
+    #[test]
+    fn test_prob_grams_3() {
+        let mut gp = GramsParser::new(BufReader::new(PROB_GRAMS_3.as_bytes())).unwrap();
+        assert_eq!(gp.num_grams(), 3);
+        for (gram, prob, backoff) in [
+            ("A A C", -1.12, 0.0),
+            ("B B C", -0.53, 0.0),
+            ("D D D", -0.98, 0.0),
+        ] {
+            let gram = gram.to_string();
+            assert_eq!(
+                gp.next_prob_record().unwrap().unwrap(),
+                ProbRecord::new(gram, prob, backoff)
+            );
+        }
+        assert!(gp.next_prob_record().is_none());
     }
 }
