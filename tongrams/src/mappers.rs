@@ -11,6 +11,7 @@ pub struct SortedArrayMapper {
 
 impl SortedArrayMapper {
     #[inline(always)]
+    #[allow(clippy::wrong_self_convention)]
     pub fn from_gram<V>(&mut self, gram: Gram, vocab: &V) -> bool
     where
         V: Vocabulary,
@@ -31,6 +32,7 @@ impl SortedArrayMapper {
     }
 
     #[inline(always)]
+    #[allow(clippy::wrong_self_convention)]
     pub fn from_tokens<V>(&mut self, tokens: &[&str], vocab: &V) -> bool
     where
         V: Vocabulary,

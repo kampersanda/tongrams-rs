@@ -144,7 +144,7 @@ where
             count_ranks.push(count_rank);
         }
 
-        while let Some(_) = prev_gp.next_count_record() {
+        while prev_gp.next_count_record().is_some() {
             pointers.push(pointer);
         }
         pointers.push(pointer);
