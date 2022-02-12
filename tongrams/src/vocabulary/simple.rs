@@ -3,7 +3,6 @@ use std::io::{Read, Write};
 
 use anyhow::{anyhow, Result};
 
-use crate::handle_bincode_error;
 use crate::vocabulary::Vocabulary;
 use crate::Gram;
 
@@ -60,4 +59,8 @@ impl Vocabulary for SimpleVocabulary {
     fn get(&self, token: Gram) -> Option<usize> {
         self.map.get(&token.to_string()).copied()
     }
+}
+
+fn handle_bincode_error(e: std::boxed::Box<bincode::ErrorKind>) -> anyhow::Error {
+    anyhow::anyhow!("{:?}", e)
 }

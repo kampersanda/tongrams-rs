@@ -122,7 +122,9 @@ where
             let token_id = self.vocab.get(token).unwrap();
             token_ids.push(token_id);
             probs.push(curr_rec.prob());
-            backoffs.push(curr_rec.backoff());
+            if order < self.max_order() {
+                backoffs.push(curr_rec.backoff());
+            }
         }
 
         while prev_gp.next_count_record().is_some() {
@@ -132,8 +134,14 @@ where
 
         self.arrays.push(*T::build(token_ids, pointers));
         self.probs.push(probs);
-        self.backoffs.push(backoffs);
+        if order < self.max_order() {
+            self.backoffs.push(backoffs);
+        }
 
         Ok(())
+    }
+
+    fn max_order(&self) -> usize {
+        self.loaders.len() - 1
     }
 }

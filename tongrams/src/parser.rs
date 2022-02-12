@@ -128,26 +128,6 @@ B B C\t1
 D D D\t1
 ";
 
-    const PROB_GRAMS_1: &'static str = "4
-A\t-1.83\t-0.74
-B\t-2.01\t-0.69
-C\t-2.22
-D\t-1.91\t-0.62
-";
-
-    const PROB_GRAMS_2: &'static str = "4
-A A\t-1.43\t-0.33
-A C\t-0.59\t-0.43
-B B\t-1.03\t-0.32
-D C\t-1.08
-";
-
-    const PROB_GRAMS_3: &'static str = "3
-A A C\t-1.12
-B B C\t-0.53
-D D D\t-0.98
-";
-
     #[test]
     fn test_count_grams_1() {
         let mut gp = GramsParser::new(BufReader::new(COUNT_GRAMS_1.as_bytes())).unwrap();
@@ -189,6 +169,26 @@ D D D\t-0.98
         }
         assert!(gp.next_count_record().is_none());
     }
+
+    const PROB_GRAMS_1: &'static str = "4
+    A\t-1.83\t-0.74
+    B\t-2.01\t-0.69
+    C\t-2.22
+    D\t-1.91\t-0.62
+    ";
+
+    const PROB_GRAMS_2: &'static str = "4
+    A A\t-1.43\t-0.33
+    A C\t-0.59\t-0.43
+    B B\t-1.03\t-0.32
+    D C\t-1.08
+    ";
+
+    const PROB_GRAMS_3: &'static str = "3
+    A A C\t-1.12
+    B B C\t-0.53
+    D D D\t-0.98
+    ";
 
     #[test]
     fn test_prob_grams_1() {
