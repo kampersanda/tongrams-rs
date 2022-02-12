@@ -12,6 +12,7 @@ pub const DEFAULT_UNK_PROB: f32 = -100.0;
 
 /// Elias-Fano trie for indexing *N*-grams with their frequency counts.
 #[derive(Default, Debug)]
+#[allow(dead_code)]
 pub struct TrieProbLm<T, V> {
     vocab: V,
     arrays: Vec<T>,
