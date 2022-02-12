@@ -79,8 +79,8 @@ where
             return Some(Err(anyhow!("Invalid line, {:?}", items)));
         }
 
-        let gram = items[1].to_string();
-        if let Ok(prob) = items[0].parse() {
+        let gram = items[0].to_string();
+        if let Ok(prob) = items[1].parse() {
             let prob = if prob > 0.0 {
                 eprintln!(
                     "Warning: positive log10 probability detected. This will be mapped to 0."
@@ -129,23 +129,23 @@ D D D\t1
 ";
 
     const PROB_GRAMS_1: &'static str = "4
--1.83\tA\t-0.74
--2.01\tB\t-0.69
--2.22\tC
--1.91\tD\t-0.62
+A\t-1.83\t-0.74
+B\t-2.01\t-0.69
+C\t-2.22
+D\t-1.91\t-0.62
 ";
 
     const PROB_GRAMS_2: &'static str = "4
--1.43\tA A\t-0.33
--0.59\tA C\t-0.43
--1.03\tB B\t-0.32
--1.08\tD C
+A A\t-1.43\t-0.33
+A C\t-0.59\t-0.43
+B B\t-1.03\t-0.32
+D C\t-1.08
 ";
 
     const PROB_GRAMS_3: &'static str = "3
--1.12\tA A C
--0.53\tB B C
--0.98\tD D D
+A A C\t-1.12
+B B C\t-0.53
+D D D\t-0.98
 ";
 
     #[test]
