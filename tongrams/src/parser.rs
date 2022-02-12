@@ -4,20 +4,19 @@ use std::io::{BufRead, BufReader, Read};
 use crate::GRAM_COUNT_SEPARATOR;
 use crate::{CountRecord, ProbRecord};
 
-/// Parser for a *N*-gram file of counts.
-/// It assumes the input format of the
-/// [Google format](http://storage.googleapis.com/books/ngrams/books/datasetsv2.html).
+/// Parser for a *N*-gram file of counts or probs/backoff-weights.
+/// TODO: Add example of the format.
 pub struct GramsParser<R> {
     reader: BufReader<R>,
     num_grams: usize,
-    count: usize,
+    num_parsed: usize,
 }
 
 impl<R> GramsParser<R>
 where
     R: Read,
 {
-    /// Creates [`GramsParser`] from `BufReader` of a *N*-gram file of counts.
+    /// Creates a new [`GramsParser`] from `BufReader` of a *N*-gram file.
     pub fn new(mut reader: BufReader<R>) -> Result<Self> {
         let num_grams = {
             let mut header = String::new();
@@ -27,7 +26,7 @@ where
         Ok(Self {
             reader,
             num_grams,
-            count: 0,
+            num_parsed: 0,
         })
     }
 
@@ -36,9 +35,10 @@ where
         self.num_grams
     }
 
+    /// Parses a next [`CountRecord`].
     pub fn next_count_record(&mut self) -> Option<Result<CountRecord>> {
-        self.count += 1;
-        if self.count > self.num_grams {
+        self.num_parsed += 1;
+        if self.num_parsed > self.num_grams {
             return None;
         }
 
@@ -61,9 +61,10 @@ where
         }
     }
 
+    /// Parses a next [`ProbRecord`].
     pub fn next_prob_record(&mut self) -> Option<Result<ProbRecord>> {
-        self.count += 1;
-        if self.count > self.num_grams {
+        self.num_parsed += 1;
+        if self.num_parsed > self.num_grams {
             return None;
         }
 
@@ -78,8 +79,8 @@ where
             return Some(Err(anyhow!("Invalid line, {:?}", items)));
         }
 
-        let gram = items[1].to_string();
-        if let Ok(prob) = items[0].parse() {
+        let gram = items[0].to_string();
+        if let Ok(prob) = items[1].parse() {
             let prob = if prob > 0.0 {
                 eprintln!(
                     "Warning: positive log10 probability detected. This will be mapped to 0."
@@ -127,26 +128,6 @@ B B C\t1
 D D D\t1
 ";
 
-    const PROB_GRAMS_1: &'static str = "4
--1.83\tA\t-0.74
--2.01\tB\t-0.69
--2.22\tC
--1.91\tD\t-0.62
-";
-
-    const PROB_GRAMS_2: &'static str = "4
--1.43\tA A\t-0.33
--0.59\tA C\t-0.43
--1.03\tB B\t-0.32
--1.08\tD C
-";
-
-    const PROB_GRAMS_3: &'static str = "3
--1.12\tA A C
--0.53\tB B C
--0.98\tD D D
-";
-
     #[test]
     fn test_count_grams_1() {
         let mut gp = GramsParser::new(BufReader::new(COUNT_GRAMS_1.as_bytes())).unwrap();
@@ -188,6 +169,26 @@ D D D\t1
         }
         assert!(gp.next_count_record().is_none());
     }
+
+    const PROB_GRAMS_1: &'static str = "4
+A\t-1.83\t-0.74
+B\t-2.01\t-0.69
+C\t-2.22
+D\t-1.91\t-0.62
+";
+
+    const PROB_GRAMS_2: &'static str = "4
+A A\t-1.43\t-0.33
+A C\t-0.59\t-0.43
+B B\t-1.03\t-0.32
+D C\t-1.08
+";
+
+    const PROB_GRAMS_3: &'static str = "3
+A A C\t-1.12
+B B C\t-0.53
+D D D\t-0.98
+";
 
     #[test]
     fn test_prob_grams_1() {

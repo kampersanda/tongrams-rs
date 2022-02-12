@@ -97,6 +97,7 @@ pub mod loader;
 pub mod parser;
 pub mod record;
 pub mod trie_count_lm;
+pub mod trie_prob_lm;
 pub mod util;
 pub mod vocabulary;
 
@@ -114,6 +115,7 @@ pub const GRAM_COUNT_SEPARATOR: u8 = b'\t';
 pub use gram::Gram;
 pub use record::{CountRecord, ProbRecord};
 pub use trie_count_lm::TrieCountLm;
+pub use trie_prob_lm::TrieProbLm;
 
 pub use loader::{GramsFileFormats, GramsLoader};
 pub use parser::GramsParser;
@@ -131,6 +133,4 @@ pub type SimpleTrieCountLm = TrieCountLm<SimpleTrieArray, SimpleVocabulary, Simp
 pub type EliasFanoTrieCountLm =
     TrieCountLm<EliasFanoTrieArray, DoubleArrayVocabulary, EliasFanoRankArray>;
 
-fn handle_bincode_error(e: std::boxed::Box<bincode::ErrorKind>) -> anyhow::Error {
-    anyhow::anyhow!("{:?}", e)
-}
+pub type SimpleTrieProbLm = TrieProbLm<SimpleTrieArray, SimpleVocabulary>;
