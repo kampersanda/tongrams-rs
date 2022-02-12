@@ -97,6 +97,7 @@ pub mod loader;
 pub mod parser;
 pub mod record;
 pub mod trie_count_lm;
+pub mod trie_prob_lm;
 pub mod util;
 pub mod vocabulary;
 
