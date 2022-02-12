@@ -4,20 +4,19 @@ use std::io::{BufRead, BufReader, Read};
 use crate::GRAM_COUNT_SEPARATOR;
 use crate::{CountRecord, ProbRecord};
 
-/// Parser for a *N*-gram file of counts.
-/// It assumes the input format of the
-/// [Google format](http://storage.googleapis.com/books/ngrams/books/datasetsv2.html).
+/// Parser for a *N*-gram file of counts or probs/backoff-weights.
+/// TODO: Add example of the format.
 pub struct GramsParser<R> {
     reader: BufReader<R>,
     num_grams: usize,
-    count: usize,
+    num_parsed: usize,
 }
 
 impl<R> GramsParser<R>
 where
     R: Read,
 {
-    /// Creates [`GramsParser`] from `BufReader` of a *N*-gram file of counts.
+    /// Creates a new [`GramsParser`] from `BufReader` of a *N*-gram file.
     pub fn new(mut reader: BufReader<R>) -> Result<Self> {
         let num_grams = {
             let mut header = String::new();
@@ -27,7 +26,7 @@ where
         Ok(Self {
             reader,
             num_grams,
-            count: 0,
+            num_parsed: 0,
         })
     }
 
@@ -36,9 +35,10 @@ where
         self.num_grams
     }
 
+    /// Parses a next [`CountRecord`].
     pub fn next_count_record(&mut self) -> Option<Result<CountRecord>> {
-        self.count += 1;
-        if self.count > self.num_grams {
+        self.num_parsed += 1;
+        if self.num_parsed > self.num_grams {
             return None;
         }
 
@@ -61,9 +61,10 @@ where
         }
     }
 
+    /// Parses a next [`ProbRecord`].
     pub fn next_prob_record(&mut self) -> Option<Result<ProbRecord>> {
-        self.count += 1;
-        if self.count > self.num_grams {
+        self.num_parsed += 1;
+        if self.num_parsed > self.num_grams {
             return None;
         }
 
