@@ -67,6 +67,34 @@ impl<'a> Gram<'a> {
             })
     }
 
+    /// Pops the first token.
+    ///
+    /// ```
+    /// use tongrams::Gram;
+    ///
+    /// let tokens = "abc de f";
+    /// let mut gram = Gram::from_str(tokens);
+    ///
+    /// let (front, gram) = gram.pop_front_token().unwrap();
+    /// assert_eq!(front.raw(), "abc".as_bytes());
+    /// assert_eq!(gram.raw(), "de f".as_bytes());
+    ///
+    /// let (front, gram) = gram.pop_front_token().unwrap();
+    /// assert_eq!(front.raw(), "de".as_bytes());
+    /// assert_eq!(gram.raw(), "f".as_bytes());
+    ///
+    /// assert_eq!(gram.pop_front_token(), None);
+    /// ```
+    #[inline(always)]
+    pub fn pop_front_token(&self) -> Option<(Self, Self)> {
+        let data = self.data;
+        data.iter().position(|&x| x == TOKEN_SEPARATOR).map(|i| {
+            let pfx = &data[..i];
+            let sfx = &data[i + 1..];
+            (Self { data: pfx }, Self { data: sfx })
+        })
+    }
+
     /// Splits the gram into tokens.
     ///
     /// ```
