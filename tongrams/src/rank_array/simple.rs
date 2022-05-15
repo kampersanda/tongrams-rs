@@ -1,6 +1,7 @@
 use std::io::{Read, Write};
 
 use anyhow::Result;
+use sucds::util::VecIO;
 
 use crate::rank_array::RankArray;
 
@@ -19,23 +20,23 @@ impl RankArray for SimpleRankArray {
     where
         W: Write,
     {
-        sucds::util::vec_io::serialize_usize(&self.count_ranks, writer)
+        self.count_ranks.serialize_into(writer)
     }
 
     fn deserialize_from<R>(reader: R) -> Result<Box<Self>>
     where
         R: Read,
     {
-        let count_ranks = sucds::util::vec_io::deserialize_usize(reader)?;
+        let count_ranks = Vec::<usize>::deserialize_from(reader)?;
         Ok(Box::new(Self { count_ranks }))
     }
 
     fn size_in_bytes(&self) -> usize {
-        sucds::util::vec_io::size_in_bytes(&self.count_ranks)
+        self.count_ranks.size_in_bytes()
     }
 
     fn memory_statistics(&self) -> serde_json::Value {
-        let count_ranks = sucds::util::vec_io::size_in_bytes(&self.count_ranks);
+        let count_ranks = self.count_ranks.size_in_bytes();
         serde_json::json!({ "count_ranks": count_ranks })
     }
 

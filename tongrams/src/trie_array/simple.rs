@@ -1,6 +1,7 @@
 use std::io::{Read, Write};
 
 use anyhow::Result;
+use sucds::util::VecIO;
 
 use crate::trie_array::TrieArray;
 
@@ -23,18 +24,16 @@ impl TrieArray for SimpleTrieArray {
     where
         W: Write,
     {
-        Ok(
-            sucds::util::vec_io::serialize_usize(&self.token_ids, &mut writer)?
-                + sucds::util::vec_io::serialize_usize(&self.pointers, &mut writer)?,
-        )
+        Ok(self.token_ids.serialize_into(&mut writer)?
+            + self.pointers.serialize_into(&mut writer)?)
     }
 
     fn deserialize_from<R>(mut reader: R) -> Result<Box<Self>>
     where
         R: Read,
     {
-        let token_ids = sucds::util::vec_io::deserialize_usize(&mut reader)?;
-        let pointers = sucds::util::vec_io::deserialize_usize(&mut reader)?;
+        let token_ids = Vec::<usize>::deserialize_from(&mut reader)?;
+        let pointers = Vec::<usize>::deserialize_from(&mut reader)?;
         Ok(Box::new(Self {
             token_ids,
             pointers,
@@ -42,8 +41,7 @@ impl TrieArray for SimpleTrieArray {
     }
 
     fn size_in_bytes(&self) -> usize {
-        sucds::util::vec_io::size_in_bytes(&self.token_ids)
-            + sucds::util::vec_io::size_in_bytes(&self.pointers)
+        self.token_ids.size_in_bytes() + self.pointers.size_in_bytes()
     }
 
     fn memory_statistics(&self) -> serde_json::Value {

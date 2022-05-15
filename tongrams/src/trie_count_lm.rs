@@ -5,7 +5,8 @@ use std::io::{Read, Write};
 use std::path::Path;
 
 use anyhow::Result;
-use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
+// use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
+use sucds::{util::IntIO, Searial};
 
 use crate::loader::{
     GramsDeflateFileLoader, GramsFileLoader, GramsGzFileLoader, GramsLoader, GramsTextLoader,
@@ -145,20 +146,17 @@ where
         // vocab
         mem += self.vocab.serialize_into(&mut writer)?;
         // arrays
-        writer.write_u64::<LittleEndian>(self.arrays.len() as u64)?;
-        mem += std::mem::size_of::<u64>();
+        mem += self.arrays.len().serialize_into(&mut writer)?;
         for array in &self.arrays {
             mem += array.serialize_into(&mut writer)?;
         }
         // count_ranks
-        writer.write_u64::<LittleEndian>(self.count_ranks.len() as u64)?;
-        mem += std::mem::size_of::<u64>();
+        mem += self.count_ranks.len().serialize_into(&mut writer)?;
         for count_rank in &self.count_ranks {
             mem += count_rank.serialize_into(&mut writer)?;
         }
         // counts
-        writer.write_u64::<LittleEndian>(self.counts.len() as u64)?;
-        mem += std::mem::size_of::<u64>();
+        mem += self.counts.len().serialize_into(&mut writer)?;
         for count in &self.counts {
             mem += count.serialize_into(&mut writer)?;
         }
@@ -172,7 +170,7 @@ where
     {
         let vocab = *V::deserialize_from(&mut reader)?;
         let arrays = {
-            let len = reader.read_u64::<LittleEndian>()? as usize;
+            let len = usize::deserialize_from(&mut reader)?;
             let mut arrays = Vec::with_capacity(len);
             for _ in 0..len {
                 arrays.push(*T::deserialize_from(&mut reader)?);
@@ -180,7 +178,7 @@ where
             arrays
         };
         let count_ranks = {
-            let len = reader.read_u64::<LittleEndian>()? as usize;
+            let len = usize::deserialize_from(&mut reader)?;
             let mut count_ranks = Vec::with_capacity(len);
             for _ in 0..len {
                 count_ranks.push(*A::deserialize_from(&mut reader)?);
@@ -188,7 +186,7 @@ where
             count_ranks
         };
         let counts = {
-            let len = reader.read_u64::<LittleEndian>()? as usize;
+            let len = usize::deserialize_from(&mut reader)?;
             let mut counts = Vec::with_capacity(len);
             for _ in 0..len {
                 counts.push(sucds::CompactVector::deserialize_from(&mut reader)?);
@@ -209,17 +207,17 @@ where
         // vocab
         mem += self.vocab.size_in_bytes();
         // arrays
-        mem += std::mem::size_of::<u64>();
+        mem += usize::size_in_bytes();
         for array in &self.arrays {
             mem += array.size_in_bytes();
         }
         // count_ranks
-        mem += std::mem::size_of::<u64>();
+        mem += usize::size_in_bytes();
         for count_rank in &self.count_ranks {
             mem += count_rank.size_in_bytes();
         }
         // counts
-        mem += std::mem::size_of::<u64>();
+        mem += usize::size_in_bytes();
         for count in &self.counts {
             mem += count.size_in_bytes();
         }

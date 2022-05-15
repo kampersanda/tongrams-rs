@@ -1,6 +1,7 @@
 use std::io::{Read, Write};
 
 use anyhow::{anyhow, Result};
+use sucds::util::VecIO;
 use yada::{builder::DoubleArrayBuilder, DoubleArray};
 
 use crate::vocabulary::Vocabulary;
@@ -46,23 +47,23 @@ impl Vocabulary for DoubleArrayVocabulary {
     where
         W: Write,
     {
-        sucds::util::vec_io::serialize_u8(&self.data, writer)
+        self.data.serialize_into(writer)
     }
 
     fn deserialize_from<R>(reader: R) -> Result<Box<Self>>
     where
         R: Read,
     {
-        let data = sucds::util::vec_io::deserialize_u8(reader)?;
+        let data = Vec::<u8>::deserialize_from(reader)?;
         Ok(Box::new(Self { data }))
     }
 
     fn size_in_bytes(&self) -> usize {
-        sucds::util::vec_io::size_in_bytes(&self.data)
+        self.data.size_in_bytes()
     }
 
     fn memory_statistics(&self) -> serde_json::Value {
-        let data = sucds::util::vec_io::size_in_bytes(&self.data);
+        let data = self.data.size_in_bytes();
         serde_json::json!({ "data": data })
     }
 
