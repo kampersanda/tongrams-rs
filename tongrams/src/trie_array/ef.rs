@@ -2,6 +2,7 @@ use std::cmp::Ordering;
 use std::io::{Read, Write};
 
 use anyhow::Result;
+use sucds::Searial;
 
 use crate::trie_array::TrieArray;
 
@@ -126,13 +127,13 @@ impl EliasFanoTrieArray {
 
         let mut token_efb = sucds::EliasFanoBuilder::new(sampled_id + 1, token_ids.len()).unwrap();
         token_efb.append(&token_ids).unwrap();
-        sucds::EliasFano::new(token_efb, false)
+        token_efb.build()
     }
 
     fn build_pointers(pointers: Vec<usize>) -> sucds::EliasFano {
         let mut pointer_efb =
             sucds::EliasFanoBuilder::new(pointers.last().unwrap() + 1, pointers.len()).unwrap();
         pointer_efb.append(&pointers).unwrap();
-        sucds::EliasFano::new(pointer_efb, true)
+        pointer_efb.build().enable_rank()
     }
 }

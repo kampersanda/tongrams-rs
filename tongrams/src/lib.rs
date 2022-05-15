@@ -92,6 +92,10 @@
 //! assert_eq!(lm.num_orders(), other.num_orders());
 //! assert_eq!(lm.num_grams(), other.num_grams());
 //! ```
+
+#[cfg(not(target_pointer_width = "64"))]
+compile_error!("`target_pointer_width` must be 64");
+
 pub mod gram;
 pub mod loader;
 pub mod parser;

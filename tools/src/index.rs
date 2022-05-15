@@ -1,3 +1,4 @@
+use std::fmt::Write as _;
 use std::fs::File;
 use std::io::BufWriter;
 use std::path::PathBuf;
@@ -41,7 +42,7 @@ fn main() -> Result<()> {
         grams_filepath.push(format!("{}-grams.sorted", i));
         let mut grams_filename = grams_filepath.into_os_string().into_string().unwrap();
         if let Some(ext) = util::get_format_extension(file_format) {
-            grams_filename.push_str(&format!(".{}", ext));
+            write!(grams_filename, ".{}", ext)?;
         }
         grams_filepaths.push(grams_filename);
     }

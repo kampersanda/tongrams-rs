@@ -1,6 +1,7 @@
 use std::io::{Read, Write};
 
 use anyhow::Result;
+use sucds::Searial;
 
 use crate::rank_array::RankArray;
 

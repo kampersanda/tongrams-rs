@@ -1,3 +1,4 @@
+use std::fmt::Write as _;
 use std::fs::File;
 use std::io::{prelude::*, BufWriter};
 use std::path::PathBuf;
@@ -108,7 +109,7 @@ fn main() -> Result<()> {
 
     let mut output_filename = output_filepath.into_os_string().into_string().unwrap();
     if let Some(ext) = util::get_format_extension(file_format) {
-        output_filename.push_str(&format!(".{}", ext));
+        write!(output_filename, ".{}", ext)?;
     }
     println!("Writing the index into {:?}", output_filename);
 
