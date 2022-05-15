@@ -31,6 +31,7 @@ where
     }
 
     /// Gets the number of input grams.
+    #[allow(clippy::missing_const_for_fn)]
     pub fn num_grams(&self) -> usize {
         self.num_grams
     }
