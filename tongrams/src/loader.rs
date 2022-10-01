@@ -8,7 +8,7 @@ use anyhow::Result;
 
 use crate::parser::GramsParser;
 
-pub use crate::loader::flate2::{GramsDeflateFileLoader, GramsGzFileLoader, GramsZlibFileLoader};
+pub use crate::loader::flate2::GramsGzFileLoader;
 pub use crate::loader::plain::{GramsFileLoader, GramsTextLoader};
 
 /// Loader for a *N*-gram counts file.
@@ -25,8 +25,6 @@ where
 pub enum GramsFileFormats {
     Plain,
     Gzip,
-    Deflate,
-    Zlib,
 }
 
 impl FromStr for GramsFileFormats {
@@ -36,8 +34,6 @@ impl FromStr for GramsFileFormats {
         match fmt {
             "plain" => Ok(Self::Plain),
             "gzip" => Ok(Self::Gzip),
-            "deflate" => Ok(Self::Deflate),
-            "zlib" => Ok(Self::Zlib),
             _ => Err("Invalid format"),
         }
     }

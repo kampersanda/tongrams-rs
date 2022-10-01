@@ -3,9 +3,7 @@ use std::path::Path;
 
 use anyhow::Result;
 
-use crate::loader::{
-    GramsDeflateFileLoader, GramsFileLoader, GramsGzFileLoader, GramsLoader, GramsZlibFileLoader,
-};
+use crate::loader::{GramsFileLoader, GramsGzFileLoader, GramsLoader};
 use crate::vocabulary::{DoubleArrayVocabulary, Vocabulary};
 use crate::{CountRecord, Gram, GramsFileFormats};
 
@@ -26,14 +24,6 @@ where
         }
         GramsFileFormats::Gzip => {
             let loader: Box<dyn GramsLoader<_>> = Box::new(GramsGzFileLoader::new(filepath));
-            load_records(loader)
-        }
-        GramsFileFormats::Deflate => {
-            let loader: Box<dyn GramsLoader<_>> = Box::new(GramsDeflateFileLoader::new(filepath));
-            load_records(loader)
-        }
-        GramsFileFormats::Zlib => {
-            let loader: Box<dyn GramsLoader<_>> = Box::new(GramsZlibFileLoader::new(filepath));
             load_records(loader)
         }
     }
@@ -77,7 +67,5 @@ pub fn get_format_extension(fmt: GramsFileFormats) -> Option<String> {
     match fmt {
         GramsFileFormats::Plain => None,
         GramsFileFormats::Gzip => Some("gz".to_string()),
-        GramsFileFormats::Deflate => Some("dfl".to_string()),
-        GramsFileFormats::Zlib => Some("zlib".to_string()),
     }
 }

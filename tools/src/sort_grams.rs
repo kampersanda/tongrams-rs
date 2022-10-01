@@ -6,7 +6,7 @@ use std::path::PathBuf;
 use anyhow::Result;
 use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
 use extsort::{ExternalSorter, Sortable};
-use flate2::write::{DeflateEncoder, GzEncoder, ZlibEncoder};
+use flate2::write::GzEncoder;
 use flate2::Compression;
 use structopt::StructOpt;
 
@@ -130,14 +130,6 @@ fn main() -> Result<()> {
         GramsFileFormats::Gzip => {
             let f = BufWriter::new(File::create(output_filename)?);
             write_records(Box::new(GzEncoder::new(f, Compression::default())))?;
-        }
-        GramsFileFormats::Deflate => {
-            let f = BufWriter::new(File::create(output_filename)?);
-            write_records(Box::new(DeflateEncoder::new(f, Compression::default())))?;
-        }
-        GramsFileFormats::Zlib => {
-            let f = BufWriter::new(File::create(output_filename)?);
-            write_records(Box::new(ZlibEncoder::new(f, Compression::default())))?;
         }
     };
 
