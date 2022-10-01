@@ -92,11 +92,10 @@ where
                     prob
                 };
                 if let Some(x) = items.get(2) {
-                    if let Ok(backoff) = x.parse() {
-                        Some(Ok(ProbRecord::new(gram, prob, backoff)))
-                    } else {
-                        Some(Err(anyhow!("Parse error, {:?}", items)))
-                    }
+                    x.parse().map_or_else(
+                        |_| Some(Err(anyhow!("Parse error, {:?}", items))),
+                        |backoff| Some(Ok(ProbRecord::new(gram, prob, backoff))),
+                    )
                 } else {
                     Some(Ok(ProbRecord::new(gram, prob, 0.0)))
                 }
