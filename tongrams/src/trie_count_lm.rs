@@ -5,13 +5,9 @@ use std::io::{Read, Write};
 use std::path::Path;
 
 use anyhow::Result;
-// use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
 use sucds::{util::IntIO, Searial};
 
-use crate::loader::{
-    GramsDeflateFileLoader, GramsFileLoader, GramsGzFileLoader, GramsLoader, GramsTextLoader,
-    GramsZlibFileLoader,
-};
+use crate::loader::{GramsFileLoader, GramsGzFileLoader, GramsLoader, GramsTextLoader};
 use crate::rank_array::RankArray;
 use crate::trie_array::TrieArray;
 use crate::vocabulary::Vocabulary;
@@ -22,12 +18,7 @@ pub use crate::trie_count_lm::lookuper::TrieCountLmLookuper;
 
 /// Elias-Fano trie for indexing *N*-grams with their frequency counts.
 #[derive(Default, Debug)]
-pub struct TrieCountLm<T, V, A>
-where
-    T: TrieArray,
-    V: Vocabulary,
-    A: RankArray,
-{
+pub struct TrieCountLm<T, V, A> {
     vocab: V,
     arrays: Vec<T>,
     count_ranks: Vec<A>,
@@ -53,8 +44,6 @@ where
         match fmt {
             GramsFileFormats::Plain => Self::from_plain_files(filepaths),
             GramsFileFormats::Gzip => Self::from_gz_files(filepaths),
-            GramsFileFormats::Deflate => Self::from_deflate_files(filepaths),
-            GramsFileFormats::Zlib => Self::from_zlib_files(filepaths),
         }
     }
 
@@ -87,40 +76,6 @@ where
         let mut loaders = Vec::with_capacity(filepaths.len());
         for filepath in filepaths {
             let loader: Box<dyn GramsLoader<_>> = Box::new(GramsGzFileLoader::new(filepath));
-            loaders.push(loader);
-        }
-        TrieCountLmBuilder::new(loaders)?.build()
-    }
-
-    /// Builds the index from *N*-gram counts files in a deflate compressed format.
-    ///
-    /// # Arguments
-    ///
-    ///  - `filepaths`: Paths of *N*-gram counts files that should be sorted by *N* = 1, 2, ...
-    pub fn from_deflate_files<P>(filepaths: &[P]) -> Result<Self>
-    where
-        P: AsRef<Path>,
-    {
-        let mut loaders = Vec::with_capacity(filepaths.len());
-        for filepath in filepaths {
-            let loader: Box<dyn GramsLoader<_>> = Box::new(GramsDeflateFileLoader::new(filepath));
-            loaders.push(loader);
-        }
-        TrieCountLmBuilder::new(loaders)?.build()
-    }
-
-    /// Builds the index from *N*-gram counts files in a zlib compressed format.
-    ///
-    /// # Arguments
-    ///
-    ///  - `filepaths`: Paths of *N*-gram counts files that should be sorted by *N* = 1, 2, ...
-    pub fn from_zlib_files<P>(filepaths: &[P]) -> Result<Self>
-    where
-        P: AsRef<Path>,
-    {
-        let mut loaders = Vec::with_capacity(filepaths.len());
-        for filepath in filepaths {
-            let loader: Box<dyn GramsLoader<_>> = Box::new(GramsZlibFileLoader::new(filepath));
             loaders.push(loader);
         }
         TrieCountLmBuilder::new(loaders)?.build()
