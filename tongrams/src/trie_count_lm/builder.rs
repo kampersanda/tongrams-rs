@@ -12,13 +12,7 @@ use crate::TrieCountLm;
 use crate::MAX_ORDER;
 
 /// Builder for [`TrieCountLm`].
-pub struct TrieCountLmBuilder<R, T, V, A>
-where
-    R: Read,
-    T: TrieArray,
-    V: Vocabulary,
-    A: RankArray,
-{
+pub struct TrieCountLmBuilder<R, T, V, A> {
     loaders: Vec<Box<dyn GramsLoader<R>>>,
     vocab: V,
     arrays: Vec<T>,

@@ -18,12 +18,7 @@ pub use crate::trie_count_lm::lookuper::TrieCountLmLookuper;
 
 /// Elias-Fano trie for indexing *N*-grams with their frequency counts.
 #[derive(Default, Debug)]
-pub struct TrieCountLm<T, V, A>
-where
-    T: TrieArray,
-    V: Vocabulary,
-    A: RankArray,
-{
+pub struct TrieCountLm<T, V, A> {
     vocab: V,
     arrays: Vec<T>,
     count_ranks: Vec<A>,
