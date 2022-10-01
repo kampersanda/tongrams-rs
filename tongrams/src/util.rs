@@ -29,7 +29,7 @@ where
     }
 }
 
-/// Loads all of [`CountRecord`] from a gzipped gram-count file.
+/// Loads all of [`CountRecord`] from a gram-count file.
 fn load_records<R: Read>(loader: Box<dyn GramsLoader<R>>) -> Result<Vec<CountRecord>>
 where
     R: Read,
