@@ -55,11 +55,10 @@ where
         }
 
         let gram = items[0].to_string();
-        if let Ok(count) = items[1].parse() {
-            Some(Ok(CountRecord::new(gram, count)))
-        } else {
-            Some(Err(anyhow!("Parse error, {:?}", items)))
-        }
+        items[1].parse().map_or_else(
+            |_| Some(Err(anyhow!("Parse error, {:?}", items))),
+            |count| Some(Ok(CountRecord::new(gram, count))),
+        )
     }
 
     /// Parses a next [`ProbRecord`].
@@ -81,27 +80,28 @@ where
         }
 
         let gram = items[0].to_string();
-        if let Ok(prob) = items[1].parse() {
-            let prob = if prob > 0.0 {
-                eprintln!(
-                    "Warning: positive log10 probability detected. This will be mapped to 0."
-                );
-                0.0
-            } else {
-                prob
-            };
-            if let Some(x) = items.get(2) {
-                if let Ok(backoff) = x.parse() {
-                    Some(Ok(ProbRecord::new(gram, prob, backoff)))
+        items[1].parse().map_or_else(
+            |_| Some(Err(anyhow!("Parse error, {:?}", items))),
+            |prob| {
+                let prob = if prob > 0.0 {
+                    eprintln!(
+                        "Warning: positive log10 probability detected. This will be mapped to 0."
+                    );
+                    0.0
                 } else {
-                    Some(Err(anyhow!("Parse error, {:?}", items)))
+                    prob
+                };
+                if let Some(x) = items.get(2) {
+                    if let Ok(backoff) = x.parse() {
+                        Some(Ok(ProbRecord::new(gram, prob, backoff)))
+                    } else {
+                        Some(Err(anyhow!("Parse error, {:?}", items)))
+                    }
+                } else {
+                    Some(Ok(ProbRecord::new(gram, prob, 0.0)))
                 }
-            } else {
-                Some(Ok(ProbRecord::new(gram, prob, 0.0)))
-            }
-        } else {
-            Some(Err(anyhow!("Parse error, {:?}", items)))
-        }
+            },
+        )
     }
 }
 
