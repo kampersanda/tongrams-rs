@@ -14,11 +14,11 @@ pub struct DoubleArrayVocabulary {
 }
 
 impl Vocabulary for DoubleArrayVocabulary {
-    fn new() -> Box<Self> {
-        Box::new(Self { data: Vec::new() })
+    fn new() -> Self {
+        Self { data: Vec::new() }
     }
 
-    fn build(tokens: &[Gram]) -> Result<Box<Self>> {
+    fn build(tokens: &[Gram]) -> Result<Self> {
         if (tokens.len() >> 31) != 0 {
             return Err(anyhow!(
                 "The number of tokens must be represented in 31 bits."
@@ -38,9 +38,9 @@ impl Vocabulary for DoubleArrayVocabulary {
             }
         }
 
-        Ok(Box::new(Self {
+        Ok(Self {
             data: DoubleArrayBuilder::build(&keyset[..]).unwrap(),
-        }))
+        })
     }
 
     fn serialize_into<W>(&self, writer: W) -> Result<usize>
@@ -50,12 +50,12 @@ impl Vocabulary for DoubleArrayVocabulary {
         self.data.serialize_into(writer)
     }
 
-    fn deserialize_from<R>(reader: R) -> Result<Box<Self>>
+    fn deserialize_from<R>(reader: R) -> Result<Self>
     where
         R: Read,
     {
         let data = Vec::<u8>::deserialize_from(reader)?;
-        Ok(Box::new(Self { data }))
+        Ok(Self { data })
     }
 
     fn size_in_bytes(&self) -> usize {

@@ -13,20 +13,20 @@ pub struct SimpleVocabulary {
 }
 
 impl Vocabulary for SimpleVocabulary {
-    fn new() -> Box<Self> {
-        Box::new(Self {
+    fn new() -> Self {
+        Self {
             map: HashMap::new(),
-        })
+        }
     }
 
-    fn build(tokens: &[Gram]) -> Result<Box<Self>> {
+    fn build(tokens: &[Gram]) -> Result<Self> {
         let mut map = HashMap::new();
         for (id, token) in tokens.iter().enumerate() {
             if let Some(v) = map.insert(token.to_string(), id) {
                 return Err(anyhow!("Depulicated key: {:?} => {}", token, v));
             }
         }
-        Ok(Box::new(Self { map }))
+        Ok(Self { map })
     }
 
     fn serialize_into<W>(&self, writer: W) -> Result<usize>
@@ -37,12 +37,12 @@ impl Vocabulary for SimpleVocabulary {
         Ok(self.size_in_bytes())
     }
 
-    fn deserialize_from<R>(reader: R) -> Result<Box<Self>>
+    fn deserialize_from<R>(reader: R) -> Result<Self>
     where
         R: Read,
     {
         let map = bincode::deserialize_from(reader).map_err(handle_bincode_error)?;
-        Ok(Box::new(Self { map }))
+        Ok(Self { map })
     }
 
     fn size_in_bytes(&self) -> usize {

@@ -69,7 +69,7 @@ mod tests {
             Gram::from_str("D"),
             Gram::from_str("B"),
         ];
-        let vocab = *SimpleVocabulary::build(&grams).unwrap();
+        let vocab = SimpleVocabulary::build(&grams).unwrap();
         let mut mapper = SortedArrayMapper::default();
 
         assert_eq!(mapper.from_gram(Gram::from_str("A B D"), &vocab), true);
