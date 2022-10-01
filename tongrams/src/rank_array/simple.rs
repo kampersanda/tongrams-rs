@@ -12,8 +12,8 @@ pub struct SimpleRankArray {
 }
 
 impl RankArray for SimpleRankArray {
-    fn build(count_ranks: Vec<usize>) -> Box<Self> {
-        Box::new(Self { count_ranks })
+    fn build(count_ranks: Vec<usize>) -> Self {
+        Self { count_ranks }
     }
 
     fn serialize_into<W>(&self, writer: W) -> Result<usize>
@@ -23,12 +23,12 @@ impl RankArray for SimpleRankArray {
         self.count_ranks.serialize_into(writer)
     }
 
-    fn deserialize_from<R>(reader: R) -> Result<Box<Self>>
+    fn deserialize_from<R>(reader: R) -> Result<Self>
     where
         R: Read,
     {
         let count_ranks = Vec::<usize>::deserialize_from(reader)?;
-        Ok(Box::new(Self { count_ranks }))
+        Ok(Self { count_ranks })
     }
 
     fn size_in_bytes(&self) -> usize {

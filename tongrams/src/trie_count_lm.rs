@@ -168,12 +168,12 @@ where
     where
         R: Read,
     {
-        let vocab = *V::deserialize_from(&mut reader)?;
+        let vocab = V::deserialize_from(&mut reader)?;
         let arrays = {
             let len = usize::deserialize_from(&mut reader)?;
             let mut arrays = Vec::with_capacity(len);
             for _ in 0..len {
-                arrays.push(*T::deserialize_from(&mut reader)?);
+                arrays.push(T::deserialize_from(&mut reader)?);
             }
             arrays
         };
@@ -181,7 +181,7 @@ where
             let len = usize::deserialize_from(&mut reader)?;
             let mut count_ranks = Vec::with_capacity(len);
             for _ in 0..len {
-                count_ranks.push(*A::deserialize_from(&mut reader)?);
+                count_ranks.push(A::deserialize_from(&mut reader)?);
             }
             count_ranks
         };

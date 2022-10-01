@@ -13,11 +13,11 @@ pub struct SimpleTrieArray {
 }
 
 impl TrieArray for SimpleTrieArray {
-    fn build(token_ids: Vec<usize>, pointers: Vec<usize>) -> Box<Self> {
-        Box::new(Self {
+    fn build(token_ids: Vec<usize>, pointers: Vec<usize>) -> Self {
+        Self {
             token_ids,
             pointers,
-        })
+        }
     }
 
     fn serialize_into<W>(&self, mut writer: W) -> Result<usize>
@@ -28,16 +28,16 @@ impl TrieArray for SimpleTrieArray {
             + self.pointers.serialize_into(&mut writer)?)
     }
 
-    fn deserialize_from<R>(mut reader: R) -> Result<Box<Self>>
+    fn deserialize_from<R>(mut reader: R) -> Result<Self>
     where
         R: Read,
     {
         let token_ids = Vec::<usize>::deserialize_from(&mut reader)?;
         let pointers = Vec::<usize>::deserialize_from(&mut reader)?;
-        Ok(Box::new(Self {
+        Ok(Self {
             token_ids,
             pointers,
-        }))
+        })
     }
 
     fn size_in_bytes(&self) -> usize {

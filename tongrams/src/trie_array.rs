@@ -11,13 +11,15 @@ pub use crate::trie_array::simple::SimpleTrieArray;
 /// Trait for a data structure for sorted arrays of each trie level.
 pub trait TrieArray {
     /// Builds a [`TrieArray`] from sequences of token ids and pointers.
-    fn build(token_ids: Vec<usize>, pointers: Vec<usize>) -> Box<Self>;
+    fn build(token_ids: Vec<usize>, pointers: Vec<usize>) -> Self;
 
     /// Serializes the data structure into the writer.
     fn serialize_into<W: Write>(&self, writer: W) -> Result<usize>;
 
     /// Deserializes the data structure from the reader.
-    fn deserialize_from<R: Read>(reader: R) -> Result<Box<Self>>;
+    fn deserialize_from<R: Read>(reader: R) -> Result<Self>
+    where
+        Self: Sized;
 
     /// Gets the number of bytes to serialize the data structure.
     fn size_in_bytes(&self) -> usize;

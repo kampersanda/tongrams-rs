@@ -11,16 +11,20 @@ use crate::Gram;
 /// Trait for a data structure for mapping tokens to unique identifiers.
 pub trait Vocabulary {
     /// Creates an empty [`Vocabulary`].
-    fn new() -> Box<Self>;
+    fn new() -> Self;
 
     /// Builds a [`Vocabulary`] from a sequence of tokens.
-    fn build(tokens: &[Gram]) -> Result<Box<Self>>;
+    fn build(tokens: &[Gram]) -> Result<Self>
+    where
+        Self: Sized;
 
     /// Serializes the data structure into the writer.
     fn serialize_into<W: Write>(&self, writer: W) -> Result<usize>;
 
     /// Deserializes the data structure from the reader.
-    fn deserialize_from<R: Read>(reader: R) -> Result<Box<Self>>;
+    fn deserialize_from<R: Read>(reader: R) -> Result<Self>
+    where
+        Self: Sized;
 
     /// Gets the number of bytes to serialize the data structure.
     fn size_in_bytes(&self) -> usize;

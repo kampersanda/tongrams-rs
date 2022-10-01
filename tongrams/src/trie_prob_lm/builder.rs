@@ -29,7 +29,7 @@ where
         }
         Ok(Self {
             loaders,
-            vocab: *V::new(),
+            vocab: V::new(),
             arrays: vec![],
             probs: vec![],
             backoffs: vec![],
@@ -64,7 +64,7 @@ where
         };
 
         let grams: Vec<Gram> = records.iter().map(|r| r.gram()).collect();
-        self.vocab = *V::build(&grams)?;
+        self.vocab = V::build(&grams)?;
 
         let mut probs = Vec::with_capacity(records.len());
         let mut backoffs = Vec::with_capacity(records.len());
@@ -132,7 +132,7 @@ where
         }
         pointers.push(pointer);
 
-        self.arrays.push(*T::build(token_ids, pointers));
+        self.arrays.push(T::build(token_ids, pointers));
         self.probs.push(probs);
         if order < self.max_order() {
             self.backoffs.push(backoffs);

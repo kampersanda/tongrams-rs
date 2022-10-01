@@ -14,18 +14,18 @@ pub struct EliasFanoTrieArray {
 }
 
 impl TrieArray for EliasFanoTrieArray {
-    fn build(token_ids: Vec<usize>, pointers: Vec<usize>) -> Box<Self> {
+    fn build(token_ids: Vec<usize>, pointers: Vec<usize>) -> Self {
         if token_ids.is_empty() {
-            return Box::new(Self::default());
+            return Self::default();
         }
 
         let token_ids = Self::build_token_sequence(token_ids, &pointers);
         let pointers = Self::build_pointers(pointers);
 
-        Box::new(Self {
+        Self {
             token_ids,
             pointers,
-        })
+        }
     }
 
     fn serialize_into<W>(&self, mut writer: W) -> Result<usize>
@@ -36,16 +36,16 @@ impl TrieArray for EliasFanoTrieArray {
             + self.pointers.serialize_into(&mut writer)?)
     }
 
-    fn deserialize_from<R>(mut reader: R) -> Result<Box<Self>>
+    fn deserialize_from<R>(mut reader: R) -> Result<Self>
     where
         R: Read,
     {
         let token_ids = sucds::EliasFano::deserialize_from(&mut reader)?;
         let pointers = sucds::EliasFano::deserialize_from(&mut reader)?;
-        Ok(Box::new(Self {
+        Ok(Self {
             token_ids,
             pointers,
-        }))
+        })
     }
 
     fn size_in_bytes(&self) -> usize {

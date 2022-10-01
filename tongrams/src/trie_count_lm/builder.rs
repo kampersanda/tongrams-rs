@@ -40,7 +40,7 @@ where
         }
         Ok(Self {
             loaders,
-            vocab: *V::new(),
+            vocab: V::new(),
             arrays: vec![],
             count_ranks: vec![],
             counts_builder: CountsBuilder::default(),
@@ -88,14 +88,14 @@ where
         };
 
         let grams: Vec<Gram> = records.iter().map(|r| r.gram()).collect();
-        self.vocab = *V::build(&grams)?;
+        self.vocab = V::build(&grams)?;
 
         let mut count_ranks = Vec::with_capacity(records.len());
         for rec in &records {
             let count_rank = self.counts_builder.rank(0, rec.count()).unwrap();
             count_ranks.push(count_rank);
         }
-        self.count_ranks.push(*A::build(count_ranks));
+        self.count_ranks.push(A::build(count_ranks));
         Ok(())
     }
 
@@ -149,8 +149,8 @@ where
         }
         pointers.push(pointer);
 
-        self.arrays.push(*T::build(token_ids, pointers));
-        self.count_ranks.push(*A::build(count_ranks));
+        self.arrays.push(T::build(token_ids, pointers));
+        self.count_ranks.push(A::build(count_ranks));
         Ok(())
     }
 }

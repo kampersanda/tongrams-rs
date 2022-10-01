@@ -11,13 +11,15 @@ pub use crate::rank_array::simple::SimpleRankArray;
 /// Trait for a data structure for storing count ranks.
 pub trait RankArray {
     /// Builds a [`RankArray`] from a sequence of count ranks.
-    fn build(count_ranks: Vec<usize>) -> Box<Self>;
+    fn build(count_ranks: Vec<usize>) -> Self;
 
     /// Serializes the data structure into the writer.
     fn serialize_into<W: Write>(&self, writer: W) -> Result<usize>;
 
     /// Deserializes the data structure from the reader.
-    fn deserialize_from<R: Read>(reader: R) -> Result<Box<Self>>;
+    fn deserialize_from<R: Read>(reader: R) -> Result<Self>
+    where
+        Self: Sized;
 
     /// Gets the number of bytes to serialize the data structure.
     fn size_in_bytes(&self) -> usize;

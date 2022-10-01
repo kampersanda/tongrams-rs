@@ -12,10 +12,10 @@ pub struct EliasFanoRankArray {
 }
 
 impl RankArray for EliasFanoRankArray {
-    fn build(count_ranks: Vec<usize>) -> Box<Self> {
-        Box::new(Self {
+    fn build(count_ranks: Vec<usize>) -> Self {
+        Self {
             count_ranks: sucds::EliasFanoList::from_slice(&count_ranks).unwrap(),
-        })
+        }
     }
 
     fn serialize_into<W>(&self, mut writer: W) -> Result<usize>
@@ -25,12 +25,12 @@ impl RankArray for EliasFanoRankArray {
         self.count_ranks.serialize_into(&mut writer)
     }
 
-    fn deserialize_from<R>(mut reader: R) -> Result<Box<Self>>
+    fn deserialize_from<R>(mut reader: R) -> Result<Self>
     where
         R: Read,
     {
         let count_ranks = sucds::EliasFanoList::deserialize_from(&mut reader)?;
-        Ok(Box::new(Self { count_ranks }))
+        Ok(Self { count_ranks })
     }
 
     fn size_in_bytes(&self) -> usize {
